@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>義工上線資訊查詢｜8/21-8/22報到者</title>
+<title>義工上線資訊查詢｜報到總表（全部115人）</title>
 <style>
   :root{
     --paper:#f6f1e6;
@@ -91,43 +91,69 @@
   .card{
     background:var(--card);
     border:1px solid var(--line);
-    border-radius:16px;
-    padding:16px 18px;
-    margin-bottom:14px;
+    border-radius:14px;
+    padding:10px 16px;
+    margin-bottom:8px;
     box-shadow:var(--shadow);
+  }
+  .card.cancelled{
+    background:#f3f0ee;
+    border-color:#d8c9c2;
+    opacity:0.85;
   }
   .card .name-row{
     display:flex;
     align-items:baseline;
     gap:10px;
-    margin-bottom:10px;
+    margin-bottom:4px;
     border-bottom:1px dashed var(--line);
-    padding-bottom:10px;
+    padding-bottom:4px;
   }
   .card .name{
-    font-size:22px;
+    font-size:20px;
     font-weight:700;
     color:var(--ink);
   }
   .card .fname{
-    font-size:16px;
+    font-size:15px;
     color:var(--gold-deep);
+  }
+  .cancel-tag{
+    margin-left:auto;
+    background:#c0392b;
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    padding:1px 10px;
+    border-radius:999px;
+  }
+  .leader-tag{
+    margin-left:auto;
+    background:none;
+    color:#c0392b;
+    font-size:14px;
+    font-weight:700;
+    padding:0;
+  }
+  .card.leader{
+    border-color:var(--gold);
+    border-width:2px;
   }
   .card .fields{
     display:grid;
-    grid-template-columns:64px 1fr;
-    row-gap:8px;
+    grid-template-columns:60px 1fr;
+    row-gap:3px;
     column-gap:10px;
-    font-size:17px;
+    font-size:15px;
   }
   .card .label{
     color:var(--ink-soft);
-    font-size:14px;
-    padding-top:2px;
+    font-size:13px;
+    padding-top:1px;
   }
   .card .value{
     color:var(--ink);
-    line-height:1.5;
+    line-height:1.35;
   }
   .badge{
     display:inline-block;
@@ -204,7 +230,7 @@
   <header>
     <div class="eyebrow">115年度中台禪寺開山三十五週年四合一法會</div>
     <h1>義工上線資訊查詢</h1>
-    <p>普高精舍 義工8/21~8/22報到者，共 101 人</p>
+    <p>普高精舍 義工報到總表　共 115 人（含取消）</p>
   </header>
 
   <div class="search-box">
@@ -221,107 +247,121 @@
 
 <script>
 const people = [
-  {"name": "黃聖茂", "room": "普賢寮130-4", "fname": "法恆", "group": "男眾機動組", "time": "07:00 上線", "loc": "B2總務組", "car": "2車"},
-  {"name": "吳怡青", "room": "雲來寮625-3", "fname": "法誼", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車"},
-  {"name": "劉碧慧", "room": "雲來寮625-2", "fname": "傳屏", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車"},
-  {"name": "鄭思明", "room": "雲來寮625-1", "fname": "傳昉", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車"},
-  {"name": "伍木山", "room": "法藏苑B115-3", "fname": "傳易", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "其他專車"},
-  {"name": "張麗淳", "room": "法藏苑C112-4", "fname": "法淳", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "4車"},
-  {"name": "陳靜宜", "room": "中智寮110-2", "fname": "法嵐", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "其他專車"},
-  {"name": "鄭莛蓉", "room": "法藏苑C110-2", "fname": "傳熙", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "小車自行"},
-  {"name": "呂志君", "room": "中智寮410-3", "fname": "傳晨", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車"},
-  {"name": "方郁淳", "room": "中智寮404-6", "fname": "傳淳", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "4車"},
-  {"name": "王蜀秀", "room": "中智寮404-2", "fname": "傳億", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "其他專車"},
-  {"name": "蘇慧娟", "room": "中智寮306-6", "fname": "法娟", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "4車"},
-  {"name": "蔣慧芬", "room": "女學中道110-1", "fname": "傳書", "group": "創意進場-總部", "time": "待確認", "loc": "待確認", "car": "小車02"},
-  {"name": "洪玉真", "room": "護教四樓護七室57", "fname": "傳心", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "4車"},
-  {"name": "李瓊文", "room": "B1M淨願寮03-2", "fname": "傳第", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "其他專車"},
-  {"name": "董靜宜", "room": "B1M淨願寮03-1", "fname": "傳竫", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "其他專車"},
-  {"name": "伍謝美華", "room": "中智寮105-2", "fname": "傳璟", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "其他專車"},
-  {"name": "蔡美佐", "room": "法藏苑C109-1", "fname": "傳佑", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "其他專車"},
-  {"name": "黃怡晴", "room": "中智寮304-4", "fname": "傳晴", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "其他專車"},
-  {"name": "鐘瑋伶", "room": "中智寮304-7", "fname": "法伶", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "其他專車"},
-  {"name": "黃如琳", "room": "明心寮717-2", "fname": "傳昂", "group": "書記室", "time": "待確認", "loc": "待確認", "car": "其他專車"},
-  {"name": "吳珮甄", "room": "明心寮202-1", "fname": "傳忯", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "其他專車"},
-  {"name": "王小芳", "room": "明心寮208-3", "fname": "法大", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "3車"},
-  {"name": "胡益鐘", "room": "B1M淨行寮08-1", "fname": "法躬", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "2車"},
-  {"name": "陳文瑞", "room": "護法四樓護七室18", "fname": "法濡", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "2車"},
-  {"name": "黃文崇", "room": "B1M淨行寮08-3", "fname": "傳開", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "3車"},
-  {"name": "俞貞元", "room": "普賢寮119-1", "fname": "法士", "group": "安全組", "time": "07:00 上線", "loc": "安全組（般若車道口）", "car": "2車"},
-  {"name": "婁國棟", "room": "普賢寮119-2", "fname": "法棟", "group": "安全組", "time": "07:00 上線", "loc": "安全組（般若車道口）", "car": "2車"},
-  {"name": "郭旭洲", "room": "護法四樓護七室70", "fname": "法睿", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "李明吉", "room": "護法202-3", "fname": "傳集", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "沈天成", "room": "法藏苑B115-2", "fname": "法穎", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "郭國慶", "room": "法藏苑B115-4", "fname": "傳同", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "詹益坤", "room": "法藏苑B115-1", "fname": "法松", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "羅輝農", "room": "普賢寮211-3", "fname": "法劍", "group": "男眾機動組", "time": "07:00 上線", "loc": "B2總務組", "car": "2車"},
-  {"name": "張又嘉", "room": "護法八樓護七室19", "fname": "法禪", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "小車14"},
-  {"name": "朱麗俐", "room": "B1M淨願寮05-4", "fname": "法修", "group": "大寮炒手", "time": "04:15 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "3車"},
-  {"name": "楊秀美", "room": "B1M淨願寮09-4", "fname": "法怡", "group": "大寮挑菜區", "time": "08:15 上線", "loc": "菩提苑", "car": "2車"},
-  {"name": "高如巧", "room": "B1M淨願寮01-3", "fname": "法巧", "group": "大寮煮飯區", "time": "03:20 上線（連香）", "loc": "煮飯區", "car": "3車"},
-  {"name": "吳鳳銀", "room": "法藏苑C111-3", "fname": "法持", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "陳彩鑾", "room": "法藏苑C112-3", "fname": "傳霞", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "陳錦華", "room": "法藏苑C111-1", "fname": "法帛", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "黃郁庭", "room": "法藏苑C111-4", "fname": "", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "廖彩汝", "room": "法藏苑C111-2", "fname": "法乳", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "劉羽珣", "room": "法藏苑C110-1", "fname": "傳如", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "小車12"},
-  {"name": "謝喜麗", "room": "法藏苑C112-1", "fname": "傳捨", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "余紀彤", "room": "中智寮410-6", "fname": "法藏", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "3車"},
-  {"name": "余雪", "room": "中智寮402-6", "fname": "法白", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "余婕瑜", "room": "中智寮406-6", "fname": "傳潔", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車13"},
-  {"name": "杜淑惠", "room": "中智寮406-5", "fname": "傳淑", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車13"},
-  {"name": "林文斐", "room": "中智寮402-2", "fname": "法具", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "林沂萱", "room": "中智寮410-4", "fname": "傳宣", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車12"},
-  {"name": "邱靖瑋", "room": "中智寮402-4", "fname": "法刋", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "姜力心", "room": "中智寮402-3", "fname": "法力", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "洪宇力", "room": "中智寮402-1", "fname": "法溉", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "唐惠敏", "room": "中智寮402-5", "fname": "法儀", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "翁愉玫", "room": "中智寮406-2", "fname": "傳悅", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "張宴菁", "room": "中智寮402-7", "fname": "法嚴", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "3車"},
-  {"name": "郭懿文", "room": "中智寮406-1", "fname": "法心", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "黃鈺涵", "room": "中智寮406-7", "fname": "法悅", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車14"},
-  {"name": "潘美桃", "room": "中智寮406-3", "fname": "傳貿", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車"},
-  {"name": "潘素美", "room": "中智寮406-4", "fname": "傳約", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車13"},
-  {"name": "王姝姗", "room": "法藏苑C108-2", "fname": "法銖", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "吳金英", "room": "法藏苑C108-4", "fname": "法滴", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "林瑛", "room": "法藏苑C108-3", "fname": "傳亦", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "莊淑珍", "room": "法藏苑C109-2", "fname": "傳閒", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "陳尤素珍", "room": "法藏苑C108-1", "fname": "法珠", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車"},
-  {"name": "吳麗雲", "room": "護教四樓護七室53", "fname": "法珣", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "李淑娟", "room": "中智寮304-1", "fname": "法格", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "沈美蕙", "room": "中智寮306-4", "fname": "傳琦", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "周春桂", "room": "中智寮302-1", "fname": "傳朔", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "周淑娟", "room": "中智寮302-5", "fname": "傳迹", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "林倪好", "room": "中智寮404-4", "fname": "法戒", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "林惠琳", "room": "中智寮302-6", "fname": "傳日", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "姜沛君", "room": "護教四樓護七室52", "fname": "法朋", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "柯惠君", "room": "中智寮301-5", "fname": "法初", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "張簡慧雪", "room": "中智寮404-1", "fname": "法晴", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "許筀絍", "room": "護教四樓護七室62", "fname": "傳漸", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "小車13"},
-  {"name": "郭雅珍", "room": "中智寮404-3", "fname": "法頤", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "陳玥綸", "room": "中智寮302-7", "fname": "傳玥", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "陳美玉", "room": "中智寮304-5", "fname": "法迪", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "陳惠珍", "room": "中智寮304-6", "fname": "法勒", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "陳麗萍", "room": "中智寮306-1", "fname": "法星", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "傅國萍", "room": "中智寮306-5", "fname": "法平", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "黃子容", "room": "中智寮302-3", "fname": "法容", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "黃雅紅", "room": "中智寮302-2", "fname": "法恩", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "鄭庭卉", "room": "中智寮306-7", "fname": "法齊", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "薛王洪鳳", "room": "護教四樓護七室54", "fname": "傳滿", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "薛佳琳", "room": "中智寮404-5", "fname": "法琳", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "譚應葵", "room": "中智寮304-3", "fname": "法應", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車"},
-  {"name": "蘇芊華", "room": "中智寮306-3", "fname": "傳滿", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "小車13"},
-  {"name": "龔淑珍", "room": "中智寮302-4", "fname": "法證", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車"},
-  {"name": "鄭家潔", "room": "女學中道109-3", "fname": "法德", "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "2車"},
-  {"name": "鄭惠娟", "room": "女學中道109-2", "fname": "法彤", "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "2車"},
-  {"name": "鄭鳳容", "room": "女學中道109-4", "fname": "法鋤", "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "2車"},
-  {"name": "江佩珊", "room": "護教四樓護七室55", "fname": "傳佩", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "3車"},
-  {"name": "李蔚廷", "room": "護教四樓護七室59", "fname": "法懃", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "2車"},
-  {"name": "林玉君", "room": "護教四樓護七室58", "fname": "傳策", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "2車"},
-  {"name": "陳秀卿", "room": "護教四樓護七室60", "fname": "法起", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "3車"},
-  {"name": "方幼如", "room": "明心寮205-2", "fname": "法因", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "2車"},
-  {"name": "周端梅", "room": "明心寮205-4", "fname": "傳端", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "2車"},
-  {"name": "高玉梅", "room": "明心寮205-3", "fname": "法旌", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "2車"},
+  {"name": "邴立湄", "room": "", "fname": "傳巧", "group": "書記室", "time": "待確認", "loc": "待確認", "car": "自行", "cancelled": false},
+  {"name": "張鳳枝", "room": "中諦寮101-3", "fname": "傳吉", "group": "美工設計組", "time": "待確認", "loc": "待確認", "car": "其他專車", "cancelled": false},
+  {"name": "李佩蓉", "room": "女學實相108-2", "fname": "法容", "group": "創意進場-總部", "time": "待確認", "loc": "待確認", "car": "小車04", "cancelled": false},
+  {"name": "曾得洋", "room": "B1M淨行寮15-4", "fname": "法順", "group": "大寮煮飯區", "time": "03:20 上線（連香）", "loc": "煮飯區", "car": "其他專車", "cancelled": false},
+  {"name": "李順興", "room": "普賢寮119-3", "fname": "法覺", "group": "安全組", "time": "07:00 上線", "loc": "安全組（般若車道口）", "car": "其他專車", "cancelled": false},
+  {"name": "余素華", "room": "中諦寮101-2", "fname": "傳謙", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "其他專車", "cancelled": false},
+  {"name": "陳芷涵", "room": "中諦寮212-5", "fname": "傳芷", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車", "cancelled": false},
+  {"name": "史育千", "room": "中諦寮213-3", "fname": "傳蜜", "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "其他專車", "cancelled": false},
+  {"name": "李豔麗", "room": "中諦寮213-2", "fname": "法初", "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "其他專車", "cancelled": false},
+  {"name": "黃瓊瑤", "room": "中諦寮213-5", "fname": "傳琬", "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "其他專車", "cancelled": false},
+  {"name": "張俞婷", "room": "中諦寮214-2", "fname": "傳燈", "group": "創意進場-總部", "time": "待確認", "loc": "待確認", "car": "其他專車", "cancelled": false},
+  {"name": "王小芳", "room": "明心寮208-3", "fname": "法大", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "1車", "cancelled": false, "note": "8/26才回程"},
+  {"name": "胡益鐘", "room": "B1M淨行寮08-1", "fname": "法躬", "phone": "0929-268623", "leader": true, "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "2車", "cancelled": false},
+  {"name": "陳文瑞", "room": "護法四樓護七室18", "fname": "法濡", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "2車", "cancelled": false},
+  {"name": "黃文崇", "room": "B1M淨行寮08-3", "fname": "傳開", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "3車", "cancelled": false},
+  {"name": "俞貞元", "room": "普賢寮119-1", "fname": "法士", "phone": "0960-383923", "leader": true, "group": "安全組", "time": "07:00 上線", "loc": "安全組（般若車道口）", "car": "2車", "cancelled": false},
+  {"name": "婁國棟", "room": "普賢寮119-2", "fname": "法棟", "group": "安全組", "time": "07:00 上線", "loc": "安全組（般若車道口）", "car": "2車", "cancelled": false},
+  {"name": "郭旭洲", "room": "護法四樓護七室70", "fname": "法睿", "phone": "0935-716201", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "伍木山", "room": "法藏苑B115-3", "fname": "傳易", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "其他專車", "cancelled": false},
+  {"name": "李明吉", "room": "護法202-3", "fname": "傳集", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "沈天成", "room": "法藏苑B115-2", "fname": "法穎", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "郭國慶", "room": "法藏苑B115-4", "fname": "傳同", "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "詹益坤", "room": "法藏苑B115-1", "fname": "法松", "phone": "0932-861983", "leader": true, "group": "男眾巡寮組", "time": "抵達法藏苑後，先向男眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "黃聖茂", "room": "普賢寮130-4", "fname": "法恆", "group": "男眾機動組", "time": "07:00 上線", "loc": "B2總務組", "car": "2車", "cancelled": false, "note": "6轉2車"},
+  {"name": "羅輝農", "room": "普賢寮211-3", "fname": "法劍", "phone": "0988-734355", "leader": true, "group": "男眾機動組", "time": "07:00 上線", "loc": "B2總務組", "car": "2車", "cancelled": false},
+  {"name": "張又嘉", "room": "護法八樓護七室19", "fname": "法禪", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "小車14", "cancelled": false, "note": "改8/22早上"},
+  {"name": "朱麗俐", "room": "B1M淨願寮05-4", "fname": "法修", "phone": "0937-310677", "leader": true, "group": "大寮炒手", "time": "04:15 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "3車", "cancelled": false},
+  {"name": "楊秀美", "room": "B1M淨願寮09-4", "fname": "法怡", "phone": "0922-558399", "leader": true, "group": "大寮挑菜區", "time": "08:15 上線", "loc": "菩提苑", "car": "2車", "cancelled": false},
+  {"name": "高如巧", "room": "B1M淨願寮01-3", "fname": "法巧", "phone": "0977-087136", "leader": true, "group": "大寮煮飯區", "time": "03:20 上線（連香）", "loc": "煮飯區", "car": "3車", "cancelled": false},
+  {"name": "吳鳳銀", "room": "法藏苑C111-3", "fname": "法持", "phone": "0912-724008", "leader": true, "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "張麗淳", "room": "法藏苑C112-4", "fname": "法淳", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "4車", "cancelled": false},
+  {"name": "陳彩鑾", "room": "法藏苑C112-3", "fname": "傳霞", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "陳錦華", "room": "法藏苑C111-1", "fname": "法帛", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "陳靜宜", "room": "中智寮110-2", "fname": "法嵐", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "其他專車", "cancelled": false},
+  {"name": "黃郁庭", "room": "法藏苑C111-4", "fname": "", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "廖彩汝", "room": "法藏苑C111-2", "fname": "法乳", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "劉羽珣", "room": "法藏苑C110-1", "fname": "傳如", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "小車12", "cancelled": false},
+  {"name": "鄭莛蓉", "room": "法藏苑C110-2", "fname": "傳熙", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "取消", "cancelled": true, "note": "汽車故障"},
+  {"name": "謝喜麗", "room": "法藏苑C112-1", "fname": "傳捨", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "余紀彤", "room": "中智寮410-6", "fname": "法藏", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "3車", "cancelled": false},
+  {"name": "余雪", "room": "中智寮402-6", "fname": "法白", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "余婕瑜", "room": "中智寮406-6", "fname": "傳潔", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車13", "cancelled": false},
+  {"name": "呂志君", "room": "中智寮410-3", "fname": "傳晨", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車", "cancelled": false},
+  {"name": "杜淑惠", "room": "中智寮406-5", "fname": "傳淑", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車13", "cancelled": false},
+  {"name": "林文斐", "room": "中智寮402-2", "fname": "法具", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "林沂萱", "room": "中智寮410-4", "fname": "傳宣", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車12", "cancelled": false},
+  {"name": "邱靖瑋", "room": "中智寮402-4", "fname": "法刋", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "姜力心", "room": "中智寮402-3", "fname": "法力", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "洪宇力", "room": "中智寮402-1", "fname": "法溉", "phone": "0979-413419", "leader": true, "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "唐惠敏", "room": "中智寮402-5", "fname": "法儀", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "翁愉玫", "room": "中智寮406-2", "fname": "傳悅", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "張宴菁", "room": "中智寮402-7", "fname": "法嚴", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "3車", "cancelled": false},
+  {"name": "郭懿文", "room": "中智寮406-1", "fname": "法心", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "黃鈺涵", "room": "中智寮406-7", "fname": "法悅", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車14", "cancelled": false, "note": "8/22早上出發"},
+  {"name": "潘美桃", "room": "中智寮406-3", "fname": "傳貿", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "2車", "cancelled": false},
+  {"name": "潘素美", "room": "中智寮406-4", "fname": "傳約", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "小車13", "cancelled": false},
+  {"name": "王姝姗", "room": "法藏苑C108-2", "fname": "法銖", "phone": "0921-272657", "leader": true, "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "吳金英", "room": "法藏苑C108-4", "fname": "法滴", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "林瑛", "room": "法藏苑C108-3", "fname": "傳亦", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "莊淑珍", "room": "法藏苑C109-2", "fname": "傳閒", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "陳尤素珍", "room": "法藏苑C108-1", "fname": "法珠", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "3車", "cancelled": false},
+  {"name": "方郁淳", "room": "中智寮404-6", "fname": "傳淳", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "4車", "cancelled": false},
+  {"name": "王蜀秀", "room": "中智寮404-2", "fname": "傳億", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "其他專車", "cancelled": false},
+  {"name": "吳麗雲", "room": "護教四樓護七室53", "fname": "法珣", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "李淑娟", "room": "中智寮304-1", "fname": "法格", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "沈美蕙", "room": "中智寮306-4", "fname": "傳琦", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "周春桂", "room": "中智寮302-1", "fname": "傳朔", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "周淑娟", "room": "中智寮302-5", "fname": "傳迹", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "林倪好", "room": "中智寮404-4", "fname": "法戒", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "林惠琳", "room": "中智寮302-6", "fname": "傳日", "phone": "0931-563622", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "林愛國", "room": "中智寮304-2", "fname": "法策", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "取消", "cancelled": true, "note": "病未痊癒"},
+  {"name": "姜沛君", "room": "護教四樓護七室52", "fname": "法朋", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "柯惠君", "room": "中智寮301-5", "fname": "法初", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "張簡慧雪", "room": "中智寮404-1", "fname": "法晴", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "許筀絍", "room": "護教四樓護七室62", "fname": "傳漸", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "小車13", "cancelled": false},
+  {"name": "郭雅珍", "room": "中智寮404-3", "fname": "法頤", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "陳玥綸", "room": "中智寮302-7", "fname": "傳玥", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "陳美玉", "room": "中智寮304-5", "fname": "法迪", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "陳惠珍", "room": "中智寮304-6", "fname": "法勒", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "陳麗萍", "room": "中智寮306-1", "fname": "法星", "phone": "0910-811218", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "傅國萍", "room": "中智寮306-5", "fname": "法平", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "馮素琴", "room": "中智寮306-2", "fname": "法杖", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "取消", "cancelled": true, "note": "傷病"},
+  {"name": "黃子容", "room": "中智寮302-3", "fname": "法容", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "黃雅紅", "room": "中智寮302-2", "fname": "法恩", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "鄭庭卉", "room": "中智寮306-7", "fname": "法齊", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "薛王洪鳳", "room": "護教四樓護七室54", "fname": "傳滿", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "薛佳琳", "room": "中智寮404-5", "fname": "法琳", "phone": "0938-587687", "leader": true, "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "譚應葵", "room": "中智寮304-3", "fname": "法應", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "2車", "cancelled": false},
+  {"name": "蘇芊華", "room": "中智寮306-3", "fname": "傳滿", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "小車13", "cancelled": false},
+  {"name": "蘇慧娟", "room": "中智寮306-6", "fname": "法娟", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "4車", "cancelled": false},
+  {"name": "龔淑珍", "room": "中智寮302-4", "fname": "法證", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "3車", "cancelled": false},
+  {"name": "鄭家潔", "room": "女學中道109-3", "fname": "法德", "phone": "0988-721633", "leader": true, "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "2車", "cancelled": false},
+  {"name": "鄭惠娟", "room": "女學中道109-2", "fname": "法彤", "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "2車", "cancelled": false},
+  {"name": "鄭鳳容", "room": "女學中道109-4", "fname": "法鋤", "group": "衣缽組", "time": "07:00 上線", "loc": "圓覺禪堂外廊道", "car": "2車", "cancelled": false},
+  {"name": "蔣慧芬", "room": "女學中道110-1", "fname": "傳書", "group": "創意進場-總部", "time": "待確認", "loc": "待確認", "car": "小車02", "cancelled": false},
+  {"name": "江佩珊", "room": "護教四樓護七室55", "fname": "傳佩", "phone": "0988-590300", "leader": true, "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "3車", "cancelled": false},
+  {"name": "李蔚廷", "room": "護教四樓護七室59", "fname": "法懃", "phone": "0986-803796", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "2車", "cancelled": false},
+  {"name": "林玉君", "room": "護教四樓護七室58", "fname": "傳策", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "2車", "cancelled": false},
+  {"name": "洪玉真", "room": "護教四樓護七室57", "fname": "傳心", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "4車", "cancelled": false},
+  {"name": "陳秀卿", "room": "護教四樓護七室60", "fname": "法起", "group": "齋供照客", "time": "05:00 上線", "loc": "菩提廊道齋供服務台", "car": "3車", "cancelled": false},
+  {"name": "方幼如", "room": "明心寮205-2", "fname": "法因", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "2車", "cancelled": false},
+  {"name": "周端梅", "room": "明心寮205-4", "fname": "傳端", "phone": "0918-394889", "leader": true, "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "2車", "cancelled": false},
+  {"name": "高玉梅", "room": "明心寮205-3", "fname": "法旌", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "2車", "cancelled": false},
+  {"name": "李瓊文", "room": "B1M淨願寮03-2", "fname": "傳第", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "其他專車", "cancelled": false},
+  {"name": "董靜宜", "room": "B1M淨願寮03-1", "fname": "傳竫", "group": "大寮內場", "time": "04:00 上線", "loc": "菩提大寮（自動門旁需按門鈴）", "car": "其他專車", "cancelled": false},
+  {"name": "伍謝美華", "room": "中智寮105-2", "fname": "傳璟", "group": "女眾巡寮組", "time": "抵達法藏苑後，先向女眾巡寮組執事法師報到", "loc": "法藏苑", "car": "其他專車", "cancelled": false},
+  {"name": "蔡美佐", "room": "法藏苑C109-1", "fname": "傳佑", "group": "交通組", "time": "抵達法藏苑後，先向交通組執事法師報到", "loc": "法藏苑", "car": "其他專車", "cancelled": false},
+  {"name": "黃怡晴", "room": "中智寮304-4", "fname": "傳晴", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "其他專車", "cancelled": false},
+  {"name": "鐘瑋伶", "room": "中智寮304-7", "fname": "法伶", "group": "行堂組", "time": "04:50 上線", "loc": "菩提廊道電子看板對面", "car": "其他專車", "cancelled": false},
+  {"name": "黃如琳", "room": "明心寮717-2", "fname": "傳昂", "group": "書記室", "time": "待確認", "loc": "待確認", "car": "其他專車", "cancelled": false},
+  {"name": "吳珮甄", "room": "明心寮202-1", "fname": "傳忯", "group": "醫護組", "time": "8/22 08:00 上線；8/23 07:30 上線", "loc": "醫護中心", "car": "其他專車", "cancelled": false},
+  {"name": "劉書亨", "room": "", "fname": "傳元", "group": "創意進場-總部", "time": "待確認", "loc": "待確認", "car": "小車25", "cancelled": false},
+  {"name": "吳怡青", "room": "雲來寮625-3", "fname": "法誼", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車", "cancelled": false},
+  {"name": "劉碧慧", "room": "雲來寮625-2", "fname": "傳屏", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車", "cancelled": false},
+  {"name": "鄭思明", "room": "雲來寮625-1", "fname": "傳昉", "group": "女眾機動環保組", "time": "07:00 上線", "loc": "B2女機環休息區", "car": "其他專車", "cancelled": false},
 ];
 
 const groupCounts = {};
@@ -361,7 +401,7 @@ function render(items, groupByHeaders){
       listEl.appendChild(header);
     }
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card' + (p.cancelled ? ' cancelled' : '') + (p.leader ? ' leader' : '');
     const fieldsHtml = p._simple ? `
       <div class="fields">
         <div class="label">車次</div>
@@ -377,19 +417,26 @@ function render(items, groupByHeaders){
         <div class="value">${p.room || '未查得'}</div>
         <div class="label">組別</div>
         <div class="value"><span class="badge">${p.group}</span></div>
+        ${p.phone ? `
+        <div class="label">電話</div>
+        <div class="value">${p.phone}</div>
+        ` : ''}
+        ${p.cancelled ? '' : `
         <div class="label">上線</div>
         <div class="value time-value">${p.time}</div>
         <div class="label">地點</div>
         <div class="value">${p.loc}</div>
+        `}
       </div>
     `;
     card.innerHTML = `
       <div class="name-row">
         <span class="name">${p.name}</span>
         <span class="fname">${p.fname}</span>
+        ${p.cancelled ? '<span class="cancel-tag">已取消</span>' : (p.leader ? '<span class="leader-tag">小組長</span>' : '')}
       </div>
       ${fieldsHtml}
-      ${p.note ? `<div class="note"><b>提醒：</b>${p.note}</div>` : ''}
+      ${p.note ? `<div class="note"><b>備註：</b>${p.note}</div>` : ''}
     `;
     listEl.appendChild(card);
   });
