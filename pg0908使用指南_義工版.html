@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美工組出坡簽到系統 — 使用說明（義工版）</title>
+<style>
+  :root{
+    --bg:#FAF7F1;
+    --paper:#FFFFFF;
+    --ink:#1C1B1A;
+    --ink-soft:#4A4540;
+    --line:#D9D2C5;
+    --moss:#3B5249;
+    --moss-light:#E0EBE4;
+    --gold:#A66F28;
+    --gold-light:#F8F0E3;
+    --gold-text:#704B19;
+    --danger:#AB3B29;
+    --danger-light:#FBDBD8;
+    --radius:14px;
+    --shadow:0 2px 10px rgba(28,27,26,.06);
+    --serif:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
+    --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--sans);
+    font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;
+  }
+  #wrap{max-width:760px;margin:0 auto;padding:0 20px 80px;}
+
+  header.cover{
+    padding:56px 0 40px;text-align:center;border-bottom:1px solid var(--line);margin-bottom:8px;
+  }
+  header.cover .kicker{
+    font-family:var(--serif);color:var(--gold-text);font-size:14px;letter-spacing:.08em;margin-bottom:10px;
+  }
+  header.cover h1{
+    font-family:var(--serif);font-size:32px;line-height:1.4;margin:0 0 12px;color:var(--ink);
+  }
+  header.cover .sub{color:var(--ink-soft);font-size:16px;}
+
+  nav.toc{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:22px 26px;margin:32px 0 44px;
+  }
+  nav.toc h2{
+    font-family:var(--serif);font-size:16px;margin:0 0 12px;color:var(--gold-text);
+    font-weight:700;
+  }
+  nav.toc ol{margin:0;padding-left:22px;}
+  nav.toc li{margin-bottom:6px;}
+  nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--ink-soft);}
+  nav.toc a:hover{color:var(--gold-text);border-bottom-color:var(--gold-text);}
+
+  section{
+    margin-bottom:28px;background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 28px;
+  }
+  section h2{
+    font-family:var(--serif);font-size:21px;color:var(--ink);
+    margin:0 0 18px;display:flex;align-items:baseline;gap:10px;
+  }
+  section h2 .num{
+    color:var(--gold-text);font-size:13px;font-weight:700;background:var(--gold-light);
+    border-radius:999px;padding:3px 11px;font-family:var(--sans);
+  }
+  section h3{font-family:var(--serif);font-size:17px;color:var(--moss);margin:22px 0 10px;}
+
+  p{margin:0 0 14px;}
+  ul,ol{padding-left:24px;margin:0 0 16px;}
+  li{margin-bottom:6px;}
+
+  .callout{
+    background:var(--gold-light);border-left:4px solid var(--gold);border-radius:8px;
+    padding:14px 18px;margin:18px 0;color:var(--gold-text);font-size:15.5px;
+  }
+  .callout b{color:var(--ink);}
+
+  table{border-collapse:collapse;width:100%;margin:18px 0;background:var(--bg);
+    border-radius:10px;overflow:hidden;border:1px solid var(--line);}
+  th,td{border:1px solid var(--line);padding:11px 14px;text-align:left;font-size:15.5px;vertical-align:top;}
+  th{background:var(--moss-light);color:var(--moss);font-family:var(--serif);font-weight:700;font-size:14px;}
+
+  .steps{list-style:none;padding:0;margin:0 0 16px;counter-reset:step;}
+  .steps li{
+    counter-increment:step;position:relative;padding:10px 0 10px 44px;
+    border-bottom:1px dashed var(--line);
+  }
+  .steps li:last-child{border-bottom:none;}
+  .steps li::before{
+    content:counter(step);position:absolute;left:0;top:9px;
+    width:28px;height:28px;border-radius:50%;background:var(--moss);color:#fff;
+    font-family:var(--serif);font-weight:700;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .icon-badge{
+    display:inline-flex;align-items:center;gap:6px;background:var(--moss-light);
+    color:var(--moss);border-radius:999px;padding:3px 12px;font-size:14px;font-weight:700;
+  }
+
+  code{background:var(--gold-light);color:var(--gold-text);padding:1px 6px;border-radius:5px;font-family:var(--sans);font-size:.95em;}
+
+  footer{
+    text-align:center;color:var(--ink-soft);font-size:13.5px;padding-top:30px;
+    border-top:1px solid var(--line);margin-top:20px;
+  }
+
+  @media print{
+    body{background:#fff;font-size:12pt;}
+    nav.toc{break-after:page;}
+    section{break-inside:avoid;}
+  }
+
+  @media (max-width:520px){
+    header.cover{padding:40px 0 28px;}
+    header.cover h1{font-size:26px;}
+    section h2{font-size:20px;}
+    #wrap{padding:0 14px 60px;}
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <header class="cover">
+    <div class="kicker">普高精舍．美工組</div>
+    <h1>出坡簽到系統<br>使用說明（義工版）</h1>
+    <div class="sub">如何打開系統、簽到簽退、填寫每日紀錄</div>
+  </header>
+
+  <nav class="toc">
+    <h2>目錄</h2>
+    <ol>
+      <li><a href="#s1">如何打開系統</a></li>
+      <li><a href="#s2">認識畫面</a></li>
+      <li><a href="#s3">怎麼簽到</a></li>
+      <li><a href="#s4">怎麼簽退</a></li>
+      <li><a href="#s5">每天頁面下方的五個打卡項目</a></li>
+      <li><a href="#s6">怎麼查看法務公告、交接坡務、本週班表</a></li>
+    </ol>
+  </nav>
+
+  <section id="s1">
+    <h2><span class="num">1</span> 如何打開系統</h2>
+    <p>用手機或電腦的瀏覽器（例如 Chrome、Safari），打開管理者提供給你的網址即可，<b>不用登入帳號密碼</b>，也不用安裝任何 App。</p>
+    <p>建議把網址加到手機主畫面或瀏覽器書籤，之後打開更方便。</p>
+    <p>打開後畫面會先出現「連線至 Google Sheets 中…」的讀取畫面，通常幾秒鐘就會顯示出本週的排班內容。</p>
+  </section>
+
+  <section id="s2">
+    <h2><span class="num">2</span> 認識畫面</h2>
+    <h3>手機版</h3>
+    <p>畫面左上角有一個 <code>☰</code> 按鈕，點一下會從左邊滑出選單；選好項目後選單會自動收起來。</p>
+    <h3>電腦版</h3>
+    <p>左邊會固定顯示一排選單，不用另外點開。</p>
+    <h3>選單裡有這些項目</h3>
+    <table>
+      <tr><th>項目</th><th>內容</th></tr>
+      <tr><td>📌 法務公告</td><td>彙整所有從每天畫面寫入的公告事項，越新的排在越上面</td></tr>
+      <tr><td>📋 交接坡務</td><td>彙整每天「交接坡務說明」打卡項目累積下來的紀錄，純顯示，不能在這裡新增</td></tr>
+      <tr><td>🗓️ 週班表</td><td>整週7天的總覽表格，一眼看到誰被排在哪一天做什麼任務</td></tr>
+      <tr><td>週一～週日</td><td>點進去看當天的詳細排班內容，也是簽到/簽退跟填寫各種打卡紀錄的地方</td></tr>
+    </table>
+    <p>每一天旁邊會顯示像「3/5」這樣的數字，代表「已經簽到的人數 / 總排班人數」，方便一眼看出今天完成度。</p>
+  </section>
+
+  <section id="s3">
+    <h2><span class="num">3</span> 怎麼簽到</h2>
+    <ol class="steps">
+      <li>切到自己被排班的那一天（例如「週三」）</li>
+      <li>找到自己的名字，直接點下去（名字底下有底線代表可以點）</li>
+      <li>會跳出一個小視窗，問你要「簽到」還是「簽退」，第一次點的時候「簽退」按鈕會是灰色不能按（因為還沒簽到）</li>
+      <li>點「簽到」</li>
+      <li>跳出 PIN 碼輸入畫面，輸入你自己的3碼 PIN 碼</li>
+      <li>輸入完滿3碼後，下方按鈕會變成可以按的顏色，按下去即可</li>
+      <li>完成後畫面上你的名字狀態會變成「已簽到 XX:XX」</li>
+    </ol>
+    <div class="callout"><b>提醒：</b>PIN 碼輸入錯誤會有紅字提示，重新輸入正確的即可，不會被鎖住。</div>
+  </section>
+
+  <section id="s4">
+    <h2><span class="num">4</span> 怎麼簽退</h2>
+    <p>簽退比簽到多一個步驟：<b>要先勾選今天實際做了哪些出坡內容</b>，這是為了統計每個人各項技能（工巧明認證標章）累積次數用的。</p>
+    <ol class="steps">
+      <li>點自己的名字（要跟簽到用同一筆排班點）</li>
+      <li>點「簽退」</li>
+      <li>打開後畫面上方會先看到一個紅色提示框，提醒你一定要勾選內容或填其他欄位才能送出</li>
+      <li>往下看到編號 01～26 的關鍵字清單（例如「切割紙張」「護貝膠膜」「掃地拖地」等），把今天實際有做的項目全部勾起來（可以複選，不限一項）</li>
+      <li>如果做的事情不在清單裡，可以在下面「其他」文字框自己打字說明（這格填的內容<b>不會列入關鍵字統計</b>，純粹備註用）</li>
+      <li>最後才輸入 PIN 碼（簽退時畫面不會自動跳出數字鍵盤，是設計成這樣讓你能先好好勾選，勾完自己點一下 PIN 欄位，鍵盤才會跳出來）</li>
+      <li>至少要勾一項關鍵字，或是「其他」欄位有填字，才能按下「確認簽退」</li>
+      <li>完成後畫面上會顯示「已簽到 XX:XX・已簽退 XX:XX（服務 X.X 小時）」，下面還會列出你剛剛勾選/填寫的出坡內容</li>
+    </ol>
+  </section>
+
+  <section id="s5">
+    <h2><span class="num">5</span> 每天頁面下方的五個打卡項目</h2>
+    <p>切到任何一天，往下捲動，簽到排班列表下方會看到五張卡片，這些跟「排班簽到」是分開的，<b>不用是被排班的人也能填</b>，任何人都可以幫忙記錄：</p>
+    <table>
+      <tr><th>項目</th><th>要填什麼</th><th>需要說明文字嗎</th></tr>
+      <tr><td>🙋 當日新增或取消</td><td>姓名/法名＋出坡時間</td><td>需要（填時間，例如15:30-17:30）</td></tr>
+      <tr><td>📋 交接坡務說明</td><td>姓名＋交接內容</td><td>需要，請照「人．事．時．地．物」詳細寫清楚</td></tr>
+      <tr><td>🗑️ 發心倒垃圾</td><td>姓名</td><td>不用</td></tr>
+      <tr><td>🧹 發心全室拖地</td><td>姓名</td><td>不用</td></tr>
+      <tr><td>🖨️ 關閉影印機(最後離開者)</td><td>姓名</td><td>不用</td></tr>
+    </table>
+    <p>操作方式都一樣：點卡片下方「＋ 新增紀錄」→ 填資料 → 送出，同一天同一項目可以重複新增多筆（例如拖地換了兩個人，兩筆都可以各自留紀錄）。</p>
+    <div class="callout">「交接坡務說明」這裡填的內容，會自動彙整顯示到左側選單的「📌 交接坡務」頁面裡，不用另外去那裡填。</div>
+  </section>
+
+  <section id="s6">
+    <h2><span class="num">6</span> 怎麼查看法務公告、交接坡務、本週班表</h2>
+    <p><span class="icon-badge">📌 法務公告</span> 點左側選單，會看到所有天彙整起來的公告清單，越新的排最上面。想新增公告，要到「某一天」的畫面，往下捲到「📝 法務公告」卡片去新增（跟5個打卡項目同一區塊）。</p>
+    <p><span class="icon-badge">📋 交接坡務</span> 點左側選單，這裡純粹用來看，不能在這頁新增，要新增請到當天畫面的「交接坡務說明」卡片。</p>
+    <p><span class="icon-badge">🗓️ 週班表</span> 點左側選單，會看到7天橫向排列的表格，一眼看到整週誰被排在哪裡；表格裡任務名稱是金色字、姓名是深色字，如果是「時段長」身分，姓名後面會多一個★星號。</p>
+  </section>
+
+  <footer>
+    有任何操作上的問題，可以直接詢問管理者，或參考本指南第二部分（後台管理說明）。
+  </footer>
+
+</div>
+</body>
+</html>
