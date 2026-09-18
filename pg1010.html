@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回山領隊作業實務</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#faf8f3; --paper-deep:#f1ece1; --ink:#2a2723; --ink-soft:#4a463f; --muted:#8a8375;
+  --line:#ddd5c4; --gold:#b4903d; --gold-deep:#8f6f28;
+  --sage:#7e9683; --bronze:#a97c4f; --navy:#333a5c; --slate:#5c6b8a;
+  --card:#ffffff; --sidebar-w:270px;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{ margin:0; background:var(--paper); color:var(--ink); font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; line-height:1.8; -webkit-font-smoothing:antialiased; }
+.serif{ font-family:"Noto Serif TC","Times New Roman",serif; }
+
+.sidebar{
+  position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w);
+  background:var(--navy); color:#e9e2cf; overflow-y:auto; z-index:60; padding:26px 0 30px;
+  transition:transform .28s ease;
+}
+.sidebar-brand{ font-family:"Noto Serif TC",serif; font-weight:700; font-size:15.5px; color:#fff; padding:0 24px 18px; line-height:1.5; border-bottom:1px solid rgba(255,255,255,.14); margin-bottom:8px;}
+.sidebar-brand span{ display:block; font-size:11.5px; font-weight:400; color:var(--gold); margin-top:6px; }
+.sidenav{ list-style:none; margin:0; padding:0; }
+.sidenav li a{ display:flex; align-items:center; gap:10px; padding:8px 24px; font-size:13.5px; color:#cfc7ae; text-decoration:none; border-left:3px solid transparent; }
+.sidenav li a:hover{ background:rgba(255,255,255,.06); color:#fff; }
+.sidenav li a.active{ background:rgba(180,144,61,.16); color:#fff; border-left-color:var(--gold); font-weight:500; }
+.sidx{ font-family:"Noto Serif TC",serif; font-size:11.5px; color:var(--gold); width:34px; flex:0 0 auto; opacity:.9;}
+
+.sidebar-toggle{ position:fixed; top:14px; left:14px; z-index:70; width:40px; height:40px; border-radius:50%; background:var(--navy); border:none; cursor:pointer; display:none; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.sidebar-toggle span, .sidebar-toggle span::before, .sidebar-toggle span::after{ content:""; display:block; width:17px; height:2px; background:#fff; position:relative;}
+.sidebar-toggle span::before{ position:absolute; top:-6px; }
+.sidebar-toggle span::after{ position:absolute; top:6px; }
+.sidebar-overlay{ display:none; position:fixed; inset:0; background:rgba(20,18,14,.45); z-index:55; }
+
+.main{ margin-left:var(--sidebar-w); }
+
+.wrap{ max-width:760px; margin:0 auto; padding:0 30px 80px; }
+
+.page-title{ font-size:15px; font-weight:700; color:var(--gold-deep); padding:26px 0 14px; letter-spacing:.03em; }
+.intro-title{ font-size:clamp(24px,5vw,32px); margin:0 0 18px; }
+.doc-meta{ display:grid; grid-template-columns:auto 1fr; gap:5px 16px; font-size:13px; color:var(--ink-soft); max-width:420px; margin-bottom:26px; padding-bottom:26px; border-bottom:2px solid var(--ink);}
+.doc-meta dt{ font-weight:700; color:var(--ink); }
+.doc-meta dd{ margin:0; }
+
+.chapter{ padding:30px 0; display:none; }
+.chapter.visible{ display:block; }
+.chapter h2{ display:flex; align-items:baseline; gap:12px; font-size:21px; margin:0 0 16px; }
+.intro-h{ font-size:20px; margin:0 0 16px; color:var(--ink); }
+.numtag{ font-family:"Noto Serif TC",serif; font-weight:700; color:var(--gold-deep); }
+.numtag.big{ font-size:20px; min-width:54px; }
+.sub{ margin:20px 0 8px; }
+.sub h3{ display:flex; align-items:baseline; gap:10px; font-size:16.5px; margin:0 0 10px; color:var(--navy); }
+.sub .numtag{ font-size:14px; min-width:40px; }
+.subsub{ margin:14px 0 6px 8px; }
+.subsub h4{ display:flex; align-items:baseline; gap:9px; font-size:14.5px; margin:0 0 8px; color:var(--bronze); }
+.subsub .numtag{ font-size:13px; min-width:44px; }
+
+.p{ font-size:15px; color:var(--ink-soft); margin:0 0 12px; }
+.label-lead{ color:var(--navy); font-weight:700; }
+.chapter:not(.intro) > .p{ margin-left:66px; }
+.ul{ margin:0 0 10px; padding-left:1.3em; font-size:14.5px; color:var(--ink-soft); }
+.chapter:not(.intro) > .ul{ margin-left:66px; padding-left:1.3em; }
+.chapter:not(.intro) > .file-badge{ margin-left:66px; }
+.ul li{ margin-bottom:5px; }
+.sub > .p, .sub > .ul, .sub > .file-badge{ margin-left:50px; }
+.subsub > .p, .subsub > .ul, .subsub > .file-badge{ margin-left:53px; }
+.note{ font-size:13px; color:var(--muted); font-style:italic; margin:6px 0 10px; }
+
+.owner-tag{ font-size:11.5px; color:var(--navy); background:var(--paper-deep); border:1px solid var(--line); border-radius:8px; padding:1px 8px; margin-left:6px; }
+
+.tagitem{ display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-top:1px dashed var(--line); font-size:14.5px; margin-left:66px; }
+.chapter > .tagitem:first-of-type{ border-top:none; }
+.cat-tag{ flex:0 0 auto; font-size:11px; font-weight:700; color:#fff; border-radius:9px; padding:2px 9px; margin-top:2px; white-space:nowrap;}
+.cat-sage{ background:var(--sage);} .cat-bronze{ background:var(--bronze);} .cat-navy{ background:var(--navy);} .cat-gold{ background:var(--gold-deep);} .cat-slate{ background:var(--slate);}
+
+.file-badge{
+  display:inline-flex; align-items:center; gap:5px; font-size:12.5px; color:var(--navy);
+  background:var(--paper-deep); border:1px solid var(--line); border-radius:12px; padding:3px 11px;
+  text-decoration:none; margin:2px 4px 8px 0;
+}
+.file-badge:hover{ background:var(--line); }
+.file-badge.pending{ color:var(--muted); font-style:italic; cursor:default; }
+.file-badge.pending:hover{ background:var(--paper-deep); }
+
+.doc-table{ width:100%; border-collapse:collapse; margin-top:16px; font-size:14px;}
+.doc-table th{ text-align:left; background:var(--navy); color:#f3efe4; padding:8px 12px; font-weight:500;}
+.doc-table td{ padding:9px 12px; border-bottom:1px solid var(--line); }
+.doclink{ color:var(--navy); text-decoration:none; background:var(--paper-deep); border:1px solid var(--line); border-radius:10px; padding:2px 10px; font-size:12.5px;}
+.doclink-pending{ color:var(--muted); font-size:12.5px; font-style:italic; }
+
+footer{ text-align:center; padding:36px 0 50px; font-size:12px; color:var(--muted); }
+
+/* ===================== 高對比／易讀性覆寫層 ===================== */
+:root {
+  --paper: #f9f8f5;
+  --paper-deep: #eee9dc;
+  --ink: #1a1a1a;
+  --ink-soft: #2d2a26;
+  --muted: #59544b;
+  --line: #cccccc;
+  --gold-deep: #7a5c1a;
+  --navy: #1f2742;
+  --card: #ffffff;
+  --sidebar-w: 300px;
+}
+
+body {
+  font-size: 18px;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+}
+
+.intro-title {
+  font-size: clamp(28px, 6vw, 36px);
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 24px;
+}
+
+.chapter h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--navy);
+  border-bottom: 2px solid var(--gold-deep);
+  padding-bottom: 8px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.sub h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold-deep);
+  margin-top: 24px;
+}
+
+.subsub h4 {
+  font-size: 19px;
+  font-weight: 700;
+  color: #8c4a00;
+}
+
+.p {
+  font-size: 18px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+
+.chapter:not(.intro) > .p,
+.chapter:not(.intro) > .ul,
+.sub > .p, .sub > .ul {
+  margin-left: 12px;
+}
+
+.ul {
+  font-size: 18px;
+  color: var(--ink-soft);
+  padding-left: 1.5em;
+}
+
+.ul li {
+  margin-bottom: 10px;
+}
+
+.note {
+  font-size: 16px;
+  color: var(--muted);
+  background: var(--paper-deep);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.sidenav li a {
+  padding: 14px 24px;
+  font-size: 17px;
+}
+
+.file-badge, .doclink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--navy);
+  background: #ffffff;
+  border: 2px solid var(--navy);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin: 6px 6px 12px 0;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.file-badge:hover, .doclink:hover {
+  background: var(--navy);
+  color: #ffffff;
+}
+
+.doc-table {
+  font-size: 17px;
+  margin-top: 20px;
+}
+
+.doc-table th {
+  background: var(--navy);
+  color: #ffffff;
+  padding: 14px;
+  font-size: 18px;
+}
+
+.doc-table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.doc-table tr:nth-child(even) {
+  background-color: var(--paper-deep);
+}
+/* =================== /高對比／易讀性覆寫層 ===================== */
+
+@media(max-width:900px){
+  .sidebar{ transform:translateX(-100%); }
+  .sidebar.open{ transform:translateX(0); }
+  .sidebar-toggle{ display:flex; }
+  body.nav-open .sidebar-toggle{ display:none; }
+  .main{ margin-left:0; }
+  body.nav-open .sidebar-overlay{ display:block; }
+  .page-title{ padding-top:64px; }
+  .intro-title{ margin-top:50px; }
+}
+</style>
+</head>
+<body>
+
+<button class="sidebar-toggle" id="navToggle" aria-label="開啟選單"><span></span></button>
+<div class="sidebar-overlay" id="navOverlay"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand serif">回山領隊作業實務</div>
+  <ul class="sidenav">
+  <li><a href="#intro"><span class="sidx">－</span>定義與範圍</a></li>
+<li><a href="#c1"><span class="sidx">1</span>前行</a></li>
+<li><a href="#c2"><span class="sidx">2</span>領隊會議</a></li>
+<li><a href="#c3"><span class="sidx">3</span>行前電聯</a></li>
+<li><a href="#c4"><span class="sidx">4</span>去程</a></li>
+<li><a href="#c5"><span class="sidx">5</span>法會現場</a></li>
+<li><a href="#c6"><span class="sidx">6</span>回程集結</a></li>
+<li><a href="#c7"><span class="sidx">7</span>回程車上</a></li>
+<li><a href="#c8"><span class="sidx">8</span>抵達精舍</a></li>
+<li><a href="#c附錄一"><span class="sidx">附錄一</span>領隊五大職責</a></li>
+<li><a href="#c附錄二"><span class="sidx">附錄二</span>文件與表單</a></li>
+
+  </ul>
+</nav>
+
+<div class="main">
+<div class="wrap">
+
+  <div class="page-title serif">回山領隊作業實務</div>
+
+  
+<section class="chapter intro" id="intro">
+  <h1 class="serif intro-title">回山領隊作業實務</h1>
+  <dl class="doc-meta">
+    <dt>文件版本</dt><dd>v2.2</dd>
+    <dt>適用對象</dt><dd>執秘、大隊長、領隊、副領隊</dd>
+    <dt>文件性質</dt><dd>回山車隊作業依據</dd>
+  </dl>
+  <h2 class="serif intro-h">定義與範圍</h2>
+  <p class="p">普高精舍每年多次辦理信眾回山活動，領隊與副領隊是活動現場第一線的執行者，直接承擔學員的人身安全、行程掌握與臨場應變，其角色是整趟行程能否順利圓滿的關鍵。</p><p class="p"><strong class="label-lead">定義：</strong>「回山領隊作業實務」是將領隊、副領隊在回山任務中所需具備的知識與操作方式，系統化整理而成的作業依據。過去領隊、副領隊的養成多仰賴隨隊見習與資深帶新的口耳相傳，做法因人而異，遇到人員異動或新進領隊增加時，容易出現交接落差、標準不一的情形；本文件即是為了改善這個狀況而制定。</p><p class="p"><strong class="label-lead">範圍：</strong>內容涵蓋人員管理、物資管理、溝通聯繫、應變處理、文件與紀錄留存五大職責，並以接獲通知到抵達精舍八個階段為主軸完整展開；適用對象為執秘、大隊長、領隊、副領隊。全文分為正文各章節，以及可供現場快速核對使用的附錄；其中「現場作息／法會流程範例」章節所列時間、地點僅為說明格式，實際執行仍以每次活動的正式通知為準。其中附件連結檔案所列內容僅為說明參考，實際執行仍以每次活動的正式內容為準。</p>
+</section>
+
+<section class="chapter" id="c1">
+  <h2><span class="numtag big">1</span>前行</h2>
+  <p class="p">本章說明領隊會議召開前，需要完成的組織確認與各項前置作業，確保會議當天資訊完整、設備齊全、人員到位，讓後續每一場會議都能站在相同的基礎上進行。</p><div class="sub" id="s1.1"><h3><span class="numtag">1.1</span>組織運作要務</h3><ul class="ul"><li>住持法師、指導法師</li><li>總召：總召集人，統籌全局。</li><li>法務執秘（大會窗口）：配合大會，回報發車；服務台報到，午齋領取；協同總檢物料。</li><li>行政執秘（精舍窗口）：規劃車隊停放；關照司機齋食身心；協同總檢物料。</li><li>總領隊：配合大會及總指導法師；統籌法務、行政執秘職責。</li><li>大隊長：上呈下達；整合關照領隊、副領隊；掌握車隊行進；協同總檢物料。</li><li>領隊：佈達執行，回報事務；登記借還，整理物料。</li><li>副領隊：協助領隊，關照學員身心並回報。</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1nAegh-lw-na248CxKYca_cmrA2GhOt48vPvSB7xMnrk/edit?usp=sharing" target="_blank" rel="noopener">📎 f01</a></div><div class="sub" id="s1.2"><h3><span class="numtag">1.2</span>執事名單</h3><p class="p">包含所有執事人員與車隊領隊、副領隊的詳細分配名單。</p><a class="file-badge" href="https://docs.google.com/spreadsheets/d/19JggJrQFAYQsYz_A7tQj2o1XiWSqZFw6Sbur08ol5zE/edit?usp=sharing" target="_blank" rel="noopener">📎 f02</a></div><div class="sub" id="s1.3"><h3><span class="numtag">1.3</span>領隊會議邀請電聯稿</h3><p class="p">照客電聯稿</p><a class="file-badge" href="https://docs.google.com/document/d/1BT595WD_jJQESodgaAXhJOltARiPCPYTmkcmvIjXSdo/edit?usp=sharing" target="_blank" rel="noopener">📎 f03</a></div>
+</section>
+
+<section class="chapter" id="c2">
+  <h2><span class="numtag big">2</span>領隊會議</h2>
+  <p class="p">領隊會議是全體領隊、副領隊出發前的正式會議場合，由法務、行政執秘於會中逐一說明注意事項，目的是讓每一位領隊都帶著一致的認知上路，減少臨場才發現認知落差的風險。</p><div class="sub" id="s2.1"><h3><span class="numtag">2.1</span>會前</h3><ul class="ul"><li>場布（冷氣、音響、視訊、筆電、座位安排、茶點）<span class="owner-tag">負責：總領隊</span></li><li>資料：組織表、執事名單、出車表、領隊須知、精舍須知　<span class="owner-tag">負責：總領隊</span></li></ul></div><div class="sub" id="s2.2"><h3><span class="numtag">2.2</span>介紹法師、各執事、領隊副領隊</h3><a class="file-badge" href="https://docs.google.com/spreadsheets/d/19JggJrQFAYQsYz_A7tQj2o1XiWSqZFw6Sbur08ol5zE/edit?usp=sharing" target="_blank" rel="noopener">📎 f02</a></div><div class="sub" id="s2.3"><h3><span class="numtag">2.3</span>法務執秘</h3><div class="subsub" id="s2.3.1"><h4><span class="numtag">2.3.1</span>法會須知</h4><ul class="ul"><li>法會行程（地點、行程表）</li><li>休息區</li><li>領隊須知</li></ul></div><div class="subsub" id="s2.3.2"><h4><span class="numtag">2.3.2</span>安單流程</h4><ul class="ul"><li>安單流程與注意事項</li><li>寮區規範</li></ul></div><div class="subsub" id="s2.3.3"><h4><span class="numtag">2.3.3</span>解說 GOOGLE 表單</h4><ul class="ul"><li>線上人數回報</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1_aclywWo-lN_Yhglbzw9PRolPAqU3gAjbf_NvRVETY4/edit?usp=sharing" target="_blank" rel="noopener">📎 f05</a></div><div class="subsub" id="s2.3.4"><h4><span class="numtag">2.3.4</span>領隊備忘錄</h4><ul class="ul"><li>領隊備忘錄</li><li>公版電聯稿</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1gkAyxYUaQriiOqzexPWL_sjvfRafA69Fv8cjENATLrc/edit?usp=sharing" target="_blank" rel="noopener">📎 f04</a></div></div><div class="sub" id="s2.4"><h3><span class="numtag">2.4</span>行政執秘</h3><div class="subsub" id="s2.4.1"><h4><span class="numtag">2.4.1</span>停車位置</h4><ul class="ul"><li>中台全區平面圖、停車場位置　</li></ul><a class="file-badge" href="https://drive.google.com/file/d/13q719DuiiIeGSJfF_dCJgIwCNjXpInw0/view?usp=sharing" target="_blank" rel="noopener">📎 f12</a><ul class="ul"><li>停車場：指月林、淨覺、妙覺</li><li>停車場至休息區步行動線　</li></ul><a class="file-badge" href="https://drive.google.com/file/d/1EG28gZk9MUcKKVztH6c8v_lZGu05k1dC/view?usp=sharing" target="_blank" rel="noopener">📎 f13</a></div><div class="subsub" id="s2.4.2"><h4><span class="numtag">2.4.2</span>車隊計畫</h4><a class="file-badge" href="https://docs.google.com/presentation/d/1XxMEOFIWIT0WHx4mpxhMnrXfShMLNxboOGYJcvM7mHQ/edit?usp=sharing" target="_blank" rel="noopener">📎 f15</a><p class="p">編組：</p><ul class="ul"><li>大車車隊司機資訊　</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1pSSiqaztm0Lf0AinVGBYIke2MUzAXnxYM315DsHCpSM/edit?usp=sharing" target="_blank" rel="noopener">📎 f11</a><ul class="ul"><li>車隊進場與上車點</li><li>去程回程休息站</li></ul><p class="p">物料：</p><ul class="ul"><li>領取日期、地點與內容</li><li>物料單填寫範例</li><li>背心收摺規定　</li></ul><a class="file-badge" href="https://drive.google.com/file/d/1SE9Zq32mtkRHquVrTDQIxQJLEJG5lUu0/view?usp=sharing" target="_blank" rel="noopener">📎 f14</a><p class="p">車檢：</p><ul class="ul"><li>車檢計畫與合格名單</li><li>大客車安檢表　</li></ul><a class="file-badge" href="https://docs.google.com/document/d/1jsZPSWHx1uHTDy1uQ5lndciVOIlZP565t-hQraOSFfc/edit?usp=sharing" target="_blank" rel="noopener">📎 f16</a></div><div class="subsub" id="s2.4.3"><h4><span class="numtag">2.4.3</span>精舍休息區</h4><a class="file-badge" href="https://docs.google.com/document/d/18J4Ryz7jZa7woaUovoelM0u6lSoJCsZZWbtfaEBKVGo/edit?usp=sharing" target="_blank" rel="noopener">📎 f18</a></div><div class="subsub" id="s2.4.4"><h4><span class="numtag">2.4.4</span>寮區安單流程與注意事項</h4><a class="file-badge" href="https://drive.google.com/file/d/1dcPqzfi_7wEVNm0g4do04UglDbPxCo1Q/view?usp=sharing" target="_blank" rel="noopener">📎 f19</a></div><div class="subsub" id="s2.4.5"><h4><span class="numtag">2.4.5</span>餐點領取</h4><ul class="ul"><li>規劃與人力</li></ul><a class="file-badge" href="https://docs.google.com/document/d/1sy114FbX8ryElloqmMmJfaxb9KBVVWCI5p6nt33cmAg/edit?usp=sharing" target="_blank" rel="noopener">📎 f17</a></div><div class="subsub" id="s2.4.6"><h4><span class="numtag">2.4.6</span>博愛隊接駁計畫</h4></div></div><div class="sub" id="s2.5"><h3><span class="numtag">2.5</span>演練 GOOGLE 表單填寫</h3><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1_aclywWo-lN_Yhglbzw9PRolPAqU3gAjbf_NvRVETY4/edit?usp=sharing" target="_blank" rel="noopener">📎 f05</a></div><div class="sub" id="s2.6"><h3><span class="numtag">2.6</span>開始組立車隊群組</h3><ul class="ul"><li>透過已加好友、義工組別、學員長、電話</li></ul></div><div class="sub" id="s2.7"><h3><span class="numtag">2.7</span>會議場地復原</h3></div>
+</section>
+
+<section class="chapter" id="c3">
+  <h2><span class="numtag big">3</span>行前電聯</h2>
+  <p class="p">領隊會議結束後，領隊副領隊開始聯繫學員，確認參加人數、取消原因。</p><div class="sub" id="s3.1"><h3><span class="numtag">3.1</span>第一次電聯回報</h3><ul class="ul"><li>截止日期</li><li>出車表拍照私訊大隊長</li></ul></div><div class="sub" id="s3.2"><h3><span class="numtag">3.2</span>後續回報</h3><ul class="ul"><li>大群組直接回報</li></ul></div><div class="sub" id="s3.3"><h3><span class="numtag">3.3</span>第二次領隊會議</h3><ul class="ul"><li>日期時間</li><li>議程</li><li>第二版出車表（更新版）</li></ul></div>
+</section>
+
+<section class="chapter" id="c4">
+  <h2><span class="numtag big">4</span>去程</h2>
+  <div class="sub" id="s4.1"><h3><span class="numtag">4.1</span>集合資訊</h3><ul class="ul"><li>第三版出車表</li><li>點名、發物料、點心、飲水、車輛安檢</li><li>逾時不候</li><li>行李上車順序提醒</li></ul></div><div class="sub" id="s4.2"><h3><span class="numtag">4.2</span>車上</h3><ul class="ul"><li>參考領隊備忘錄　</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1gkAyxYUaQriiOqzexPWL_sjvfRafA69Fv8cjENATLrc/edit?usp=sharing" target="_blank" rel="noopener">📎 f04</a><ul class="ul"><li>點名與回報人數　</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1_aclywWo-lN_Yhglbzw9PRolPAqU3gAjbf_NvRVETY4/edit?usp=sharing" target="_blank" rel="noopener">📎 f05</a><ul class="ul"><li>介紹隨車法師、領隊、副領隊、司機、車號</li><li>觀看行車須知影片</li><li>早／晚課</li><li>齋食供養與祝願</li><li>抵達休息站前宣達注意事項</li><li>上車點名與回報</li><li>布達法會須知</li><li>下交流道後放置車前排</li><li>引道司機抵達停車場</li></ul></div>
+</section>
+
+<section class="chapter" id="c5">
+  <h2><span class="numtag big">5</span>法會現場</h2>
+  <ul class="ul"><li>群組回報已經抵達</li><li>全程配戴識別證及精舍背心；貴賓證隨身攜帶</li><li>依據規劃動線帶隊，保持安靜；不需為趕上前面隊伍而催促學員快走，行動不便或年長學員容易因此脫隊</li><li>安排專人關照所帶物資；安單表協助不熟寮區者</li><li>領隊副領隊保持開機，設定為有感震動模式或用藍芽耳機</li></ul><ul class="ul"><li>參考領隊備忘錄－法會中內容　</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1gkAyxYUaQriiOqzexPWL_sjvfRafA69Fv8cjENATLrc/edit?usp=sharing" target="_blank" rel="noopener">📎 f04</a>
+</section>
+
+<section class="chapter" id="c6">
+  <h2><span class="numtag big">6</span>回程集結</h2>
+  <ul class="ul"><li>布達集合點與時間</li><li>清點人數、確認全員到齊</li><li>確認個人物品未遺留</li><li>點名後回報群組</li><li>人員臨時換車之處理</li><li>確認回程點心或齋食</li></ul><ul class="ul"><li>參考領隊備忘錄－回程內容　</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1gkAyxYUaQriiOqzexPWL_sjvfRafA69Fv8cjENATLrc/edit?usp=sharing" target="_blank" rel="noopener">📎 f04</a>
+</section>
+
+<section class="chapter" id="c7">
+  <h2><span class="numtag big">7</span>回程車上</h2>
+  <ul class="ul"><li>點名、介紹司機、晚課</li><li>布達事項</li><li>收回背心、識別牌吊帶（派斯套）；招募志工負責清洗並交代收摺方式</li></ul><ul class="ul"><li>參考領隊備忘錄－回程內容　</li></ul><a class="file-badge" href="https://docs.google.com/spreadsheets/d/1gkAyxYUaQriiOqzexPWL_sjvfRafA69Fv8cjENATLrc/edit?usp=sharing" target="_blank" rel="noopener">📎 f04</a>
+</section>
+
+<section class="chapter" id="c8">
+  <h2><span class="numtag big">8</span>抵達精舍</h2>
+  <ul class="ul"><li>抵達後在群組回報</li><li>繳回車檢報告單、物料歸位與清消</li><li>出車表等個資文件銷毀</li><li>告假</li></ul>
+</section>
+
+<section class="chapter" id="c附錄一">
+  <h2><span class="numtag big">附錄一</span>領隊五大職責</h2>
+  <ul class="ul"><li>人員管理：乘車人員的清點、識別與照顧</li><li>物資管理：物料保管、發放與回收</li><li>溝通聯繫：對學員與對上的訊息傳遞</li><li>應變處理：臨時狀況的處理與上報</li><li>文件與紀錄留存：表單歸檔與查核</li></ul>
+</section>
+
+<section class="chapter" id="c附錄二">
+  <h2><span class="numtag big">附錄二</span>文件與表單</h2>
+  <p class="note">以下為本作業涉及之相關文件與表單清單；已標示編號者可點擊開啟對應連結文件（編號 f01–f99），其餘待後續補上連結。「法會各執事表」涵蓋：總召／總領隊／行政執秘／法務執秘／大隊長／領隊／副領隊。連結檔案所列內容僅為說明參考，實際執行仍以每次活動的正式內容為準。</p><table class="doc-table"><thead><tr><th>文件名稱</th><th>連結</th></tr></thead><tbody><tr><td>停車場座標</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>邀請出席領隊會議通知稿</td><td><a class="doclink" href="https://docs.google.com/spreadsheets/d/1nAegh-lw-na248CxKYca_cmrA2GhOt48vPvSB7xMnrk/edit?usp=sharing" target="_blank" rel="noopener">📎 f01</a></td></tr><tr><td>抵達寺後步行路線</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>大客車安檢表</td><td><a class="doclink" href="https://docs.google.com/document/d/1jsZPSWHx1uHTDy1uQ5lndciVOIlZP565t-hQraOSFfc/edit?usp=sharing" target="_blank" rel="noopener">📎 f16</a></td></tr><tr><td>中台．全區平面圖</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>安單流程及注意事項</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>外圍寮區掛單、出寮路線</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>北門到指月林大客車路線圖</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>法會各執事表</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>領隊須知SOP</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>大白牛車組織運作要務</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>義工報到總表</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>義工上線時間表</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>大客車隨身卡PDF</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>大客車車輛資訊</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>物料明細</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>精舍意見回饋</td><td><span class="doclink-pending">連結待補</span></td></tr></tbody></table>
+</section>
+
+
+</div>
+</div>
+
+<footer>普高精舍　回山領隊作業實務　｜　v2.2</footer>
+
+<script>
+var toggle = document.getElementById('navToggle');
+var sidebar = document.getElementById('sidebar');
+var overlay = document.getElementById('navOverlay');
+function closeNav(){ sidebar.classList.remove('open'); document.body.classList.remove('nav-open'); }
+function openNav(){ sidebar.classList.add('open'); document.body.classList.add('nav-open'); }
+toggle.addEventListener('click', function(){ sidebar.classList.contains('open') ? closeNav() : openNav(); });
+overlay.addEventListener('click', closeNav);
+
+var navLinks = Array.prototype.slice.call(document.querySelectorAll('.sidenav a'));
+var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapter'));
+
+function showChapter(id){
+  chapters.forEach(function(ch){ ch.classList.toggle('visible', ch.id === id); });
+  navLinks.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === '#' + id); });
+  var pageTitle = document.querySelector('.page-title');
+  if (pageTitle) pageTitle.style.display = (id === 'intro') ? 'none' : 'block';
+  window.scrollTo(0, 0);
+}
+
+navLinks.forEach(function(a){
+  a.addEventListener('click', function(e){
+    e.preventDefault();
+    var id = a.getAttribute('href').slice(1);
+    showChapter(id);
+    history.replaceState(null, '', '#' + id);
+    closeNav();
+  });
+});
+
+var startId = (location.hash || '').slice(1);
+if (!startId || !document.getElementById(startId)) startId = 'intro';
+showChapter(startId);
+</script>
+</body>
+</html>
