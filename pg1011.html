@@ -157,6 +157,21 @@ footer{margin-top:32px;font-size:14px;color:var(--muted);text-align:center}
   .photo{max-height:calc(100vh - 150px)}
 }
 @media (max-width:899px){ .side{display:none} }
+
+/* compact text cards (half height) */
+.tabs{padding:6px 0}
+.tab{padding:3px 4px;line-height:1.3}
+.chip{padding:2px 12px;line-height:1.3}
+.route-btn{padding:3px 12px;line-height:1.3}
+.btn{padding:2px 12px;line-height:1.3}
+.stop{padding:1px 8px;line-height:1.3}
+.opt{padding:4px 12px;line-height:1.3}
+#learnB{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0}
+#learnB .stops,#learnB .row{margin:0}
+@media (min-width:900px){
+  .side .tab{padding:4px 8px}
+  .side .row .btn{flex:1 1 auto}
+}
 </style>
 </head>
 <body data-tab="learn">
