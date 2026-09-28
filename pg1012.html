@@ -58,15 +58,15 @@ button:focus-visible{outline:3px solid var(--sign);outline-offset:2px}
 .lbtop{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;color:#fff}
 .lbtop h2{margin:0;font-size:20px;flex:1}
 .lbtop .count{font-size:16px;opacity:.8;font-variant-numeric:tabular-nums}
-.lbimg{position:relative;touch-action:pan-y;background:#000}
+.lbimg{position:relative;touch-action:pan-y;background:#000;min-height:220px;display:flex;align-items:center;justify-content:center}
+.lbimg img{position:relative;z-index:1}
 .lbimg img{width:auto;height:auto;max-width:66.7vw;max-height:66.7vh;display:block;margin:0 auto}
-.lb-btn{position:absolute;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:34px;line-height:1;width:52px;height:52px;border-radius:50%}
+.lb-btn{position:absolute;z-index:2;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:34px;line-height:1;width:52px;height:52px;border-radius:50%}
 .close{position:static;font-size:22px;width:40px;height:40px;background:rgba(255,255,255,.15)}
 .lb-btn.prev,.lb-btn.next{width:46px;height:46px;font-size:30px}
 .prev{left:10px;top:50%;transform:translateY(-50%)} .next{right:10px;top:50%;transform:translateY(-50%)}
 .lb-btn[hidden]{display:none}
-.lbload{margin:0;padding:80px 20px;color:#fff;text-align:center;font-size:18px;min-width:280px}
-.lbload[hidden]{display:none}
+.lbload{position:absolute;inset:0;z-index:0;margin:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;min-width:280px;text-align:center;padding:0 16px}
 </style>
 </head>
 <body>
@@ -88,7 +88,7 @@ button:focus-visible{outline:3px solid var(--sign);outline-offset:2px}
   <div class="lbtop"><span class="count" id="lbCount" style="flex:1"></span><button class="lb-btn close" id="close" aria-label="關閉">✕</button></div>
   <div class="lbimg" id="lbimg">
     <img id="lbPhoto" alt="">
-    <p class="lbload" id="lbLoad" hidden>照片載入中…</p>
+    <p class="lbload" id="lbLoad">照片載入中…</p>
     <button class="lb-btn prev" id="prev" aria-label="上一個地點">‹</button>
     <button class="lb-btn next" id="next" aria-label="下一個地點">›</button>
   </div>
@@ -150,12 +150,14 @@ function show(){
   const p=D.points[cur];
   pins[cur].classList.add('seen');
   $('#lbPhoto').alt=`實景照片 ${cur+1}`;
-  const img=$('#lbPhoto'); const want=PH[cur];
-  $('#lbLoad').hidden=true;
-  const cached=new Image(); cached.src=want;
-  if(!cached.complete){ img.removeAttribute('src'); $('#lbLoad').hidden=false; }
-  img.onload=()=>{ $('#lbLoad').hidden=true; };
-  img.src=want;
+  const img=$('#lbPhoto'), msg=$('#lbLoad'), n=String(cur+1).padStart(2,'0');
+  const tries=[`${n}.jpg`,`photos/${n}.jpg`,`${n}.JPG`,`photos/${n}.JPG`];
+  let k=0;
+  msg.textContent='照片載入中…';
+  img.style.visibility='visible';
+  img.onerror=()=>{ k++; if(k<tries.length){ img.src=tries[k]; } else { img.style.visibility='hidden'; msg.textContent=`照片無法載入（找不到 ${n}.jpg）`; } };
+  img.removeAttribute('src');
+  img.src=tries[0];
   [cur+1,cur-1].forEach(k=>{ const j=(k+PH.length)%PH.length; const pre=new Image(); pre.src=PH[j]; });
   const many=D.points.length>1;
   $('#lbCount').textContent = many ? `${cur+1} / ${D.points.length}` : '';
