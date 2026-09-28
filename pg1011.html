@@ -35,8 +35,8 @@ body{margin:0;background:var(--page);color:var(--ink);
   font-size:18px;line-height:1.6;-webkit-text-size-adjust:100%}
 .wrap{margin:0 auto;padding:0 12px 48px}
 .lede,.hint,.hero-note,.seg,.routes,.stops,.row,.toggle,h2{max-width:1100px}
-.photo{aspect-ratio:4/3;max-height:max(260px,calc(100vh - 230px));width:100%}
-.photo img{width:100%;height:100%;max-height:none;object-fit:contain}
+.photo{width:100%}
+.photo img{width:100%;height:auto;max-height:max(240px,calc(100vh - 104px));object-fit:contain;display:block}
 @media (max-width:700px){
   .hero,.mapbox,.viewer{margin-left:-12px;margin-right:-12px;border-radius:0;border-left:0;border-right:0}
   .qcard{margin-left:-12px;margin-right:-12px;border-radius:0;border-left:0;border-right:0}
@@ -62,7 +62,8 @@ header{padding:22px 0 14px}
   font-weight:700;font-size:18px}
 .tab[aria-selected="true"]{background:var(--sign);color:var(--sign-ink)}
 section[hidden]{display:none}
-section,#quizBox,.viewer{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 80px)}
+section,#quizBox{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 80px)}
+.viewer{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 50px)}
 h2{font-size:22px;margin:18px 0 8px}
 .hint{color:var(--muted);font-size:16px;margin:0 0 12px}
 
@@ -96,16 +97,26 @@ h2{font-size:22px;margin:18px 0 8px}
 
 /* viewer */
 .viewer{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.photo{position:relative;background:#000;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;touch-action:pan-y}
+.photo{position:relative;background:var(--surface);touch-action:pan-y;cursor:pointer}
 
 .tap{margin:0;padding:8px 14px;background:var(--sign-soft);color:var(--ink);font-size:17px;text-align:center}
 .tap[hidden]{display:none}
-.vbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px}
+.vbar{display:flex;align-items:center;gap:8px;padding:6px 10px}
+.vmid{flex:1;display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:4px 10px;text-align:center;min-width:0}
 .count{font-weight:700;font-variant-numeric:tabular-nums}
-.part{padding:10px 14px 0;color:var(--muted);font-size:16px}
+.part{color:var(--muted);font-size:16px;line-height:1.3}
+.lb{position:fixed;inset:0;z-index:50;background:#000;display:flex;align-items:center;justify-content:center;touch-action:pan-y}
+.lb[hidden]{display:none}
+.lb img{width:100vw;height:100vh;object-fit:contain}
+.lb-btn{position:absolute;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:34px;line-height:1;width:52px;height:52px;border-radius:50%}
+.lb-close{top:calc(env(safe-area-inset-top,0px) + 10px);right:10px;font-size:26px}
+.lb-prev{left:10px;top:50%;transform:translateY(-50%)}
+.lb-next{right:10px;top:50%;transform:translateY(-50%)}
+.lb-count{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);color:#fff;border-radius:999px;padding:2px 12px;font-size:17px;font-variant-numeric:tabular-nums}
 .dots{display:flex;gap:5px;justify-content:center;padding:0 12px 12px;flex-wrap:wrap}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
 .dot.on{background:var(--sign)}
+.dots[hidden]{display:none}
 .toggle{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:17px}
 .toggle input{width:22px;height:22px;accent-color:var(--sign)}
 
@@ -154,11 +165,14 @@ footer{margin-top:32px;font-size:14px;color:var(--muted);text-align:center}
   section,#quizBox,.viewer{scroll-margin-top:16px}
   #learn{padding-top:16px}
   .mapbox svg{max-height:calc(100vh - 32px)}
-  .photo{max-height:calc(100vh - 150px)}
+  .photo img{max-height:max(240px,calc(100vh - 86px))}
+  .viewer{scroll-margin-top:8px}
 }
 @media (max-width:899px){ .side{display:none} }
 
 /* compact text cards (half height) */
+@media (max-width:600px){.vbar{flex-wrap:wrap}.vmid{order:-1;flex-basis:100%}#zoom{margin-left:auto}}
+
 .tabs{padding:6px 0}
 .tab{padding:3px 4px;line-height:1.3}
 .chip{padding:2px 12px;line-height:1.3}
@@ -218,15 +232,22 @@ footer{margin-top:32px;font-size:14px;color:var(--muted);text-align:center}
     <label class="toggle"><input type="checkbox" id="guess"> 先猜再看：照片先不顯示箭頭，點一下才揭曉</label>
   </div>
   <div class="viewer">
-    <div class="part" id="partName"></div>
-    <div class="photo" id="photo"><img id="photoImg" alt=""></div>
-    <p class="tap" id="cover" hidden>先想想往哪走，再點照片看答案</p>
     <div class="vbar">
       <button class="btn" id="prev">上一張</button>
-      <span class="count" id="count"></span>
+      <span class="vmid"><span class="part" id="partName"></span><span class="count" id="count"></span></span>
+      <button class="btn" id="zoom" aria-label="全螢幕看照片">全螢幕</button>
       <button class="btn primary" id="next">下一張</button>
     </div>
-    <div class="dots" id="dots"></div>
+    <p class="tap" id="cover" hidden>先想想往哪走，再點照片看答案</p>
+    <div class="photo" id="photo"><img id="photoImg" alt=""></div>
+    <div class="dots" id="dots" hidden></div>
+  </div>
+  <div class="lb" id="lb" hidden role="dialog" aria-label="全螢幕照片">
+    <img id="lbImg" alt="">
+    <button class="lb-btn lb-close" id="lbClose" aria-label="關閉">✕</button>
+    <button class="lb-btn lb-prev" id="lbPrev" aria-label="上一張">‹</button>
+    <button class="lb-btn lb-next" id="lbNext" aria-label="下一張">›</button>
+    <span class="lb-count" id="lbCount"></span>
   </div>
 </section>
 
@@ -350,7 +371,7 @@ $('#toWalk').onclick=()=>{ switchTab('walk'); pickWalk(curRoute.walk); };
 let W=null, idx=0, revealed=false;
 WALKS.forEach(w=>{
   const b=el('button',{class:'chip','aria-pressed':'false','data-w':w.id},w.name);
-  b.onclick=()=>{pickWalk(w.id);scrollMain('walk');}; $('#walkList').append(b);
+  b.onclick=()=>{pickWalk(w.id);$('.viewer').scrollIntoView({block:'start'});}; $('#walkList').append(b);
 });
 function pickWalk(id){
   const w=WALKS.find(x=>x.id===id);
@@ -372,7 +393,22 @@ function showPhoto(){
   $('#next').textContent = idx===W.items.length-1 ? '到了' : '下一張';
   $('#dots').querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i<=idx));
 }
-$('#photo').onclick=()=>{ if(!revealed){ revealed=true; $('#photoImg').src=W.items[idx].ann; $('#cover').hidden=true; } };
+function reveal(){ revealed=true; $('#photoImg').src=W.items[idx].ann; $('#cover').hidden=true; if(!$('#lb').hidden) syncLb(); }
+$('#photo').onclick=()=>{ if(!revealed) reveal(); else openLb(); };
+function syncLb(){ const it=W.items[idx]; $('#lbImg').src = revealed ? it.ann : DATA.raw[it.id]; $('#lbImg').alt=$('#photoImg').alt; $('#lbCount').textContent=`${idx+1} / ${W.items.length}`; $('#lbPrev').disabled=idx===0; }
+function openLb(){ $('#lb').hidden=false; syncLb(); $('#lbClose').focus(); }
+function closeLb(){ $('#lb').hidden=true; $('#zoom').focus({preventScroll:true}); }
+$('#zoom').onclick=openLb; $('#lbClose').onclick=closeLb;
+$('#lbImg').onclick=()=>{ if(!revealed) reveal(); };
+$('#lbPrev').onclick=()=>{ $('#prev').click(); syncLb(); };
+$('#lbNext').onclick=()=>{ $('#next').click(); syncLb(); };
+document.addEventListener('keydown',e=>{ if($('#lb').hidden) return;
+  if(e.key==='Escape') closeLb(); else if(e.key==='ArrowRight') $('#lbNext').click(); else if(e.key==='ArrowLeft') $('#lbPrev').click(); });
+(function(){ let x0=null; const l=$('#lb');
+  l.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+  l.addEventListener('touchend',e=>{ if(x0===null) return; const dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)>50){ dx<0?$('#lbNext').click():$('#lbPrev').click(); } });
+})();
 $('#prev').onclick=()=>{ if(idx>0){idx--;showPhoto();} };
 $('#next').onclick=()=>{ if(idx<W.items.length-1){idx++;showPhoto();} else { const n=WALKS.findIndex(w=>w.id===W.id); pickWalk(WALKS[(n+1)%WALKS.length].id); } };
 $('#guess').onchange=()=>{ store.set('guess',$('#guess').checked?'1':'0'); showPhoto(); };
