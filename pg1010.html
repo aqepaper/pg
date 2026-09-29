@@ -721,6 +721,7 @@ function showChapter(id, fromSync){
     projectId: "project-fc07eb57-eb21-498b-880",
   };
   var SYNC_PATH = "lingdui_sop_sync/currentChapter";
+  var SCROLL_PATH = "lingdui_sop_sync/scrollPct";
 
   function loadScript(src){
     return new Promise(function(resolve, reject){
@@ -746,14 +747,36 @@ function showChapter(id, fromSync){
       var app = firebase.initializeApp(firebaseConfig);
       var ref = firebase.database().ref(SYNC_PATH);
 
+      var scrollRef = firebase.database().ref(SCROLL_PATH);
+
       if (isPresenter){
         addBadge('🔴 主持模式（畫面會同步給跟隨裝置）', '#8f6f28');
-        window.__syncBroadcast = function(id){ ref.set(id); };
+        window.__syncBroadcast = function(id){ scrollRef.set(0); ref.set(id); };
+
+        var scrollTimer = null;
+        window.addEventListener('scroll', function(){
+          if (scrollTimer) clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(function(){
+            var max = document.documentElement.scrollHeight - window.innerHeight;
+            var pct = max > 0 ? (window.scrollY / max) : 0;
+            scrollRef.set(pct);
+          }, 150);
+        }, { passive: true });
+
       } else if (isFollower){
         addBadge('🟢 跟隨模式（畫面會自動跟隨主持裝置）', '#333a5c');
+        var followingScroll = false;
         ref.on('value', function(snap){
           var id = snap.val();
           if (id && document.getElementById(id)) showChapter(id, true);
+        });
+        scrollRef.on('value', function(snap){
+          var pct = snap.val();
+          if (typeof pct !== 'number') return;
+          followingScroll = true;
+          var max = document.documentElement.scrollHeight - window.innerHeight;
+          window.scrollTo(0, Math.max(0, max) * pct);
+          setTimeout(function(){ followingScroll = false; }, 200);
         });
       }
       // 一般開啟（無 present／follow 參數）：不連接同步，獨立瀏覽
