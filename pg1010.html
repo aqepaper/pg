@@ -775,7 +775,7 @@ function showChapter(id, fromSync){
           if (typeof pct !== 'number') return;
           followingScroll = true;
           var max = document.documentElement.scrollHeight - window.innerHeight;
-          window.scrollTo(0, Math.max(0, max) * pct);
+          window.scrollTo({ top: Math.max(0, max) * pct, behavior: 'instant' });
           setTimeout(function(){ followingScroll = false; }, 200);
         });
       }
