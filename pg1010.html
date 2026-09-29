@@ -699,13 +699,67 @@ if (mt){
   });
 }
 
-function showChapter(id){
+function showChapter(id, fromSync){
   chapters.forEach(function(ch){ ch.classList.toggle('visible', ch.id === id); });
   navLinks.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === '#' + id); });
   var pageTitle = document.querySelector('.page-title');
   if (pageTitle) pageTitle.style.display = (id === 'intro') ? 'none' : 'block';
   window.scrollTo(0, 0);
+  if (window.__syncBroadcast && !fromSync) window.__syncBroadcast(id);
 }
+
+// ---------------- 多裝置同步（Firebase） ----------------
+(function(){
+  var params = new URLSearchParams(location.search);
+  var isPresenter = params.get('present') === '1';
+  var isFollower = params.get('follow') === '1';
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyBaR8nsUz9b5WYx4oNH2CRQmDbqrE9T2w4",
+    authDomain: "project-fc07eb57-eb21-498b-880.firebaseapp.com",
+    databaseURL: "https://project-fc07eb57-eb21-498b-880-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "project-fc07eb57-eb21-498b-880",
+  };
+  var SYNC_PATH = "lingdui_sop_sync/currentChapter";
+
+  function loadScript(src){
+    return new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = src; s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  function addBadge(text, color){
+    var b = document.createElement('div');
+    b.textContent = text;
+    b.style.cssText = 'position:fixed;top:12px;right:12px;z-index:80;background:' + color +
+      ';color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.25);font-family:"Noto Sans TC",sans-serif;';
+    document.body.appendChild(b);
+  }
+
+  if (!isPresenter && !isFollower) return;
+
+  loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js')
+    .then(function(){ return loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js'); })
+    .then(function(){
+      var app = firebase.initializeApp(firebaseConfig);
+      var ref = firebase.database().ref(SYNC_PATH);
+
+      if (isPresenter){
+        addBadge('🔴 主持模式（畫面會同步給跟隨裝置）', '#8f6f28');
+        window.__syncBroadcast = function(id){ ref.set(id); };
+      } else if (isFollower){
+        addBadge('🟢 跟隨模式（畫面會自動跟隨主持裝置）', '#333a5c');
+        ref.on('value', function(snap){
+          var id = snap.val();
+          if (id && document.getElementById(id)) showChapter(id, true);
+        });
+      }
+      // 一般開啟（無 present／follow 參數）：不連接同步，獨立瀏覽
+    })
+    .catch(function(err){ console.warn('同步功能載入失敗（不影響一般瀏覽）', err); });
+})();
 
 navLinks.forEach(function(a){
   a.addEventListener('click', function(e){
