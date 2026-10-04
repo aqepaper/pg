@@ -480,6 +480,18 @@ body{ background:var(--paper); }
 .wrap{ padding-top:24px; }
 .page-title{ padding-bottom:12px; }
 .intro-title{ margin-top:8px; }
+
+/* ---------- 附錄三 景點打卡趣 ---------- */
+.blank{ display:inline-block; min-width:8em; border-bottom:1px solid var(--muted); }
+.route-card{ background:#fff; border:1px solid var(--border-line); border-radius:10px; padding:14px 16px 16px; margin:0 0 16px; }
+.route-hd{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.route-title{ font-size:20px; font-weight:700; color:var(--navy); }
+.route-prog{ font-size:16px; font-weight:700; color:var(--gold-deep); background:var(--gold-light); border-radius:999px; padding:0 12px; }
+.route-prog.done{ background:var(--navy); color:#fff; }
+.route-se{ margin:0 0 8px; color:var(--ink-soft); }
+.route-card .checklist{ margin-left:0 !important; }
+.route-reset{ margin-top:10px; font-size:16px; padding:6px 14px; }
+.sub.card > ol.ul{ margin-left:0 !important; padding-left:1.5em; }
 </style>
 </head>
 <body>
@@ -497,8 +509,8 @@ body{ background:var(--paper); }
 <li><a href="#c6"><span class="sidx">6</span>回程集結</a></li>
 <li><a href="#c7"><span class="sidx">7</span>回程車上</a></li>
 <li><a href="#c8"><span class="sidx">8</span>返抵精舍</a></li>
-<li><a href="#c附錄一"><span class="sidx">附錄一</span>帶隊直通關</a></li><li><a href="#c附錄二"><span class="sidx">附錄二</span>中台實景地圖</a></li><li><a href="#c附錄三"><span class="sidx">附錄三</span>領隊五大職責</a></li>
-<li><a href="#c附錄四"><span class="sidx">附錄四</span>文件與表單</a></li>
+<li><a href="#c附錄一"><span class="sidx">附錄一</span>帶隊直通關</a></li><li><a href="#c附錄二"><span class="sidx">附錄二</span>中台實景地圖</a></li><li><a href="#c附錄三"><span class="sidx">附錄三</span>景點打卡趣</a></li><li><a href="#c附錄四"><span class="sidx">附錄四</span>領隊五大職責</a></li>
+<li><a href="#c附錄五"><span class="sidx">附錄五</span>文件與表單</a></li>
 </ul>
 </nav>
 <div class="main">
@@ -601,8 +613,8 @@ body{ background:var(--paper); }
 </div>
 <div class="card"><div class="checklist"><div class="citem" data-idx="c8-45"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8.1</span>抵達後在群組回報</div></div><div class="citem" data-idx="c8-46"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8.2</span>請學員發心協助清洗背心，並讚歎發心學員</div></div><div class="citem" data-idx="c8-47"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8.3</span>安排車上總巡人員</div></div><div class="citem" data-idx="c8-48"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8.4</span>繳回車檢報告單、物料歸位與清消</div></div><div class="citem" data-idx="c8-49"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8.5</span>意見回饋表繳回（依師父指派）</div></div><div class="citem" data-idx="c8-50"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8.6</span>出車表等個資文件銷毀</div></div><div class="citem" data-idx="c8-51"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8.7</span>告假</div></div></div></div>
 </section>
-<section class="chapter" id="c附錄三">
-<div class="slide-header"><h2><span class="numtag big">附錄三</span>領隊五大職責</h2></div>
+<section class="chapter" id="c附錄四">
+<div class="slide-header"><h2><span class="numtag big">附錄四</span>領隊五大職責</h2></div>
 <p class="p">領隊在整趟行程中的核心職責範疇，此處為總覽對照，詳細內容已依八階段展開於正文。</p>
 <div class="card"><div class="card-grid">
 <div class="info-card"><div class="ic-icon" style="color:var(--sage);"><svg fill="none" stroke="currentColor" stroke-width="1.6" viewbox="0 0 24 24"><rect height="18" rx="2" width="16" x="4" y="3"></rect><circle cx="12" cy="10" r="2.6"></circle><path d="M8 17c.6-2 2-3 4-3s3.4 1 4 3"></path></svg></div><div class="ic-title">人員管理</div><div class="ic-desc">從報到、上車到返程，全程掌握學員人數與動向，維護識別配戴、隊形整隊與人身安全，確保無人脫隊、無人落單。</div></div>
@@ -612,8 +624,8 @@ body{ background:var(--paper); }
 <div class="info-card"><div class="ic-icon" style="color:var(--slate);"><svg fill="none" stroke="currentColor" stroke-width="1.6" viewbox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"></path><path d="M15 3v4h4"></path><path d="M9 12h7M9 15.5h7M9 9h3"></path></svg></div><div class="ic-title">文件管理</div><div class="ic-desc">妥善保管出車表、車檢報告單等文件，活動結束後回收並銷毀，避免延伸洩漏個資問題，若有帶隊建議可回饋作為改善參考。</div></div>
 </div></div>
 </section>
-<section class="chapter" id="c附錄四">
-<div class="slide-header"><h2><span class="numtag big">附錄四</span>文件與表單</h2></div>
+<section class="chapter" id="c附錄五">
+<div class="slide-header"><h2><span class="numtag big">附錄五</span>文件與表單</h2></div>
 <p class="p">本作業涉及之相關文件與表單，已標示編號者可點擊開啟，其餘待後續補上連結。</p>
 <div class="card"><table class="doc-table"><thead><tr><th>文件名稱</th><th>連結</th></tr></thead><tbody><tr><td>停車場座標</td><td><a class="doclink" href="https://drive.google.com/file/d/13q719DuiiIeGSJfF_dCJgIwCNjXpInw0/view?usp=sharing" rel="noopener" target="_blank">📎 f12</a></td></tr><tr><td>邀請出席領隊會議通知稿</td><td><a class="doclink" href="https://docs.google.com/document/d/1BT595WD_jJQESodgaAXhJOltARiPCPYTmkcmvIjXSdo/edit?usp=sharing" rel="noopener" target="_blank">📎 f03</a></td></tr><tr><td>抵達寺後步行路線</td><td><a class="doclink" href="https://drive.google.com/file/d/1EG28gZk9MUcKKVztH6c8v_lZGu05k1dC/view?usp=sharing" rel="noopener" target="_blank">📎 f13</a></td></tr><tr><td>大客車安檢表</td><td><a class="doclink" href="https://docs.google.com/document/d/1jsZPSWHx1uHTDy1uQ5lndciVOIlZP565t-hQraOSFfc/edit?usp=sharing" rel="noopener" target="_blank">📎 f16</a></td></tr><tr><td>中台．全區平面圖</td><td><a class="doclink" href="https://drive.google.com/file/d/13q719DuiiIeGSJfF_dCJgIwCNjXpInw0/view?usp=sharing" rel="noopener" target="_blank">📎 f12</a></td></tr><tr><td>安單流程及注意事項</td><td><a class="doclink" href="https://drive.google.com/file/d/1dcPqzfi_7wEVNm0g4do04UglDbPxCo1Q/view?usp=sharing" rel="noopener" target="_blank">📎 f19</a></td></tr><tr><td>外圍寮區掛單、出寮路線</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>北門到指月林大客車路線圖</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>法會各執事表</td><td><a class="doclink" href="https://docs.google.com/spreadsheets/d/19JggJrQFAYQsYz_A7tQj2o1XiWSqZFw6Sbur08ol5zE/edit?usp=sharing" rel="noopener" target="_blank">📎 f02</a></td></tr><tr><td>領隊須知SOP</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>大白牛車組織運作要務</td><td><a class="doclink" href="https://docs.google.com/spreadsheets/d/1nAegh-lw-na248CxKYca_cmrA2GhOt48vPvSB7xMnrk/edit?usp=sharing" rel="noopener" target="_blank">📎 f01</a></td></tr><tr><td>義工報到總表</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>義工上線時間表</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>大客車隨身卡PDF</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>大客車車輛資訊</td><td><a class="doclink" href="https://docs.google.com/spreadsheets/d/1pSSiqaztm0Lf0AinVGBYIke2MUzAXnxYM315DsHCpSM/edit?usp=sharing" rel="noopener" target="_blank">📎 f11</a></td></tr><tr><td>物料明細</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>小背心摺疊說明圖</td><td><a class="doclink" href="https://drive.google.com/file/d/1SE9Zq32mtkRHquVrTDQIxQJLEJG5lUu0/view?usp=sharing" rel="noopener" target="_blank">📎 f14</a></td></tr><tr><td>精舍意見回饋</td><td><span class="doclink-pending">連結待補</span></td></tr><tr><td>精舍各殿堂位置圖（停車場／主體／圓明殿／妙覺／淨覺／指月林／娑羅殿／三德堂／般若講堂／華嚴大樓／祖師塔）</td><td><span class="doclink-pending">連結待補</span></td></tr></tbody></table></div>
 </section>
@@ -631,6 +643,34 @@ body{ background:var(--paper); }
 <iframe id="pg1012Frame" loading="lazy" src="https://aqepaper.github.io/pg/pg1012"></iframe>
 </div></div>
 </section>
+<section class="chapter" id="c附錄三">
+<div class="slide-header"><h2><span class="numtag big">附錄三</span>景點打卡趣</h2></div>
+<p class="p">實地走訪各園區並沿線拍照打卡，熟悉中台景點名稱、位置與帶隊路線。</p>
+<div class="sub card"><h3 class="card-title">培訓目的</h3>
+<p class="p">為使學員熟悉中台各園區的名稱、位置與帶隊路線，特辦理本次「實境打卡培訓」。透過實地走訪、沿線拍照與回報，強化學員的空間記憶、路線指引及帶隊能力。</p></div>
+<div class="sub card"><h3 class="card-title">培訓對象</h3>
+<p class="p">參加 10/18 精舍聯展之學員。</p></div>
+<div class="sub card"><h3 class="card-title">培訓時間與集合地點</h3>
+<p class="p"><strong class="label-lead">培訓時間：</strong><span class="blank">&nbsp;</span></p>
+<p class="p"><strong class="label-lead">集合地點：</strong><span class="blank">&nbsp;</span></p></div>
+<div class="sub card"><h3 class="card-title">路線規劃</h3>
+<p class="p">本次共規劃 5 條指定路線（路線四含兩條分支），學員分為 <span class="blank" style="min-width:2em">&nbsp;</span> 個小隊，各小隊依分配路線實地走訪。</p>
+<p class="note">到達每個景點並拍照後，點景點前面的方框即可打勾。進度會保留在這支手機上。</p>
+</div>
+<div class="route-card" data-total="8"><div class="route-hd"><div class="route-title">路線一</div><span class="route-prog">0/8</span></div><p class="route-se">妙覺園區 ➔ 圓明講堂</p><div class="checklist"><div class="citem" data-idx="ck1-1"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">1</span>妙覺園區</div></div><div class="citem" data-idx="ck1-2"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">2</span>妙覺架房區</div></div><div class="citem" data-idx="ck1-3"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">3</span>友善天橋</div></div><div class="citem" data-idx="ck1-4"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">4</span>小博牌樓</div></div><div class="citem" data-idx="ck1-5"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">5</span>同源橋園區</div></div><div class="citem" data-idx="ck1-6"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">6</span>觀音亭</div></div><div class="citem" data-idx="ck1-7"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">7</span>四天王殿廣場</div></div><div class="citem" data-idx="ck1-8"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8</span>圓明講堂</div></div></div><button type="button" class="reset-btn route-reset">重設本路線</button></div><div class="route-card" data-total="10"><div class="route-hd"><div class="route-title">路線二</div><span class="route-prog">0/10</span></div><p class="route-se">淨覺園區 ➔ 菩提講堂</p><div class="checklist"><div class="citem" data-idx="ck2-1"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">1</span>淨覺園區</div></div><div class="citem" data-idx="ck2-2"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">2</span>禪悅苑接駁站</div></div><div class="citem" data-idx="ck2-3"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">3</span>淨覺園區接駁站</div></div><div class="citem" data-idx="ck2-4"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">4</span>西門</div></div><div class="citem" data-idx="ck2-5"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">5</span>進入指月林</div></div><div class="citem" data-idx="ck2-6"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">6</span>大客車停車場</div></div><div class="citem" data-idx="ck2-7"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">7</span>往華嚴大樓</div></div><div class="citem" data-idx="ck2-8"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8</span>華嚴大樓左轉</div></div><div class="citem" data-idx="ck2-9"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">9</span>華嚴大樓正門</div></div><div class="citem" data-idx="ck2-10"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">10</span>往菩提講堂</div></div></div><button type="button" class="reset-btn route-reset">重設本路線</button></div><div class="route-card" data-total="8"><div class="route-hd"><div class="route-title">路線三</div><span class="route-prog">0/8</span></div><p class="route-se">正覺園區 ➔ 菩提講堂</p><div class="checklist"><div class="citem" data-idx="ck3-1"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">1</span>正覺園區</div></div><div class="citem" data-idx="ck3-2"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">2</span>平雲山都</div></div><div class="citem" data-idx="ck3-3"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">3</span>普台公園步道</div></div><div class="citem" data-idx="ck3-4"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">4</span>普台公園</div></div><div class="citem" data-idx="ck3-5"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">5</span>行人專用迴旋步道</div></div><div class="citem" data-idx="ck3-6"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">6</span>吉祥鐘</div></div><div class="citem" data-idx="ck3-7"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">7</span>光明園區</div></div><div class="citem" data-idx="ck3-8"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">8</span>菩提講堂</div></div></div><button type="button" class="reset-btn route-reset">重設本路線</button></div><div class="route-card" data-total="5"><div class="route-hd"><div class="route-title">路線四之一</div><span class="route-prog">0/5</span></div><p class="route-se">般若講堂 ➔ 娑羅殿</p><div class="checklist"><div class="citem" data-idx="ck4-1"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">1</span>般若講堂</div></div><div class="citem" data-idx="ck4-2"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">2</span>三德堂</div></div><div class="citem" data-idx="ck4-3"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">3</span>下斜坡</div></div><div class="citem" data-idx="ck4-4"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">4</span>環保站原木桌區</div></div><div class="citem" data-idx="ck4-5"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">5</span>娑羅殿</div></div></div><button type="button" class="reset-btn route-reset">重設本路線</button></div><div class="route-card" data-total="7"><div class="route-hd"><div class="route-title">路線四之二</div><span class="route-prog">0/7</span></div><p class="route-se">般若講堂 ➔ 娑羅殿</p><div class="checklist"><div class="citem" data-idx="ck5-1"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">1</span>般若講堂</div></div><div class="citem" data-idx="ck5-2"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">2</span>左轉往醫護中心</div></div><div class="citem" data-idx="ck5-3"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">3</span>祖師塔</div></div><div class="citem" data-idx="ck5-4"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">4</span>鹿野園平台</div></div><div class="citem" data-idx="ck5-5"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">5</span>下樓梯走道</div></div><div class="citem" data-idx="ck5-6"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">6</span>交通組前</div></div><div class="citem" data-idx="ck5-7"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">7</span>娑羅殿</div></div></div><button type="button" class="reset-btn route-reset">重設本路線</button></div><div class="route-card" data-total="7"><div class="route-hd"><div class="route-title">路線五</div><span class="route-prog">0/7</span></div><p class="route-se">妙德苑 ➔ 般若講堂</p><div class="checklist"><div class="citem" data-idx="ck6-1"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">1</span>妙德苑</div></div><div class="citem" data-idx="ck6-2"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">2</span>北門警衛室</div></div><div class="citem" data-idx="ck6-3"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">3</span>護法義工中心</div></div><div class="citem" data-idx="ck6-4"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">4</span>環保站原木桌區</div></div><div class="citem" data-idx="ck6-5"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">5</span>上斜坡</div></div><div class="citem" data-idx="ck6-6"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">6</span>三德堂</div></div><div class="citem" data-idx="ck6-7"><div class="cbox"><svg fill="none" viewbox="0 0 24 24"><path d="M20 6L9 17l-5-5"></path></svg></div><div class="ctext"><span class="citem-num">7</span>般若講堂</div></div></div><button type="button" class="reset-btn route-reset">重設本路線</button></div>
+<div class="sub card"><h3 class="card-title">打卡規則與執行流程</h3>
+<ol class="ul"><li><strong class="label-lead">依序行進：</strong>各小隊依分配路線前進，並於每個指定節點（地標）進行團體拍照留存。</li>
+<li><strong class="label-lead">抵達集合點：</strong>全體隊員完成路線，並一同抵達最終集合點。</li>
+<li><strong class="label-lead">上傳照片：</strong>將沿線拍攝的照片上傳至指定通訊群組。</li>
+<li><strong class="label-lead">回報訊息：</strong>照片上傳完畢後，於群組發送標準回報訊息：「第 N 小隊抵達集合點」。</li></ol></div>
+<div class="sub card"><h3 class="card-title">注意事項</h3>
+<ul class="ul"><li><strong class="label-lead">安全第一：</strong>行經斜坡、天橋、樓梯走道或跨越車道時，請務必留意全隊安全。</li>
+<li><strong class="label-lead">團隊行動：</strong>嚴禁脫隊單獨行動，小隊長須隨時掌握隊員動向。</li>
+<li><strong class="label-lead">控制速度：</strong>隊首請配合隊伍步調，避免走得過快。</li>
+<li><strong class="label-lead">愛護環境：</strong>打卡過程請輕聲細語，共同維護道場莊嚴。</li></ul>
+<p class="note">備註：本計畫得依現場狀況與天候，由大隊長機動調整路線或集合時間。</p></div>
+</section>
+
 </div>
 </div>
 <footer>普高精舍　回山領隊作業實務　｜　v2.0</footer>
@@ -659,8 +699,9 @@ var ICONS = {
   c8: '<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/>',
   "c附錄一": '<path d="M12 21s7-6.5 7-12a7 7 0 00-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/>',
   "c附錄二": '<path d="M9 4L3 6.5v13L9 17l6 3 6-2.5v-13L15 7 9 4z"/><path d="M9 4v13M15 7v13"/>',
-  "c附錄三": '<path d="M12 3l2.6 5.6 6.1.6-4.6 4 1.3 6-5.4-3.2-5.4 3.2 1.3-6-4.6-4 6.1-.6L12 3z"/>',
-  "c附錄四": '<path d="M8 12l6-6a3 3 0 014.2 4.2l-8 8a5 5 0 01-7-7l7-7"/>',
+  "c附錄三": '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
+  "c附錄四": '<path d="M12 3l2.6 5.6 6.1.6-4.6 4 1.3 6-5.4-3.2-5.4 3.2 1.3-6-4.6-4 6.1-.6L12 3z"/>',
+  "c附錄五": '<path d="M8 12l6-6a3 3 0 014.2 4.2l-8 8a5 5 0 01-7-7l7-7"/>',
 };
 function svgIcon(key){
   var d = ICONS[key];
@@ -875,6 +916,28 @@ document.querySelectorAll('.stage-strip').forEach(function(strip){
   }
 });
 
+</script>
+<script>
+(function(){
+  function upd(card){
+    var items=card.querySelectorAll('.citem'), n=0;
+    items.forEach(function(it){ if(it.classList.contains('checked')) n++; });
+    var p=card.querySelector('.route-prog');
+    p.textContent=n+'/'+items.length;
+    p.classList.toggle('done', n===items.length);
+  }
+  document.querySelectorAll('.route-card').forEach(function(card){
+    upd(card);
+    card.querySelectorAll('.citem').forEach(function(it){
+      it.addEventListener('click', function(){ upd(card); });
+    });
+    card.querySelector('.route-reset').addEventListener('click', function(){
+      if(!confirm('確定清除本路線的打卡紀錄？')) return;
+      card.querySelectorAll('.citem.checked').forEach(function(it){ it.click(); });
+      upd(card);
+    });
+  });
+})();
 </script>
 </body>
 </html>
