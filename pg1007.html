@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>56期升班調查 操作說明</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#1f2933;--sub:#667085;--line:#d9dde3;--primary:#2f6fdb;--green:#067647;--red:#d92d20}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;font-size:18px;line-height:1.75}
+.nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);display:flex;gap:8px;padding:10px 16px;overflow-x:auto}
+.nav a{flex:none;text-decoration:none;color:var(--primary);border:2px solid var(--primary);border-radius:99px;padding:4px 16px;font-size:16px;white-space:nowrap}
+.wrap{max-width:820px;margin:0 auto;padding:16px 16px 60px}
+h1{font-size:28px;margin:40px 0 8px;padding:12px 16px;background:var(--primary);color:#fff;border-radius:12px}
+h1.doctitle{margin-top:12px;background:none;color:var(--text);padding:0 0 4px;font-size:30px;border-radius:0}
+h2{font-size:24px;margin:34px 0 6px;padding-bottom:6px;border-bottom:3px solid var(--primary)}
+h3{font-size:20px;margin:24px 0 4px;color:var(--primary)}
+p,li{font-size:18px}
+li{margin:4px 0}
+strong{font-weight:700}
+code{background:#eef2f6;color:#14325f;border-radius:6px;padding:1px 8px;font-size:18px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.tw{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:17px}
+th{background:#eef2f6;text-align:left;font-weight:700}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td:first-child{white-space:nowrap}
+.chip{display:inline-block;border-radius:99px;padding:0 12px;font-weight:400}
+.chip.gold{background:#f2c94c;color:#4a3800}
+.chip.green{background:#b7e4c7;color:#14532d}
+.chip.lightred{background:#fbd5d5;color:#7a1f1f}
+.box{display:inline-block;border-radius:6px;padding:0 10px}
+.box.g{border:2px solid var(--green)}
+.box.r{background:#fef3f2;border:2px solid #fda29b}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+@media print{.nav{display:none}h1{background:none;color:#000;border:2px solid #000}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="nav"><a href="#part1">學長篇</a><a href="#part2">總學長篇</a></div>
+<div class="wrap">
+<h1 id="title" class="doctitle">56期升班調查 操作說明</h1>
+<h1 id="part1">一、學長篇</h1>
+<p>學長的工作:<strong>詢問自己這一組的每位學員,56期想上哪一班,再幫忙在系統上登記。</strong> 登記完系統會自動存檔、自動統計,不用再抄寫紙本。意願以學員自己的回答為準,學長只是幫忙記錄。</p>
+<h2 id="1">1. 登入</h2>
+<ol>
+<li>開啟系統網址。</li>
+<li>輸入你的 <strong>PIN(6 碼數字)</strong>,輸滿 6 碼後「登入」才能按。</li>
+<li>登入後只會看到<strong>你負責的那一組</strong>,看不到別組。</li>
+</ol>
+<h3 id="pin">PIN 的原則</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>階段</th>
+<th>PIN 是什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正式使用</td>
+<td>你的<strong>手機號碼後 6 碼</strong></td>
+</tr>
+<tr>
+<td>測試階段</td>
+<td><strong>班別代碼(3 碼)+ 組號(3 碼)</strong>,共 6 碼</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>測試階段的 PIN 怎麼組:</strong></p>
+<ol>
+<li>前 3 碼:你那一班的<strong>班別代碼</strong>(每一班不一樣,下表)</li>
+<li>後 3 碼:班組別後面的<strong>組號</strong>,不足 3 碼前面補 0(組號 2 → <code>002</code>,組號 15 → <code>015</code>)</li>
+<li>男組、女組的組號在同一班內是連續編號、不會重複,所以不用分男女</li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>班</th>
+<th>班別代碼</th>
+<th>班</th>
+<th>班別代碼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>日初</td>
+<td>111</td>
+<td>夜初</td>
+<td>555</td>
+</tr>
+<tr>
+<td>日中</td>
+<td>222</td>
+<td>夜中</td>
+<td>666</td>
+</tr>
+<tr>
+<td>日高</td>
+<td>333</td>
+<td>夜高</td>
+<td>777</td>
+</tr>
+<tr>
+<td>日研</td>
+<td>444</td>
+<td>夜研</td>
+<td>888</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>舉例:</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>你的班組別</th>
+<th>班別代碼</th>
+<th>組號</th>
+<th>你的 PIN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>日初男1</td>
+<td>111</td>
+<td>001</td>
+<td><code>111001</code></td>
+</tr>
+<tr>
+<td>日初男2</td>
+<td>111</td>
+<td>002</td>
+<td><code>111002</code></td>
+</tr>
+<tr>
+<td>日初女8</td>
+<td>111</td>
+<td>008</td>
+<td><code>111008</code></td>
+</tr>
+<tr>
+<td>日中男3</td>
+<td>222</td>
+<td>003</td>
+<td><code>222003</code></td>
+</tr>
+<tr>
+<td>日中女11</td>
+<td>222</td>
+<td>011</td>
+<td><code>222011</code></td>
+</tr>
+<tr>
+<td>日高男2</td>
+<td>333</td>
+<td>002</td>
+<td><code>333002</code></td>
+</tr>
+<tr>
+<td>日高女10</td>
+<td>333</td>
+<td>010</td>
+<td><code>333010</code></td>
+</tr>
+<tr>
+<td>日研男15</td>
+<td>444</td>
+<td>015</td>
+<td><code>444015</code></td>
+</tr>
+<tr>
+<td>日研女20</td>
+<td>444</td>
+<td>020</td>
+<td><code>444020</code></td>
+</tr>
+<tr>
+<td>夜初男1</td>
+<td>555</td>
+<td>001</td>
+<td><code>555001</code></td>
+</tr>
+<tr>
+<td>夜初女16</td>
+<td>555</td>
+<td>016</td>
+<td><code>555016</code></td>
+</tr>
+<tr>
+<td>夜中女12</td>
+<td>666</td>
+<td>012</td>
+<td><code>666012</code></td>
+</tr>
+<tr>
+<td>夜高男2</td>
+<td>777</td>
+<td>002</td>
+<td><code>777002</code></td>
+</tr>
+<tr>
+<td>夜高女16</td>
+<td>777</td>
+<td>016</td>
+<td><code>777016</code></td>
+</tr>
+<tr>
+<td>夜研男1</td>
+<td>888</td>
+<td>001</td>
+<td><code>888001</code></td>
+</tr>
+<tr>
+<td>夜研女30</td>
+<td>888</td>
+<td>030</td>
+<td><code>888030</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>正式使用的 PIN:</strong> 例如你的手機是 0912-345-678,PIN 就是 <code>345678</code>(手機號碼的最後 6 個數字)。</p>
+<p>PIN 只用來確認你是誰,請不要告訴別人。輸入錯誤會顯示「找不到這組 PIN,請再確認。」</p>
+<h2 id="2">2. 畫面怎麼看</h2>
+<p>畫面最上面是你的班組別,例如「日初男2」。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>位置</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>紅字「尚餘 X 位未完成」</td>
+<td>還有 X 位還沒登記完。<strong>點一下</strong>會自動跳到第一位沒登記的人</td>
+</tr>
+<tr>
+<td>綠字「本組已全部完成」</td>
+<td>全部登記完了</td>
+</tr>
+<tr>
+<td>右邊小字「已儲存」</td>
+<td>你選的都已經存好</td>
+</tr>
+</tbody>
+</table></div>
+<p>每位學員是一張卡片,由上而下是:</p>
+<ol>
+<li><strong>姓名、法名、學員編號</strong>(同一行)</li>
+<li><strong>55期修業狀況</strong>:<span class="chip gold">全勤</span>(金色)、<span class="chip green">結業</span>(綠色)、<span class="chip lightred">留原班</span>(淺紅)。這是系統給的資料,<strong>只供參考,不能修改</strong></li>
+<li><strong>56期去向</strong>:登記學員回答的下拉選單</li>
+</ol>
+<p>卡片的顏色:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>外觀</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="box g"><strong>綠色外框</strong></span></td>
+<td>這位已經完成調查</td>
+</tr>
+<tr>
+<td><span class="box r"><strong>紅底</strong></span></td>
+<td>這位還沒完成</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-56">3. 登記 56期去向</h2>
+<p>先問學員的意願,再點下拉選單登記(一開始顯示「選取班別」)。有這些選項:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>選項</th>
+<th>什麼時候選</th>
+<th>還要做什麼</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>升班(→日中)</strong></td>
+<td>學員要升到上一班。括號裡就是升上去的班</td>
+<td>不用再選,系統自動記成日中</td>
+</tr>
+<tr>
+<td><strong>留原班(日初)</strong></td>
+<td>學員繼續讀同一班</td>
+<td>不用再選</td>
+</tr>
+<tr>
+<td><strong>轉班</strong></td>
+<td>學員要換到別的班</td>
+<td>會多出「轉入班別」,請選學員說的那一班</td>
+</tr>
+<tr>
+<td><strong>取消上課</strong></td>
+<td>學員不讀了</td>
+<td>會多出「取消原因」,<strong>必填</strong>,請記下學員說的原因</td>
+</tr>
+</tbody>
+</table></div>
+<p>幾個要注意的地方:</p>
+<ul>
+<li><strong>留原班(未結業)的學員沒有「升班」選項</strong>,只有全勤、結業才能升班。</li>
+<li><strong>日研、夜研是最高班,沒有「升班」</strong>。</li>
+<li><strong>轉班</strong>可以日夜互轉,也可以轉到比較低的班,只是不能選自己原本的班。</li>
+<li><strong>取消上課</strong>一定要填原因,照學員說的簡短記錄就好,例如「先休息」「照顧家人」。</li>
+<li>選了「轉班」沒選班別、選了「取消上課」沒填原因,這位<strong>還不算完成</strong>,卡片會維持紅底並提示「請選轉班班別」或「請填原因」。</li>
+</ul>
+<p>登記好後,卡片會顯示「56期班別:日中」之類的結果,並變成綠色外框。</p>
+<h2 id="4">4. 選錯了怎麼改</h2>
+<p>學員改變心意、或登記錯了,直接重新選就好,隨時可以改。想<strong>整個清除</strong>這位的登記,把下拉選回「選取班別」即可。</p>
+<h2 id="5">5. 存檔與提交</h2>
+<p><strong>存檔是自動的。</strong> 每選一位,系統就立刻存起來,右邊會顯示「儲存中…」然後變成「已儲存」。關掉網頁再回來,選過的都還在。</p>
+<p>如果出現紅字「<strong>有 N 筆尚未儲存,點此重試</strong>」,代表網路不穩沒存成功,請點一下重試,直到變回「已儲存」。</p>
+<p><strong>提交是通知總學長「我這組填到這裡了」。</strong> 調查期間可能跨好幾週,所以:</p>
+<ul>
+<li><strong>不用全部完成才能提交</strong>,只要有一位完成就能提交。</li>
+<li>還有人沒選時,按鈕會顯示「先提交目前進度(8/18)」,按下去會跳出確認視窗,選「先提交」即可。</li>
+<li>提交之後<strong>可以繼續填</strong>。之後再修改任何一位,這一組會回到「填寫中」,<strong>改完請再按一次提交</strong>。</li>
+<li>全部完成後,按鈕顯示「提交本組調查」,按下去就是正式完成。</li>
+</ul>
+<p>提交成功後,按鈕下方會出現綠字,例如「已提交 8/18 位」。</p>
+<p>填完請記得按「登出」(右上角),特別是用共用的手機或電腦時。</p>
+<h2 id="6">6. 常見問題</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>問題</th>
+<th>回答</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>登入顯示找不到 PIN</td>
+<td>確認輸入的是 6 碼數字。測試階段請對照上面的班別代碼與組號;正式階段請確認是手機最後 6 碼</td>
+</tr>
+<tr>
+<td>我的組沒辦法登入</td>
+<td>沒有登記學長的組(或學長沒有留電話)無法登入,請聯絡資訊組</td>
+</tr>
+<tr>
+<td>網頁一直轉圈或空白</td>
+<td>重新整理頁面;還是不行請聯絡資訊組</td>
+</tr>
+<tr>
+<td>換了手機或電腦會不會不見</td>
+<td>不會,資料存在系統裡,用 PIN 登入就能看到</td>
+</tr>
+<tr>
+<td>提交後發現登記錯了</td>
+<td>直接改,改完再提交一次</td>
+</tr>
+<tr>
+<td>學員資料(姓名、編號、修業狀況)有錯</td>
+<td>學長不能改,請通知資訊組</td>
+</tr>
+<tr>
+<td>兩個人用同一個 PIN 登入同一組</td>
+<td>一組只有一位學長;如果需要別人幫忙,請聯絡資訊組</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="part2">二、總學長篇</h1>
+<p>總學長的工作:<strong>掌握各組調查的完成進度。</strong> 看板是<strong>唯讀</strong>的,不能修改任何資料。</p>
+<h2 id="1_1">1. 登入</h2>
+<p>用總學長的 PIN 登入,<strong>每個 PIN 只看自己那一班的所有組別</strong>:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>PIN</th>
+<th>班</th>
+<th>PIN</th>
+<th>班</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>111111</td>
+<td>日初</td>
+<td>555555</td>
+<td>夜初</td>
+</tr>
+<tr>
+<td>222222</td>
+<td>日中</td>
+<td>666666</td>
+<td>夜中</td>
+</tr>
+<tr>
+<td>333333</td>
+<td>日高</td>
+<td>777777</td>
+<td>夜高</td>
+</tr>
+<tr>
+<td>444444</td>
+<td>日研</td>
+<td>888888</td>
+<td>夜研</td>
+</tr>
+</tbody>
+</table></div>
+<p>登入後直接進入看板,標題會是「日初班 調查完成進度」之類。</p>
+<h2 id="2_1">2. 看板怎麼看</h2>
+<p><strong>最上面三個數字:</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>數字</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全部完成並提交</td>
+<td>已提交,而且全組都選完的組數(例如 3 / 14)</td>
+</tr>
+<tr>
+<td>部分提交組數</td>
+<td>已經提交,但還有人沒選的組數</td>
+</tr>
+<tr>
+<td>已選人數</td>
+<td>本班已完成選擇的人數 / 本班總人數</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>各組清單:</strong> 每一組一列,右邊是狀態與進度(已完成人數 / 全組人數)。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>狀態</th>
+<th>顏色</th>
+<th>意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>未開始</td>
+<td>灰</td>
+<td>這組還沒有人選</td>
+</tr>
+<tr>
+<td>填寫中</td>
+<td>橘</td>
+<td>有人選了,但學長還沒提交(或提交後又修改)</td>
+</tr>
+<tr>
+<td>部分提交</td>
+<td>藍</td>
+<td>學長已提交,但還有人沒選完</td>
+</tr>
+<tr>
+<td>已提交</td>
+<td>綠</td>
+<td>學長已提交,而且全組都選完</td>
+</tr>
+</tbody>
+</table></div>
+<p>清單<strong>未開始、填寫中的排在最前面</strong>,方便你一眼看到需要催辦的組。</p>
+<h2 id="3">3. 更新</h2>
+<ul>
+<li>畫面每 <strong>30 秒自動更新</strong>一次。</li>
+<li>想立刻看最新資料,按右上角「重新整理」。</li>
+<li>看完請按「登出」。</li>
+</ul>
+<h2 id="4_1">4. 怎麼催辦</h2>
+<ol>
+<li>看清單最前面的「未開始」「填寫中」。</li>
+<li>「填寫中 5/18」表示這組已選 5 人,還有 13 人沒選。</li>
+<li>「部分提交 12/18」表示學長已經先交了 12 人,剩下 6 人還沒選。</li>
+<li>請直接聯絡該組學長。看板上只顯示班組別,<strong>不會顯示學長的姓名和電話</strong>。</li>
+</ol>
+<h2 id="5_1">5. 要看每位學員的選擇</h2>
+<p>看板只看進度,不顯示每位學員選了什麼。完整資料由<strong>資訊組</strong>從試算表的「調查結果」分頁取得,欄位依序是:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>欄位</th>
+<th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>學員編號、姓名、法名</td>
+<td>學員基本資料</td>
+</tr>
+<tr>
+<td>55期狀態</td>
+<td>全勤 / 結業 / 留原班,方便審核</td>
+</tr>
+<tr>
+<td>決定類型</td>
+<td>留原班 / 升班 / 轉班 / 取消上課</td>
+</tr>
+<tr>
+<td>56期班別</td>
+<td>最後確定的班別</td>
+</tr>
+<tr>
+<td>取消原因</td>
+<td>只有取消上課的人才有</td>
+</tr>
+<tr>
+<td>最後修改時間</td>
+<td>學長最後一次改這位的時間</td>
+</tr>
+</tbody>
+</table></div>
+<p>學長一選好,資料就立刻寫入這個分頁,<strong>不用等提交</strong>。</p>
+<h2 id="6_1">6. 常見問題</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>問題</th>
+<th>回答</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>看不到別班的進度</td>
+<td>正常,每個總學長只看自己那一班</td>
+</tr>
+<tr>
+<td>某一組沒出現在清單</td>
+<td>該組沒有登記學長,系統已忽略這組,請聯絡資訊組</td>
+</tr>
+<tr>
+<td>進度數字沒變</td>
+<td>按「重新整理」;學長沒有重新整理時也可能還沒改</td>
+</tr>
+<tr>
+<td>想改某位學員的選擇</td>
+<td>總學長不能改,請通知該組學長修改</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</body>
+</html>
