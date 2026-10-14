@@ -25,10 +25,12 @@ const TARGET_PAGE = '';
 
 function extractStudentId(raw){
   raw=(raw||'').trim();
-  let m=raw.match(/\b\d{9}\b/); if(m) return m[0];
-  m=raw.match(/\d{3}(?:DSA|DSB|5MA|5MB)\d{4}/i); if(m) return m[0].toUpperCase();
+  // 禪修班：9 碼數字；大乘班：10 碼（3 碼數字＋3 碼英數＋4 碼數字，如 1065MA0154）
+  let m=raw.match(/(?<![0-9A-Za-z])\d{9}(?![0-9A-Za-z])/); if(m) return m[0];
+  m=raw.match(/(?<![0-9A-Za-z])\d{3}[0-9A-Za-z]{3}\d{4}(?![0-9A-Za-z])/); if(m) return m[0].toUpperCase();
   try{ const u=new URL(raw); for(const v of u.searchParams.values()){ const r=extractStudentId(v); if(r) return r; } }catch(e){}
-  return raw;
+  if(/^[0-9A-Za-z\u4e00-\u9fff]{2,20}$/.test(raw)) return raw;
+  return '';
 }
 function target(q){
   const sep=GAS_URL.indexOf('?')>=0?'&':'?';
@@ -45,20 +47,24 @@ function goManual(){ location.href=target(''); }
   v.srcObject=stream; try{await v.play();}catch(e){}
   const c=document.createElement('canvas'), ctx=c.getContext('2d',{willReadFrequently:true});
   let done=false;
-  (function tick(){
+  function tick(){
     if(done) return;
     if(v.readyState>=2&&v.videoWidth){
       const sc=Math.min(1,640/v.videoWidth); c.width=Math.round(v.videoWidth*sc); c.height=Math.round(v.videoHeight*sc);
       ctx.drawImage(v,0,0,c.width,c.height);
       const code=jsQR(ctx.getImageData(0,0,c.width,c.height).data,c.width,c.height,{inversionAttempts:'dontInvert'});
       if(code&&code.data){
+        const id=extractStudentId(code.data);
+        if(!id){ msg.innerText='這不是上課證 QR，請重新對準'; setTimeout(()=>requestAnimationFrame(tick),600); return; }
+        msg.innerText='';
         done=true; stream.getTracks().forEach(t=>t.stop());
         if(navigator.vibrate) try{navigator.vibrate(80)}catch(e){}
-        document.getElementById('tip').innerText='已辨識，前往報名⋯';
-        location.href=target(extractStudentId(code.data)); return;
+        document.getElementById('tip').innerText='已辨識 '+id+'，前往報名⋯';
+        location.href=target(id); return;
       }
     }
     setTimeout(()=>requestAnimationFrame(tick),80);
-  })();
+  }
+  tick();
 })();
 </script></body></html>
