@@ -105,7 +105,7 @@ function onCode(code,force){
         if(res.totalCheckedIn!=null && res.totalCheckedIn>=0) $('cnt').textContent='累計 '+res.totalCheckedIn+'人';
         show('ok',res.familyName+'　報到成功',(res.memberName||'')+(res.memberId?'（'+res.memberId+'）':'')+(res.memberClassName?'　'+res.memberClassName:'')+' 之親眷｜報到時間 '+res.checkinTime);
       }else{
-        const who=[res.name,res.dharmaName].filter(Boolean).join('　')||'（未建檔）';
+        const who=[res.name,res.dharmaName].filter(Boolean).join('　')||'未報名';
         const info=[res.studentId?'學號 '+res.studentId:'',res.className?'班別 '+res.className:''].filter(Boolean).join('｜');
         if(res.totalCheckedIn!=null) $('cnt').textContent='累計 '+res.totalCheckedIn+'人';
         if(res.isWalkin) show('warn',who+'　報到成功（臨時加入）',(info?info+'｜':'')+'此人未報名本場次｜'+res.checkinTime);
