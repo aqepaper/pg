@@ -4,16 +4,19 @@
 <style>
 /* 版面：單欄閱讀＋兩區（電腦版／手機版），截圖為主，文字為輔 */
 :root{
+  --s1:#efe8da; --s2:#e5edf3; --s3:#e6eee2; --s4:#f4e6e1; --s5:#f1ebd0; --s6:#ebe6f2; --s7:#e0eeeb;
   --bg:#f7f3ec; --card:#ffffff; --ink:#2b2622; --sub:#6f665c; --line:#e3dbcf;
   --accent:#8a5a3b; --accent-soft:#f0e4d6;
   --ok:#3f6b4d; --ok-soft:#e4efe6; --warn:#8a6414; --warn-soft:#f6ecd2; --bad:#9c3a2e; --bad-soft:#f6e1dd;
   --serif:'Noto Serif TC','Songti TC','PMingLiU',serif; --sans:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --s1:#2b2620; --s2:#1f2a33; --s3:#212c22; --s4:#2f2220; --s5:#2d2918; --s6:#282236; --s7:#1d2c2a;
   --bg:#1c1916; --card:#262220; --ink:#efe8de; --sub:#a89f93; --line:#3a342f;
   --accent:#d6a47c; --accent-soft:#3a2d22;
   --ok:#8fc29d; --ok-soft:#1f3326; --warn:#e0bd6a; --warn-soft:#38301a; --bad:#e58b7d; --bad-soft:#3d2320; color-scheme:dark}}
 :root[data-theme="dark"]{
+  --s1:#2b2620; --s2:#1f2a33; --s3:#212c22; --s4:#2f2220; --s5:#2d2918; --s6:#282236; --s7:#1d2c2a;
   --bg:#1c1916; --card:#262220; --ink:#efe8de; --sub:#a89f93; --line:#3a342f;
   --accent:#d6a47c; --accent-soft:#3a2d22;
   --ok:#8fc29d; --ok-soft:#1f3326; --warn:#e0bd6a; --warn-soft:#38301a; --bad:#e58b7d; --bad-soft:#3d2320; color-scheme:dark}
@@ -30,7 +33,10 @@ nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);displa
 nav::-webkit-scrollbar{display:none}
 nav a{flex:none;white-space:nowrap;text-align:center;padding:8px 14px;border:1px solid var(--line);border-radius:8px;color:var(--ink);text-decoration:none;font-weight:700;font-size:15px;background:var(--card)}
 nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
-section{padding-top:40px;scroll-margin-top:64px}
+section{margin-top:22px;padding:26px 20px 24px;border-radius:14px;scroll-margin-top:64px}
+#prep{background:var(--s1)} #status{background:var(--s2)} #pc{background:var(--s3)} #family{background:var(--s4)}
+#guest{background:var(--s5)} #phone{background:var(--s6)} #faq{background:var(--s7)}
+@media(max-width:520px){section{padding:22px 14px 20px}}
 h2{font-family:var(--serif);font-size:clamp(23px,4.6vw,30px);margin:0 0 6px;line-height:1.35;text-wrap:balance}
 h2 small{display:block;font-family:var(--sans);font-size:14px;font-weight:500;color:var(--sub);letter-spacing:.04em;margin-top:2px}
 h3{font-size:19px;margin:34px 0 8px;display:flex;gap:10px;align-items:baseline}
