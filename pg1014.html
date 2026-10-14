@@ -34,7 +34,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 <div class="top">
   <div id="sessLab" class="lab">讀取中…</div>
   <div class="cnt" id="cnt">累計 --人</div>
-  <div style="font-size:11px;color:#888">scan v4</div>
+  <div style="font-size:11px;color:#888">scan v7</div>
 </div>
 <div class="cam">
   <video id="v" playsinline muted></video>
@@ -75,12 +75,15 @@ let curSession='';
 function loadSession(){
   api({action:'getCurrentSession'}).then(res=>{
     if(!res.ok) throw 0;
-    if(res.session!==curSession){ curSession=res.session; $('cnt').textContent='累計 --人'; }
+    if(res.session!==curSession){ curSession=res.session; loadTotal(); }
     const l=$('sessLab'); l.textContent=curSession||'⚠ 尚未設定報到場次'; l.classList.toggle('bad',!curSession);
     if(!curSession) show('err','尚未設定報到場次','請到試算表「報到場次設定」分頁 B1 選擇');
   }).catch(()=>{ $('sessLab').textContent='讀取場次失敗'; $('sessLab').classList.add('bad'); });
 }
-loadSession(); setInterval(loadSession,20000);
+function loadTotal(){
+  api({action:'getCheckinTotal'}).then(r=>{ if(r.ok&&r.total!=null) $('cnt').textContent='累計 '+r.total+'人'; }).catch(()=>{});
+}
+loadSession(); loadTotal(); setInterval(()=>{ loadSession(); loadTotal(); },20000);
 
 // 掃描
 const GUEST='777777777'; let guestSeen=0;
@@ -100,12 +103,13 @@ function onCode(code,force){
         show('ok','來賓　報到成功 +1人','來賓證｜報到時間 '+res.checkinTime);
       } else if(res.isFamily){
         if(res.totalCheckedIn!=null && res.totalCheckedIn>=0) $('cnt').textContent='累計 '+res.totalCheckedIn+'人';
-        show('ok',res.familyName+'　報到成功',(res.memberName||'')+(res.memberClassName?'　'+res.memberClassName:'')+' 之親眷｜報到時間 '+res.checkinTime);
+        show('ok',res.familyName+'　報到成功',(res.memberName||'')+(res.memberId?'（'+res.memberId+'）':'')+(res.memberClassName?'　'+res.memberClassName:'')+' 之親眷｜報到時間 '+res.checkinTime);
       }else{
-        const info=[res.name,res.dharmaName,res.className].filter(Boolean).join('　');
+        const who=[res.name,res.dharmaName].filter(Boolean).join('　')||'（未建檔）';
+        const info=[res.studentId?'學號 '+res.studentId:'',res.className?'班別 '+res.className:''].filter(Boolean).join('｜');
         if(res.totalCheckedIn!=null) $('cnt').textContent='累計 '+res.totalCheckedIn+'人';
-        if(res.isWalkin) show('warn','報到成功（臨時加入）',info+'｜此人未報名本場次｜'+res.checkinTime);
-        else show('ok',(res.name||'')+'　報到成功',info+'｜報到時間 '+res.checkinTime);
+        if(res.isWalkin) show('warn',who+'　報到成功（臨時加入）',(info?info+'｜':'')+'此人未報名本場次｜'+res.checkinTime);
+        else show('ok',who+'　報到成功',(info?info+'｜':'')+'報到時間 '+res.checkinTime);
       }
     }else show('err',res.error||'報到失敗',code);
   }).catch(()=>show('err','連線失敗，請重掃',code)).finally(()=>{ busy=false; lastAt=Date.now(); });
