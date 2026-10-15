@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>10月22日座位查詢</title>
+<title>大高二座位查詢表--10月22日</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500&display=swap" rel="stylesheet">
 <style>
   :root{--bg:#F5F3EF;--paper:#FFFFFF;--ink:#2C2C2C;--ink-soft:#6B665F;--line:#E0DACE;--moss:#7D8272;--moss-light:#E9EAE3;--charcoal:#4A4643;--charcoal-dark:#34312E;--gold-text:#704B19;--radius:4px;--radius-sm:4px;--radius-badge:3px}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Noto Sans TC',sans-serif;background-color:var(--bg);background-image:radial-gradient(rgba(0,0,0,.012) 1px,transparent 1px),radial-gradient(rgba(0,0,0,.012) 1px,transparent 1px);background-size:3px 3px;background-position:0 0,1.5px 1.5px;color:var(--ink);min-height:100vh;font-size:20px}
-  header{background:linear-gradient(to bottom,#D9DDCF 0%,#E9EAE3 45%,#F5F3EF 100%);padding:22px 16px 16px;text-align:center;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--line)}
-  header h1{font-family:'Noto Serif TC',serif;font-size:26px;font-weight:500;letter-spacing:.3em;text-indent:.3em;color:var(--ink)}
-  header p{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:500;letter-spacing:.12em;color:var(--ink-soft);margin-top:4px}
+  header{background:linear-gradient(to bottom,#D9DDCF 0%,#E9EAE3 45%,#F5F3EF 100%);padding:12px 12px 11px;display:flex;justify-content:center;align-items:baseline;gap:4px;white-space:nowrap;text-align:center;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--line)}
+  header h1{font-family:'Noto Serif TC',serif;font-size:21px;font-weight:500;letter-spacing:.1em;color:var(--ink)}
+  header p{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:500;letter-spacing:.04em;color:var(--ink-soft)}
   .main{max-width:500px;margin:0 auto;padding:22px 16px 48px}
   .squad-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
   .squad-btn{padding:13px 4px;font-size:24px;font-family:'Noto Sans TC',sans-serif;font-weight:500;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--ink);cursor:pointer;line-height:1;transition:background .15s,border-color .15s}
@@ -34,16 +34,23 @@
   .squad-grid-wrap.collapsed{max-height:0;opacity:0}
   .back-btn{display:none;width:100%;padding:13px 16px;font-size:20px;font-family:'Noto Sans TC',sans-serif;font-weight:500;background:transparent;border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--ink);cursor:pointer;margin-bottom:16px;letter-spacing:1px;text-align:left}
   .back-btn.visible{display:block}
+  .search{display:block;width:100%;padding:13px 16px;font-size:20px;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:16px;letter-spacing:.04em;outline:none;-webkit-appearance:none;appearance:none}
+  .search::placeholder{color:#A39D93}
+  .search:focus{border-color:var(--moss)}
+  .member-squad{font-size:15px;color:var(--ink-soft);margin-left:10px;flex:0 0 auto}
+  mark{background:var(--moss-light);color:var(--ink);border-bottom:2px solid var(--moss);padding:0 1px}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>大高二</h1>
-  <p>10月22日座位查詢</p>
+  <h1>大高二座位查詢表</h1>
+  <p>--10月22日</p>
 </header>
 
 <div class="main">
+  <input class="search" id="q" type="text" placeholder="輸入姓名或法名查詢" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+
   <button class="back-btn" id="backBtn" onclick="clearAll()">← 重新選擇小隊</button>
 
   <div class="squad-grid-wrap" id="squadGridWrap">
@@ -362,23 +369,22 @@ const RAW = [
   ["東23-9","第13小隊","潘威君","傳席","女"],
 ];
 
-// Build squad list (1-36)
 const SQUADS = Array.from({length:36},(_,i)=>`第${i+1}小隊`);
-
-// Build lookup
 const bySquad = {};
 SQUADS.forEach(s => bySquad[s] = []);
 RAW.forEach(r => {
   const [seat,squad,name,dharma,gender] = r;
   if(bySquad[squad]) bySquad[squad].push({seat,squad,name,dharma,gender});
 });
+const ALL = RAW.map(r => ({seat:r[0],squad:r[1],name:r[2],dharma:r[3],gender:r[4]}));
+const sqNum = s => parseInt(s.replace(/[^0-9]/g,''));
 
-let activeSquad = null;
+let activeSquad = null, query = '';
+const input = document.getElementById('q');
 
-// Render squad buttons
 const grid = document.getElementById('squadGrid');
 SQUADS.forEach(sq => {
-  const n = parseInt(sq.replace(/[^0-9]/g,''));
+  const n = sqNum(sq);
   const btn = document.createElement('button');
   btn.className = 'squad-btn';
   btn.textContent = n;
@@ -389,30 +395,62 @@ SQUADS.forEach(sq => {
 });
 
 function toggleSquad(sq, btn) {
-  if(activeSquad === sq) {
-    clearAll();
-    return;
-  }
+  if(activeSquad === sq) { clearAll(); return; }
   document.querySelectorAll('.squad-btn').forEach(b=>b.classList.remove('active'));
   activeSquad = sq;
+  input.value = ''; query = '';
   btn.classList.add('active');
-  // collapse grid, show back button
-  document.getElementById('squadGridWrap').classList.add('collapsed');
-  document.getElementById('backBtn').classList.add('visible');
   render();
 }
 
 function clearAll() {
-  activeSquad = null;
+  activeSquad = null; query = ''; input.value = '';
   document.querySelectorAll('.squad-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('squadGridWrap').classList.remove('collapsed');
-  document.getElementById('backBtn').classList.remove('visible');
   render();
+}
+
+function onSearch() {
+  query = input.value.replace(/\s+/g,'');
+  if(query) { activeSquad = null; document.querySelectorAll('.squad-btn').forEach(b=>b.classList.remove('active')); }
+  render();
+}
+input.addEventListener('input', e => { if(!e.isComposing) onSearch(); });
+input.addEventListener('compositionend', onSearch);
+
+function esc(t){ return String(t).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function hi(t){
+  t = String(t);
+  if(!query) return esc(t);
+  const i = t.indexOf(query);
+  if(i < 0) return esc(t);
+  return esc(t.slice(0,i)) + '<mark>' + esc(t.slice(i,i+query.length)) + '</mark>' + esc(t.slice(i+query.length));
 }
 
 function render() {
   const info = document.getElementById('resultInfo');
   const list = document.getElementById('cardList');
+  const showing = !!(activeSquad || query);
+  document.getElementById('squadGridWrap').classList.toggle('collapsed', showing);
+  document.getElementById('backBtn').classList.toggle('visible', showing);
+
+  if(query) {
+    const rs = ALL.filter(p => p.name.includes(query) || (p.dharma||'').includes(query))
+                  .sort((a,b) => sqNum(a.squad) - sqNum(b.squad));
+    if(!rs.length) {
+      info.innerHTML = '';
+      list.innerHTML = '<div class="empty">找不到「' + esc(query) + '」</div>';
+      return;
+    }
+    info.innerHTML = `搜尋「${esc(query)}」　共 <span class="result-count">${rs.length}</span> 人　<span style="border:2px solid #8fdc9a;border-radius:4px;padding:0 6px;font-size:14px">男眾</span>`;
+    const rows = rs.map(p => `<div class="member-row${p.gender==='男'?' male':''}">
+    <span class="member-name">${hi(p.name)}</span>
+    <span class="member-dharma">／${hi(p.dharma)}</span>
+    <span class="member-seat">　${p.seat}</span>
+    <span class="member-squad">${p.squad}</span>
+  </div>`).join('');
+    list.innerHTML = `<div class="squad-block">${rows}</div>`;
+    return;
+  }
 
   if(!activeSquad) {
     info.innerHTML = '';
