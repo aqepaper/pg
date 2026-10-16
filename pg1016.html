@@ -1,0 +1,211 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>圖書上架執行步驟 2.0</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+<style>
+/* Layout concept: a procedure sheet. One narrow column, five phases, each a ruled list of numbered steps; the numbers run 1-15 across phases. */
+:root {
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --fg: #1c2422;
+  --muted: #55625f;
+  --line: #d5dcd9;
+  --accent: #1d5a56;
+  --accent-soft: #e0eeec;
+  --note-bg: #f6ebd5;
+  --note-fg: #5f4210;
+  --font-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111715;
+    --surface: #182120;
+    --fg: #e4ebe9;
+    --muted: #9aa8a4;
+    --line: #2b3835;
+    --accent: #6fc2ba;
+    --accent-soft: #1b3230;
+    --note-bg: #392e16;
+    --note-fg: #ead3a0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111715;
+  --surface: #182120;
+  --fg: #e4ebe9;
+  --muted: #9aa8a4;
+  --line: #2b3835;
+  --accent: #6fc2ba;
+  --accent-soft: #1b3230;
+  --note-bg: #392e16;
+  --note-fg: #ead3a0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  padding-block: 32px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.sheet { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+header { display: flex; flex-direction: column; gap: 10px; }
+.meta { font-size: 13px; letter-spacing: 0.08em; color: var(--muted); }
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 38px);
+  line-height: 1.25;
+  font-weight: 700;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 .ver { color: var(--accent); }
+
+.codes {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.codes h2 { margin: 0; font-size: 13px; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; }
+.code-row { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.code { display: flex; align-items: baseline; gap: 8px; }
+.code b {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.code span { color: var(--muted); font-size: 15px; }
+.codes p { margin: 0; font-size: 14px; color: var(--muted); }
+
+.note {
+  background: var(--note-bg);
+  color: var(--note-fg);
+  padding: 12px 16px;
+  font-size: 15px;
+  margin: 0;
+}
+
+.phase { display: flex; flex-direction: column; gap: 0; }
+.phase-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--accent);
+}
+.phase-head h2 {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  margin: 0;
+}
+.phase-head .range { font-size: 13px; color: var(--accent); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+
+.step {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 2px 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.step .no {
+  grid-row: 1 / span 2;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent);
+  line-height: 1.5;
+}
+.step .item { font-weight: 700; }
+.step .body { color: var(--fg); margin: 0; overflow-wrap: anywhere; }
+.step .tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  vertical-align: 2px;
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 640px) {
+  .step {
+    grid-template-columns: 2.5rem 9.5rem minmax(0, 1fr);
+    gap: 0 16px;
+  }
+  .step .no { grid-row: auto; }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="sheet">
+  <header>
+    <div class="meta">圖書館重新開館 · 2026 年 10 月 16 日</div>
+    <h1>圖書上架執行步驟 <span class="ver">2.0</span></h1>
+  </header>
+
+  <section class="codes" aria-label="書標編號規則">
+    <h2>書標編號規則</h2>
+    <div class="code-row">
+      <div class="code"><b>A0001</b><span>世學</span></div>
+      <div class="code"><b>B0001</b><span>佛學</span></div>
+      <div class="code"><b>C0001</b><span>兒童</span></div>
+    </div>
+    <p>類別碼＋流水號，全面重新編號，印成 QR 標籤。</p>
+  </section>
+
+  <p class="note">步驟 15 的計畫書，須在正式執行前先行呈指導法師核示。</p>
+
+  <section class="phase">
+    <div class="phase-head"><h2>階段一　實體整理</h2><span class="range">步驟 1–3 · 全人工</span></div>
+    <div class="step"><div class="no">1</div><div class="item">書櫃定位、開箱、上架</div><p class="body">書櫃定位、開箱，依佛學、世學、兒童上架。</p></div>
+    <div class="step"><div class="no">2</div><div class="item">整書</div><p class="body">調整書櫃位置，依高低排列。</p></div>
+    <div class="step"><div class="no">3</div><div class="item">清點</div><p class="body">統計三類各自的本數。</p></div>
+  </section>
+
+  <section class="phase">
+    <div class="phase-head"><h2>階段二　書標 QR 標籤</h2><span class="range">步驟 4–7</span></div>
+    <div class="step"><div class="no">4</div><div class="item">印製 QR 標籤</div><p class="body">全面重新編號，依三類本數印製，編號為「類別碼＋流水號」：A0001（世）、B0001（佛）、C0001（兒）。</p></div>
+    <div class="step"><div class="no">5</div><div class="item">貼標與蓋章</div><p class="body">書標貼在內頁與封底，內頁加蓋館藏章。</p></div>
+    <div class="step"><div class="no">6</div><div class="item">貼標進度</div><p class="body">依櫃號順序進行，每櫃做完記錄起訖號與本數。</p></div>
+    <div class="step"><div class="no">7</div><div class="item">系統預建紀錄</div><p class="body">已貼出的編號先建入系統（類別、編號）。</p></div>
+  </section>
+
+  <section class="phase">
+    <div class="phase-head"><h2>階段三　開放借閱</h2><span class="range">步驟 8–11</span></div>
+    <div class="step"><div class="no">8</div><div class="item">讀者辦證</div><p class="body">讀者重新辦借書證，或從舊系統匯出讀者資料匯入。</p></div>
+    <div class="step"><div class="no">9</div><div class="item">修訂辦法</div><p class="body">修訂館藏管理辦法與借閱還書規章。</p></div>
+    <div class="step"><div class="no">10</div><div class="item">驗收</div><p class="body">館員用自己的手機掃書標 QR，演練借出與歸還。</p></div>
+    <div class="step"><div class="no">11</div><div class="item">開放借閱</div><p class="body">圖書館恢復正常服務。</p></div>
+  </section>
+
+  <section class="phase">
+    <div class="phase-head"><h2>階段四　書目資料建檔與培訓</h2><span class="range">步驟 12–14</span></div>
+    <div class="step"><div class="no">12</div><div class="item">書目建檔</div><p class="body">館員分工，用手機掃書標 QR，在圖館軟體後台輸入版權頁相關內容；沒有版權頁的舊書只輸入基本資料。</p></div>
+    <div class="step"><div class="no">13</div><div class="item">編目討論<span class="tag">不影響借閱</span></div><p class="body">索書號、作者號是否採用香光尼圖館分類與中文圖書分類，還是單只用國家圖書館用的中文圖書分類，討論後另請指導法師裁示。</p></div>
+    <div class="step"><div class="no">14</div><div class="item">教育訓練</div><p class="body">針對圖書館員的專業技能做培訓計畫。</p></div>
+  </section>
+
+  <section class="phase">
+    <div class="phase-head"><h2>階段五　進度管制</h2><span class="range">步驟 15</span></div>
+    <div class="step"><div class="no">15</div><div class="item">計畫書</div><p class="body">由執秘、總組長策畫後，做成計畫書，正式執行前先行呈指導法師核示。</p></div>
+  </section>
+</div>
+
+</body></html>
