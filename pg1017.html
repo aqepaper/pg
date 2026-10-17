@@ -1,0 +1,492 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>圖書館書籍上架計劃書</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+<style>
+/* Layout concept: one page that reads top to bottom as a memo (facts, method, limits, risks, open questions), then turns into the working checklist grouped by milestone, and ends with the sign-off block. */
+:root {
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --fg: #1c2422;
+  --muted: #55625f;
+  --line: #d5dcd9;
+  --accent: #1d5a56;
+  --accent-soft: #e0eeec;
+  --note-bg: #f6ebd5;
+  --note-fg: #5f4210;
+  --font-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111715;
+    --surface: #182120;
+    --fg: #e4ebe9;
+    --muted: #9aa8a4;
+    --line: #2b3835;
+    --accent: #6fc2ba;
+    --accent-soft: #1b3230;
+    --note-bg: #392e16;
+    --note-fg: #ead3a0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111715;
+  --surface: #182120;
+  --fg: #e4ebe9;
+  --muted: #9aa8a4;
+  --line: #2b3835;
+  --accent: #6fc2ba;
+  --accent-soft: #1b3230;
+  --note-bg: #392e16;
+  --note-fg: #ead3a0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  padding-block: 32px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--bg);
+}
+.sheet { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+header { display: flex; flex-direction: column; gap: 10px; }
+.meta { font-size: 13px; letter-spacing: 0.08em; color: var(--muted); }
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 6vw, 38px);
+  line-height: 1.25;
+  font-weight: 700;
+  margin: 0;
+  text-wrap: balance;
+}
+.lead { margin: 0; font-size: 17px; }
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border-top: 2px solid var(--accent);
+  border-bottom: 1px solid var(--line);
+}
+.fact { padding: 12px 14px 12px 0; display: flex; flex-direction: column; gap: 2px; }
+.fact b { font-family: var(--font-display); font-size: 24px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.fact span { font-size: 13px; color: var(--muted); }
+
+section { display: flex; flex-direction: column; gap: 10px; }
+h2 {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent);
+}
+p { margin: 0; }
+ul.plain { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+
+.note { background: var(--note-bg); color: var(--note-fg); padding: 12px 16px; font-size: 15px; }
+
+/* progress bar */
+.bar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: var(--bg);
+  padding-block: 10px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bar-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.total { font-weight: 700; font-variant-numeric: tabular-nums; }
+.total small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+.track { height: 8px; background: var(--line); }
+.fill { height: 100%; width: 0; background: var(--accent); transition: width 0.25s ease; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; }
+.status { font-size: 13px; color: var(--muted); }
+.filter {
+  font: inherit;
+  font-size: 14px;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.filter[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+
+/* checklist groups */
+.group { display: flex; flex-direction: column; }
+.g-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent);
+}
+.g-head h3 { font-family: var(--font-display); font-size: 19px; font-weight: 700; margin: 0; }
+.g-head .range { font-size: 13px; color: var(--accent); letter-spacing: 0.04em; }
+.g-head .count { margin-left: auto; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.group.complete .g-head .count { color: var(--accent); font-weight: 700; }
+.g-note { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+.item { border-bottom: 1px solid var(--line); }
+.item label {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px 0;
+  cursor: pointer;
+}
+.item input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); cursor: pointer; }
+.item input:disabled { cursor: default; }
+.txt { overflow-wrap: anywhere; }
+.sub { display: block; font-size: 13px; color: var(--muted); }
+.item.done .txt { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.item.done .sub { text-decoration: none; }
+.empty { padding: 14px 0; color: var(--muted); font-size: 14px; }
+#groups { display: flex; flex-direction: column; gap: 24px; }
+
+.tw { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line); }
+th { font-size: 13px; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; white-space: nowrap; }
+td:first-child { font-weight: 500; }
+.small { font-size: 14px; color: var(--muted); }
+.sign { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.sign div { border-bottom: 1px solid var(--fg); padding-top: 28px; font-size: 14px; color: var(--muted); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+</style>
+
+<div class="sheet">
+  <header>
+    <div class="meta">2026 年 10 月 17 日 · 版本 2.1 · 呈指導法師核示</div>
+    <h1>圖書館書籍上架計劃書</h1>
+    <p class="lead">圖書館縮小規模重新開幕，全部書籍重新上架、重新製作書標，預計 10 月 20 日開工、11 月 30 日完成。</p>
+  </header>
+
+  <div class="facts">
+    <div class="fact"><b>11/30</b><span>預計完成（不含書目整理與索書號編目）</span></div>
+    <div class="fact"><b>10/20</b><span>預計開工</span></div>
+    <div class="fact"><b>待盤點</b><span>總本數於清點後確認</span></div>
+    <div class="fact"><b>3 類</b><span>佛學、世學、兒童</span></div>
+  </div>
+
+  <section>
+    <h2>一、緣起與現況</h2>
+    <p>圖書館因規模縮小重新開幕，書櫃要重新擺放，館藏不到原來的四分之一。書籍已全部打包分散，舊的櫃位與掃描序號標籤也已撕除，所有書都要重新開箱、分類、上架並重新貼標，才能恢復借閱。</p>
+    <ul class="plain">
+      <li>館藏數量要盤點後才知道，新書與舊書混雜。</li>
+      <li>書櫃因重量視為固定位，定位後不再移動，容量充足。</li>
+      <li>舊書上的索書號應仍在，整書時依它排序，待現場確認；索書號與書標是兩種不同的東西。</li>
+      <li>不再使用原來的圖書館管理軟體，改用小規模的書籍管理系統；館員不用條碼槍，用自己的手機登入系統，選擇「圖書借閱」，替讀者辦理借書與還書。館員與讀者的服務大多在手機上完成。</li>
+      <li>部分舊書沒有版權頁，只能輸入基本資料。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>二、做法</h2>
+    <ul class="plain">
+      <li><b>先實體、後資料。</b>書全部上架、整理完成，再列印標籤與貼標；書櫃一旦放滿就搬不動，所以位置先定案。</li>
+      <li><b>借閱不等書目建檔。</b>貼標後先在系統預建編號紀錄（類別、編號），即可開放借書還書；書名、作者等資料開館後由館員分工補建。</li>
+      <li><b>QR Code 書標全面重新製作。</b>書標是一系列的流水號，以 QR 呈現，在 A4 標籤紙上排版列印，方式與印製索書碼相同；館員用手機登入書籍管理系統，選擇「圖書借閱」掃碼借還。</li>
+      <li><b>QR 直接貼在舊書標上。</b>舊書標不撕除，省去裁切的工夫；內頁另加蓋館藏章。</li>
+      <li><b>讀者重新辦理借閱證。</b>讀者號碼也使用 QR Code，所以全部讀者都要重新辦證，不沿用舊的讀者資料。</li>
+      <li><b>索書號與書標不同，不影響借閱。</b>貼標組完成後，由編目小組進行索書號編目：先看現有索書號是否適合，不適合就重新編制；編目依據單一的中文圖書編目系統，版權頁若有預先分類即刻採用。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>三、書標編號</h2>
+    <p>書標編號為「類別碼＋5 碼流水號」，全面重新製作，依各類盤點本數列印。書標是借還用的流水號，與找書用的索書號是不同的東西。</p>
+    <div class="tw"><table>
+      <thead><tr><th>類別</th><th>類別碼</th><th>編號範例</th></tr></thead>
+      <tbody>
+        <tr><td>世學</td><td>A</td><td>A00001</td></tr>
+        <tr><td>佛學</td><td>B</td><td>B00001</td></tr>
+        <tr><td>兒童</td><td>C</td><td>C00001</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>四、分工</h2>
+    <div class="tw"><table>
+      <thead><tr><th>組別</th><th>職責</th></tr></thead>
+      <tbody>
+        <tr><td>指導法師</td><td>核示計畫書，裁示重大事項</td></tr>
+        <tr><td>總組長</td><td>策劃計畫書後呈核；與各組長溝通協調，決定疑難書與櫃位調整</td></tr>
+        <tr><td>各組長</td><td>日常掌握各組現場狀況與進度，回報總組長</td></tr>
+        <tr><td>上架組</td><td>開箱、分類、上架、整書、盤點</td></tr>
+        <tr><td>貼標組</td><td>印製 QR 標籤、貼標、蓋館藏章、記錄每櫃起訖號</td></tr>
+        <tr><td>編目小組</td><td>貼標組完成後，負責索書號編目；編目依據單一的中文圖書編目系統</td></tr>
+        <tr><td>系統與建檔組</td><td>書籍管理 App、預建編號紀錄、讀者 QR 借閱證、開館後的書目建檔</td></tr>
+        <tr><td>全體館員</td><td>教育訓練後，用自己的手機掃碼借還</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small">各組人數待確認每日實際人數後分配。</p>
+  </section>
+
+  <section>
+    <h2>五、人力與時程限制</h2>
+    <ul class="plain">
+      <li>館員仍須支援補課組，並非全員投入，每日作業到下午 5 點止。</li>
+      <li>預計 10 月 20 日開工，11 月 30 日完成。</li>
+      <li>計畫書須經核示後才能開工，核示延後會直接順延完成日。</li>
+      <li>禪修班結業之前有很多補課需求，會壓縮館員投入圖書館的時間；結業後人力才會較充裕，因此人力需求較高的貼標等工作盡量排在結業後。</li>
+      
+    </ul>
+  </section>
+
+  <section>
+    <h2>六、主要風險與對策</h2>
+    <div class="tw"><table>
+      <thead><tr><th>風險</th><th>對策</th></tr></thead>
+      <tbody>
+        <tr><td>開放借閱時書目還沒建檔，掃碼查不到書</td><td>先在系統預建編號紀錄（類別、編號），借出時只需編號；書名等資料開館後補。</td></tr>
+        <tr><td>舊書標缺漏，整書沒有排序依據</td><td>開工前現場確認；沒有依據的書依三類暫排，之後再整理。</td></tr>
+        <tr><td>漏貼或重複貼標</td><td>每櫃記錄起訖號與本數，相減加一應等於實際本數；系統筆數再核對一次。</td></tr>
+        <tr><td>人數低於預期，貼標趕不及</td><td>貼標最先受影響；每週檢視進度，必要時調整進度安排或請求支援。</td></tr>
+        <tr><td>班程結束前補課多，館員出坡時間被壓縮</td><td>前期以盤點、上架等人力需求較低的工作為主；每週依實際出坡人數調整各組進度，貼標等需要人力的工作排在班程結束後。</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>七、驗收標準</h2>
+    <ul class="plain">
+      <li>所有書都有 QR 書標，且已上架。</li>
+      <li>系統預建的筆數與已貼標的本數一致。</li>
+      <li>抽查的書掃 QR 能查到正確的類別與編號。</li>
+      <li>館員完成借出與歸還演練。</li>
+      <li>讀者借閱證（QR Code）與館藏管理辦法已完成。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>八、待確認</h2>
+    <ul class="plain">
+      <li>館員每日實際可投入的人數。</li>
+      <li>舊書上的索書號是否仍在、是否適合沿用（不適合就重新編制）。</li>
+      <li>總本數，盤點後才能確定，並據此列印書標。</li>
+      <li>經費項目與金額，由總組長填寫。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>九、里程碑與進度</h2>
+    <div class="bar" role="region" aria-label="整體進度">
+      <div class="bar-top">
+        <div class="total"><span id="doneN">0</span> / <span id="allN">0</span> 項<small id="pct">0%</small></div>
+        <div class="status" id="status"></div>
+      </div>
+      <div class="track"><div class="fill" id="fill"></div></div>
+      <div class="tools">
+        <span class="status">勾選後所有開啟此頁的人都會看到</span>
+        <button class="filter" id="filter" type="button" aria-pressed="false">只看未完成</button>
+      </div>
+    </div>
+    <div id="groups"></div>
+  </section>
+
+  <section>
+    <h2>十、核示</h2>
+    <p class="note">本計畫書由總組長策劃，經指導法師核示後開工。</p>
+  </section>
+</div>
+
+<script>
+var GROUPS = [
+  { title: "開工前", range: "", note: "", items: [
+    { id: "a1", text: "計畫書由總組長策劃完成", sub: "總組長與各組長溝通協調" },
+    { id: "a2", text: "計畫書呈指導法師核示", sub: "須在開工前完成" },
+    { id: "a3", text: "確認每日可投入的館員人數與作業時段", sub: "館員仍支援補課組，每日到下午 5 點止" }
+  ]},
+  { title: "里程碑 1　書籍整理與清點", range: "", note: "", items: [
+    { id: "c1", text: "書櫃定位，每櫃貼櫃號" },
+    { id: "b1", text: "開箱" },
+    { id: "b4", text: "破損、發霉及不適合上架的書挑出歸類", sub: "不貼標，不列入 QR 數量" },
+    { id: "b2", text: "計算全部書籍的總本數", sub: "本數盤點後才知道" },
+    { id: "b3", text: "統計佛學、世學、兒童各自的本數", sub: "作為 QR 列印數量的依據，統計完即可開始製作 QR" },
+    { id: "c2", text: "依佛學、世學、兒童上架" },
+    { id: "c3", text: "依舊書上的索書號順序整書" },
+    { id: "c4", text: "全部上架完成，宣布位置穩定" }
+  ]},
+  { title: "里程碑 2　QR Code 製作列印", range: "", note: "", items: [
+    { id: "d1", text: "依清點本數決定 A、B、C 各類 QR 數量" },
+    { id: "d2", text: "在 A4 標籤紙排版", sub: "與印製索書碼的方式一樣" },
+    { id: "d3", text: "列印 QR 標籤", sub: "A00001（世學）、B00001（佛學）、C00001（兒童）起編" },
+    { id: "d4", text: "測試 QR Code 能否用手機掃描" }
+  ]},
+  { title: "里程碑 3　貼書標", range: "", note: "", items: [
+    { id: "e1", text: "試貼幾本，確認貼法", sub: "QR 貼在舊書標上，舊書標不撕除；內頁與封底各一張" },
+    { id: "e2", text: "內頁加蓋館藏章" },
+    { id: "e3", text: "佛學類貼標完成" },
+    { id: "e4", text: "世學類貼標完成" },
+    { id: "e5", text: "兒童類貼標完成" },
+    { id: "e6", text: "每櫃都記錄起訖號與本數", sub: "依櫃號順序進行" }
+  ]},
+  { title: "里程碑 4　書籍管理 App 完成", range: "", note: "", items: [
+    { id: "f1", text: "借出、歸還、查詢功能完成" },
+    { id: "f2", text: "館員手機登入後選「圖書借閱」，掃 QR 借還測試通過" },
+    { id: "f3", text: "後台書目輸入欄位確認" },
+    { id: "f4", text: "讀者 QR 借閱證（讀者號碼）功能完成" }
+  ]},
+  { title: "里程碑 5　資料匯入與開放借閱", range: "", note: "", items: [
+    { id: "g1", text: "編號紀錄（類別、編號）匯入 App", sub: "筆數要與已貼標本數一致" },
+    { id: "g2", text: "讀者重新辦理借閱證（讀者號碼為 QR Code）" },
+    { id: "g3", text: "修訂館藏管理辦法與借閱還書規章" },
+    { id: "g4", text: "館員教育訓練：用自己的手機登入書籍管理系統，選「圖書借閱」掃碼借還", sub: "不使用條碼槍" },
+    { id: "g5", text: "驗收：抽查掃碼與借還演練", sub: "" },
+    { id: "g6", text: "開放借閱", sub: "完成後即可對讀者提供借還服務" }
+  ]},
+  { title: "里程碑 6　編目作業", range: "貼標組完成後進行", note: "", items: [
+    { id: "h1", text: "書目建檔：手機掃 QR，在後台輸入版權頁內容", sub: "沒有版權頁的舊書只輸入基本資料" },
+    { id: "h2", text: "索書號編目：先檢視現有索書號是否適合，不適合就重新編制", sub: "由編目小組負責，貼標組完成後進行；編目依據單一的中文圖書編目系統，版權頁若有預先分類即刻採用" },
+    { id: "h3", text: "館員專業技能培訓計畫完成", sub: "" }
+  ]}
+];
+
+var state = {};
+var onlyOpen = false;
+var canWrite = true;
+var mode = "local";
+var db = null;
+var LS_KEY = "library-checklist-v1";
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+  });
+}
+function shortDate(iso) {
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return (d.getMonth() + 1) + "/" + d.getDate();
+}
+function isDone(id) { return !!(state[id] && state[id].done); }
+
+function render() {
+  var total = 0, done = 0, html = "";
+  GROUPS.forEach(function (g) {
+    var gd = 0;
+    g.items.forEach(function (it) { total++; if (isDone(it.id)) { done++; gd++; } });
+    var complete = gd === g.items.length;
+    var rows = g.items.filter(function (it) { return !onlyOpen || !isDone(it.id); }).map(function (it) {
+      var d = isDone(it.id);
+      var when = d && state[it.id].at ? shortDate(state[it.id].at) : "";
+      var sub = it.sub || "";
+      if (when) sub = (sub ? sub + " · " : "") + "完成於 " + when;
+      return '<div class="item' + (d ? " done" : "") + '"><label>' +
+        '<input type="checkbox" data-id="' + it.id + '"' + (d ? " checked" : "") + (canWrite ? "" : " disabled") + '>' +
+        '<span class="txt">' + esc(it.text) + (sub ? '<span class="sub">' + esc(sub) + "</span>" : "") + "</span></label></div>";
+    }).join("");
+    if (!rows) rows = '<div class="empty">這個里程碑的項目都已完成。</div>';
+    html += '<div class="group' + (complete ? " complete" : "") + '"><div class="g-head"><h3>' + esc(g.title) + "</h3>" +
+      (g.range ? '<span class="range">' + esc(g.range) + "</span>" : "") +
+      '<span class="count">' + gd + " / " + g.items.length + "</span></div>" +
+      (g.note ? '<p class="g-note">' + esc(g.note) + "</p>" : "") + rows + "</div>";
+  });
+  document.getElementById("groups").innerHTML = html;
+  var pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById("doneN").textContent = done;
+  document.getElementById("allN").textContent = total;
+  document.getElementById("pct").textContent = pct + "%";
+  document.getElementById("fill").style.width = pct + "%";
+}
+
+function setStatus(t) { document.getElementById("status").textContent = t; }
+
+function loadLocal() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (raw) state = JSON.parse(raw) || {};
+  } catch (e) { state = {}; }
+}
+function saveLocal() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+async function toggle(id, checked) {
+  var at = new Date().toISOString();
+  if (mode === "shared" && db) {
+    try {
+      await db.doc("progress/" + id).set({ done: checked, at: at });
+    } catch (err) {
+      setStatus("沒有存成功，請再試一次");
+      render();
+    }
+  } else {
+    state[id] = { done: checked, at: at };
+    saveLocal();
+    render();
+  }
+}
+
+document.addEventListener("change", function (e) {
+  var t = e.target;
+  if (t && t.matches && t.matches('input[type="checkbox"][data-id]')) toggle(t.getAttribute("data-id"), t.checked);
+});
+document.getElementById("filter").addEventListener("click", function () {
+  onlyOpen = !onlyOpen;
+  this.setAttribute("aria-pressed", onlyOpen ? "true" : "false");
+  render();
+});
+
+loadLocal();
+setStatus("此裝置暫存，尚未連上共用進度");
+render();
+
+(async function () {
+  var c = window.claude;
+  if (!c || !c.use) return;
+  try {
+    var results = await Promise.all([c.use("db"), c.use("user")]);
+    db = results[0];
+    var user = results[1];
+    if (!db) return;
+    if (user) {
+      var cw = await user.can("data.write");
+      if (cw === false) { canWrite = false; }
+    }
+    mode = "shared";
+    state = {};
+    setStatus(canWrite ? "共用進度，即時同步" : "共用進度，你的權限只能查看");
+    db.collection("progress").onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (d) { var v = d.data(); if (v) next[d.id] = v; });
+      state = next;
+      render();
+    }, function () {
+      mode = "local";
+      loadLocal();
+      setStatus("共用進度中斷，改用此裝置暫存");
+      render();
+    });
+    render();
+  } catch (err) {
+    mode = "local";
+  }
+})();
+</script>
+
+</body></html>
