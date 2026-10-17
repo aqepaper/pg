@@ -38,7 +38,7 @@ video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 <div class="top">
   <div id="sessLab" class="lab">讀取中…</div>
   <div class="cnt" id="cnt">累計 --人</div>
-  <div style="font-size:11px;color:#888">scan v11</div>
+  <div style="font-size:11px;color:#888">scan v13</div>
 </div>
 <div class="cam">
   <video id="v" playsinline muted></video>
@@ -119,7 +119,7 @@ function onCode(code,force){
         const who=[res.name,res.dharmaName].filter(Boolean).join('　')||'未報名';
         const info=[res.studentId?'學號 '+res.studentId:'',res.className?'班別 '+res.className:''].filter(Boolean).join('｜');
         if(res.totalCheckedIn!=null) $('cnt').textContent='累計 '+res.totalCheckedIn+'人';
-        if(res.isWalkin) show('warn',who+'　報到成功（臨時加入）',(info?info+'｜':'')+'此人未報名本場次｜'+res.checkinTime);
+        if(res.isWalkin && res.rosterNote) show('warn',who+'　報到成功',(info?info+'｜':'')+res.rosterNote+'｜'+res.checkinTime);
         else show('ok',who+'　報到成功',(info?info+'｜':'')+'報到時間 '+res.checkinTime);
       }
     }else show('err',res.error||'報到失敗',code);
