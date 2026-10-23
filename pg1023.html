@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>即時條碼掃描測試</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif;margin:0;padding:12px;background:#f5f5f3;color:#222;max-width:520px;margin:0 auto}
+  .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  h2{font-size:17px;margin:0 0 8px;color:#2e7d32}
+  .stage{position:relative;background:#000;border-radius:10px;overflow:hidden;display:none}
+  .stage video{width:100%;display:block;max-height:60vh;object-fit:cover}
+  .frame{position:absolute;left:8%;right:8%;top:30%;bottom:30%;border:2px solid #7CFC00;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.35);pointer-events:none}
+  .frame i{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,60,60,.8)}
+  .tip{position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#fff;font-size:12px;text-shadow:0 0 4px #000}
+  .row{display:flex;gap:8px;margin-top:8px}
+  button{flex:1;background:#2e7d32;color:#fff;border:0;border-radius:8px;padding:12px;font-size:15px;font-weight:bold}
+  button.sec{background:#757575}button:disabled{background:#ccc}
+  .kv{font-size:13px;line-height:1.7}.kv b{display:inline-block;min-width:92px;color:#555}
+  .ok{color:#2e7d32;font-weight:bold}.bad{color:#c62828;font-weight:bold}.warn{color:#e67e22;font-weight:bold}
+  #result{font-size:24px;font-weight:bold;letter-spacing:1px;word-break:break-all;margin:6px 0}
+  #log{font-size:12px;max-height:220px;overflow:auto;border-top:1px solid #eee;margin-top:8px}
+  #log div{padding:4px 0;border-bottom:1px solid #f0f0f0}
+  label.chk{display:block;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>環境</h2>
+  <div class="kv" id="env"></div>
+</div>
+
+<div class="card">
+  <h2>即時掃描（一維條碼優化版）</h2>
+  <div class="stage" id="stage">
+    <video id="video" playsinline muted autoplay></video>
+    <div class="frame"><i></i></div>
+    <div class="tip">條碼放進綠框、橫向對齊紅線，保持 10～20 公分</div>
+  </div>
+  <div class="row">
+    <button id="btnStart" onclick="startScan()">開始掃描</button>
+    <button id="btnStop" class="sec" onclick="stopScan()" disabled>停止</button>
+  </div>
+  <label class="chk"><input type="checkbox" id="onlyValid" checked> 只接受檢查碼正確的 ISBN（978/979），擋掉誤讀</label>
+  <div class="kv" id="zoomBox" style="display:none;margin-top:8px"><b>變焦</b><input type="range" id="zoom" style="width:60%"></div>
+  <div class="kv" id="stat" style="margin-top:8px">尚未啟動</div>
+</div>
+
+<div class="card">
+  <h2>結果</h2>
+  <div id="result">—</div>
+  <div class="kv" id="detail"></div>
+  <div id="log"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+var video = $('video'), stream = null, track = null;
+var scanning = false, timer = 0, t0 = 0, frames = 0, fpsT = 0, fps = 0, lastValue = '', lastTime = 0;
+var nativeDet = null, mfr = null, engine = '';
+var cv = document.createElement('canvas'), ctx = cv.getContext('2d', {willReadFrequently:true});
+
+function isbn13Valid(s){
+  if(!/^\d{13}$/.test(s)) return false;
+  var sum = 0; for(var i=0;i<12;i++) sum += (+s[i]) * (i%2 ? 3 : 1);
+  return ((10 - sum % 10) % 10) === +s[12];
+}
+function classify(v){
+  if(/^(978|979)\d{10}$/.test(v)) return isbn13Valid(v) ? {t:'ISBN（檢查碼正確）',c:'ok'} : {t:'像 ISBN 但檢查碼錯誤，疑似誤讀',c:'bad'};
+  if(/^[A-Z]\d{5}$/i.test(v)) return {t:'符合書標格式',c:'ok'};
+  return {t:'其他條碼',c:'warn'};
+}
+
+function envCheck(){
+  var ua = navigator.userAgent;
+  var rows = [
+    ['裝置', /iPhone|iPad/.test(ua) ? 'iOS' : (/Android/.test(ua) ? 'Android' : '其他')],
+    ['HTTPS', window.isSecureContext ? '<span class="ok">✓</span>' : '<span class="bad">✗ 非 HTTPS 無法開相機</span>'],
+    ['原生 BarcodeDetector', ('BarcodeDetector' in window) ? '<span class="ok">支援</span>' : '<span class="warn">不支援 → ZXing</span>'],
+    ['ZXing-js', window.ZXing ? '<span class="ok">已載入</span>' : '<span class="bad">未載入</span>'],
+    ['在 iframe 內', window.top !== window.self ? '<span class="bad">是（相機會被擋）</span>' : '否 ✓']
+  ];
+  $('env').innerHTML = rows.map(function(r){ return '<div><b>'+r[0]+'</b>'+r[1]+'</div>'; }).join('');
+}
+
+async function startScan(){
+  if(scanning) return;
+  $('stat').textContent = '要求相機權限中…';
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+    track = stream.getVideoTracks()[0];
+    // 連續自動對焦（支援的裝置才有效）
+    try{ await track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
+    // 變焦滑桿（Android 多半有，iOS Safari 沒有）
+    try{
+      var cap = track.getCapabilities && track.getCapabilities();
+      if(cap && cap.zoom){
+        var z = $('zoom'); z.min = cap.zoom.min; z.max = cap.zoom.max; z.step = cap.zoom.step || 0.1; z.value = cap.zoom.min;
+        z.oninput = function(){ track.applyConstraints({advanced:[{zoom:+z.value}]}).catch(function(){}); };
+        $('zoomBox').style.display = 'block';
+      }
+    }catch(e){}
+    video.srcObject = stream;
+    $('stage').style.display = 'block';
+    await video.play();
+
+    if('BarcodeDetector' in window){
+      var sup = await BarcodeDetector.getSupportedFormats();
+      var want = ['ean_13','ean_8','upc_a','code_128','code_39','qr_code'].filter(function(f){ return sup.indexOf(f)>-1; });
+      nativeDet = new BarcodeDetector({formats:want});
+      engine = 'BarcodeDetector';
+    } else if(window.ZXing){
+      var Z = ZXing, h = new Map();
+      h.set(Z.DecodeHintType.TRY_HARDER, true);
+      h.set(Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.EAN_13, Z.BarcodeFormat.EAN_8, Z.BarcodeFormat.UPC_A, Z.BarcodeFormat.CODE_128, Z.BarcodeFormat.CODE_39, Z.BarcodeFormat.QR_CODE]);
+      mfr = new Z.MultiFormatReader(); mfr.setHints(h);
+      engine = 'ZXing-js（中央區域高解析）';
+    } else { throw new Error('沒有可用的掃描引擎'); }
+
+    scanning = true; frames = 0; fpsT = performance.now(); t0 = performance.now();
+    $('btnStart').disabled = true; $('btnStop').disabled = false;
+    var s = track.getSettings ? track.getSettings() : {};
+    $('stat').innerHTML = '掃描中｜引擎：<b style="min-width:0">'+engine+'</b>｜相機：'+(s.width||'?')+'×'+(s.height||'?');
+    loop();
+  }catch(e){
+    var msg = (e && (e.name+': '+e.message)) || String(e);
+    $('stat').innerHTML = '<span class="bad">啟動失敗：'+msg+'</span>';
+    stopScan(true);
+  }
+}
+
+async function loop(){
+  if(!scanning) return;
+  var t = performance.now();
+  try{
+    if(video.readyState >= 2 && video.videoWidth){
+      var found = null;
+      if(nativeDet){
+        var codes = await nativeDet.detect(video);
+        if(codes.length) found = {v:codes[0].rawValue, f:codes[0].format};
+      } else {
+        // 只取畫面中央橫帶（對應綠框），維持原生解析度，不縮圖 → 一維條碼的細條紋才保得住
+        var vw = video.videoWidth, vh = video.videoHeight;
+        var sx = Math.round(vw*.04), sw = Math.round(vw*.92);
+        var sy = Math.round(vh*.25), sh = Math.round(vh*.5);
+        var sc = Math.min(1, 1600/sw);
+        cv.width = Math.round(sw*sc); cv.height = Math.round(sh*sc);
+        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+        try{
+          var lum = new ZXing.HTMLCanvasElementLuminanceSource(cv);
+          var r = mfr.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum)));
+          found = {v:r.getText(), f:String(r.getBarcodeFormat())};
+        }catch(e){ /* 這一幀沒讀到，正常 */ }
+      }
+      if(found) onHit(found.v, found.f);
+    }
+  }catch(e){}
+  frames++;
+  var now = performance.now();
+  if(now - fpsT > 1000){ fps = Math.round(frames*1000/(now-fpsT)); frames = 0; fpsT = now; $('stat').setAttribute('data-fps', fps);
+    $('stat').innerHTML = '掃描中｜引擎：<b style="min-width:0">'+engine+'</b>｜每秒解碼 '+fps+' 次'; }
+  timer = setTimeout(loop, Math.max(0, 60 - (now - t)));
+}
+
+function onHit(v, f){
+  var now = performance.now();
+  if(v === lastValue && now - lastTime < 2000){ lastTime = now; return; }
+  var cls = classify(v);
+  if($('onlyValid').checked && /^(978|979)\d{10}$/.test(v) && !isbn13Valid(v)) return; // 誤讀，繼續掃
+  var ms = Math.round(now - t0);
+  lastValue = v; lastTime = now; t0 = now;
+  $('result').textContent = v;
+  $('detail').innerHTML = '<div><b>格式</b>'+f+'</div><div><b>判定</b><span class="'+cls.c+'">'+cls.t+'</span></div><div><b>讀到耗時</b>'+ms+' ms'+(ms>3000?' <span class="warn">（偏慢）</span>':'')+'</div>';
+  var d = document.createElement('div');
+  d.innerHTML = new Date().toLocaleTimeString()+'　<b>'+v+'</b>　'+f+'　'+ms+'ms　<span class="'+cls.c+'">'+cls.t+'</span>';
+  $('log').insertBefore(d, $('log').firstChild);
+  if(navigator.vibrate) navigator.vibrate(80);
+}
+
+function stopScan(keepMsg){
+  scanning = false; clearTimeout(timer);
+  if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; track = null; }
+  video.srcObject = null; $('stage').style.display = 'none'; $('zoomBox').style.display = 'none';
+  $('btnStart').disabled = false; $('btnStop').disabled = true;
+  if(keepMsg !== true) $('stat').textContent = '已停止';
+}
+
+window.addEventListener('load', envCheck);
+window.addEventListener('pagehide', function(){ stopScan(); });
+</script>
+</body>
+</html>
