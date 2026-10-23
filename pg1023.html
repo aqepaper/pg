@@ -65,11 +65,10 @@
   <label class="f">索書號（可多行）</label>
   <textarea id="callno" placeholder="拍照辨識後會填在這裡，可再手動修改"></textarea>
   <div class="with-btn" style="margin-top:8px">
-    <button type="button" class="scanbtn" style="width:100%;padding:12px" id="ocrBtn" onclick="openOcrCam()">📷 拍照辨識索書號</button>
+    <button type="button" class="scanbtn" style="width:100%;padding:12px" id="ocrBtn" onclick="openOcrCam()">📷 索書號鏡頭</button>
   </div>
-  <div style="text-align:right;margin-top:6px"><a href="#" style="font-size:13px;color:#2e7d32" onclick="$('ocrFile').click();return false">或選照片 / 用系統相機</a></div>
-  <input type="file" id="ocrFile" accept="image/*" capture="environment" style="display:none" onchange="doOcr(this)">
   <div class="hint" id="ocrHint"></div>
+  <div id="ocrPreview" style="margin-top:6px"></div>
 
   <label class="f">版權頁內容（全文，可很長）</label>
   <div class="with-btn" style="margin-bottom:8px">
@@ -99,7 +98,7 @@
   </div>
   <div class="msg" id="ovMsg"></div>
   <div id="ovBar" style="display:none;text-align:center;padding:0 14px calc(env(safe-area-inset-bottom) + 16px)">
-    <button type="button" class="scanbtn" style="width:auto;padding:14px 44px;font-size:17px" onclick="shoot()">📸 拍攝</button>
+    <button type="button" class="scanbtn" style="width:auto;padding:14px 44px;font-size:17px" onclick="useReading()">✅ 採用這個結果</button>
   </div>
 </div>
 
@@ -242,7 +241,7 @@ function stopCamera(){
   stream = null; track = null; video.srcObject = null;
 }
 function closeScan(){
-  stopCamera(); ocrMode = false;
+  stopCamera(); ocrMode = false; clearTimeout(ocrTimer);
   $('ovBar').style.display = 'none';
   document.querySelector('#ov .frame').className = 'frame';
   $('ov').style.display = 'none';
@@ -273,7 +272,7 @@ function clearForm(){
   try{ localStorage.removeItem('lib_draft'); }catch(e){}
   refreshHint('label'); refreshHint('isbn');
   $('copyright').dispatchEvent(new Event('input'));
-  $('ocrHint').innerHTML = ''; $('lensHint').innerHTML = ''; $('out').style.display = 'none';
+  $('ocrHint').innerHTML = ''; $('ocrPreview').innerHTML = ''; $('lensHint').innerHTML = ''; $('out').style.display = 'none';
 }
 setInterval(saveDraft, 2000);
 document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') saveDraft(); });
@@ -314,7 +313,7 @@ function demoSubmit(){
 }
 
 /* ===== 後端設定 ===== */
-// 貼上 GAS「網路應用程式」的 /exec 網址（部署：執行身分＝我、存取權＝所有人）
+// 之後接「送出寫入」時使用：貼上 GAS「網路應用程式」的 /exec 網址
 var API_URL = '';
 
 // 帳號記在本機
@@ -323,79 +322,6 @@ $('acct').addEventListener('input', function(){
   this.value = this.value.replace(/\D/g, '');
   try{ localStorage.setItem('lib_code', this.value); }catch(e){}
 });
-
-/* ===== 索書號：拍照 → 縮圖 → 傳 GAS 做 OCR ===== */
-function loadImage(file){
-  return new Promise(function(res, rej){
-    var url = URL.createObjectURL(file), img = new Image();
-    img.onload = function(){ URL.revokeObjectURL(url); res(img); };
-    img.onerror = function(){ URL.revokeObjectURL(url); rej(new Error('圖片無法讀取')); };
-    img.src = url;
-  });
-}
-async function compressToDataUrl(file, maxEdge, quality){
-  var img = await loadImage(file);
-  var sc = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight));
-  var c = document.createElement('canvas');
-  c.width = Math.round(img.naturalWidth * sc); c.height = Math.round(img.naturalHeight * sc);
-  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-  return {dataUrl: c.toDataURL('image/jpeg', quality), w: c.width, h: c.height};
-}
-
-// 備案：從系統相機／相簿選整張照片（框外的字也會被辨識，建議優先用「拍照辨識」的取景框）
-async function doOcr(input){
-  var f = input.files && input.files[0];
-  input.value = '';
-  if(!f) return;
-  try{
-    var p = await compressToDataUrl(f, 1600, 0.85);
-    sendOcr(p.dataUrl, f.name || 'callno.jpg', p.w, p.h);
-  }catch(e){
-    $('ocrHint').innerHTML = '<span class="bad">圖片處理失敗：' + ((e && e.message) || e) + '</span>';
-  }
-}
-
-// 取景框拍攝：只截取框內區域（避免書背上其他文字混進索書號）
-var ocrMode = false;
-async function openOcrCam(){
-  if(scanning || ocrMode) return;
-  $('ovTitle').textContent = '拍攝索書號';
-  $('ovMsg').textContent = '要求相機權限中…';
-  $('ov').style.display = 'flex';
-  document.querySelector('#ov .frame').className = 'frame ocr';
-  try{
-    stream = await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
-    track = stream.getVideoTracks()[0];
-    try{ await track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
-    video.srcObject = stream;
-    await video.play();
-    ocrMode = true;
-    $('ovMsg').textContent = '把索書號標籤放進框內、對焦清楚後按「拍攝」。框外的字不會被辨識。';
-    $('ovBar').style.display = 'block';
-  }catch(e){
-    var msg = (e && (e.name + ': ' + e.message)) || String(e);
-    $('ovMsg').innerHTML = '<span class="w">啟動失敗：' + msg + '</span><br>可關閉後改用「或選照片」。';
-    stopCamera();
-  }
-}
-function shoot(){
-  if(!ocrMode || !video.videoWidth) return;
-  var view = document.querySelector('#ov .view').getBoundingClientRect();
-  var fr = document.querySelector('#ov .frame').getBoundingClientRect();
-  var vw = video.videoWidth, vh = video.videoHeight;
-  var sc = Math.max(view.width / vw, view.height / vh);          // object-fit: cover 的縮放
-  var ox = (vw*sc - view.width) / 2, oy = (vh*sc - view.height) / 2;
-  var sx = Math.max(0, (fr.left - view.left + ox) / sc), sy = Math.max(0, (fr.top - view.top + oy) / sc);
-  var sw = Math.min(vw - sx, fr.width / sc), sh = Math.min(vh - sy, fr.height / sc);
-  var k = Math.min(1, 1400 / Math.max(sw, sh));
-  var c = document.createElement('canvas');
-  c.width = Math.round(sw*k); c.height = Math.round(sh*k);
-  c.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
-  var url = c.toDataURL('image/jpeg', 0.9);
-  closeScan();
-  sendOcr(url, 'callno.jpg', c.width, c.height);
-}
 
 /* ===== 索書號標籤解析 =====
    標籤最多 4 欄：①字母（A/B/C…，由書標得知，略過）②分類號 ③著者號 ④C.n（本）／V.n（冊）
@@ -432,38 +358,109 @@ function parseCallNo(raw){
   return out;
 }
 
-async function sendOcr(dataUrl, filename, w, h){
-  var hint = $('ocrHint'), btn = $('ocrBtn');
-  if(!API_URL){ hint.innerHTML = '<span class="bad">尚未設定後端網址（程式內 API_URL）</span>'; return; }
-  var code = $('acct').value.trim();
-  if(!/^\d{6}$/.test(code)){ hint.innerHTML = '<span class="bad">請先輸入 6 碼帳號</span>'; return; }
-  btn.disabled = true;
-  hint.innerHTML = '<span class="warn">辨識中（' + w + '×' + h + '，約 ' + Math.round(dataUrl.length*0.75/1024) + ' KB）…</span>';
-  var t = performance.now();
-  try{
-    // 用 text/plain 避免瀏覽器預檢（GAS 不處理 OPTIONS）
-    var resp = await fetch(API_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({action: 'ocr', code: code, image: dataUrl, filename: filename})
-    });
-    var data = await resp.json();
-    if(!data.ok) throw new Error(data.error || '辨識失敗');
-    var P = parseCallNo(String(data.text || ''));
-    if(!P.callno){
-      hint.innerHTML = '<span class="bad">沒有辨識出索書號（找不到分類號與著者號），請拍近一點、讓標籤佔滿取景框</span>';
-    } else {
-      var ta = $('callno');
-      ta.value = ta.value.trim() ? (ta.value.replace(/\s+$/, '') + '\n' + P.callno) : P.callno;
-      var parts = ['分類號 ' + (P.cls || '？'), '著者號 ' + (P.author || '？')].concat(P.extra);
-      hint.innerHTML = '<span class="ok">✓ 辨識完成（' + Math.round((performance.now()-t)/100)/10 + ' 秒）</span>：' + parts.join('｜') +
-        P.notes.map(function(w){ return '<br><span class="warn">已修正：' + w + '</span>'; }).join('') +
-        P.warns.map(function(w){ return '<br><span class="warn">⚠ ' + w + '</span>'; }).join('');
-    }
-  }catch(e){
-    hint.innerHTML = '<span class="bad">辨識失敗：' + ((e && e.message) || e) + '</span>';
+/* ===== 索書號鏡頭：瀏覽器內建 OCR（Tesseract.js）=====
+   不需要後端；辨識錯字由人工在文字框修正。第一次使用要下載辨識模組（數 MB），之後會快取。 */
+var ocrWorker = null, ocrWorkerLoading = null, ocrBusy = false, ocrLastRead = '', ocrTimer = 0, ocrMode = false;
+
+function loadScript(src){
+  return new Promise(function(res, rej){
+    var el = document.createElement('script');
+    el.src = src; el.onload = res;
+    el.onerror = function(){ rej(new Error('辨識模組下載失敗，請確認網路後重試')); };
+    document.head.appendChild(el);
+  });
+}
+function getOcrWorker(){
+  if(ocrWorker) return Promise.resolve(ocrWorker);
+  if(!ocrWorkerLoading){
+    ocrWorkerLoading = (async function(){
+      if(!window.Tesseract) await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+      var w = await Tesseract.createWorker('eng');
+      await w.setParameters({ tessedit_pageseg_mode: '6', tessedit_char_whitelist: '0123456789.ABCV' });
+      ocrWorker = w;
+      return w;
+    })().catch(function(e){ ocrWorkerLoading = null; throw e; });
   }
-  btn.disabled = false;
+  return ocrWorkerLoading;
+}
+// 閒置時先在背景載入，第一次按鏡頭就不用等
+window.addEventListener('load', function(){ setTimeout(function(){ getOcrWorker().catch(function(){}); }, 3000); });
+
+// 取得取景框內的畫面（依 object-fit: cover 換算回影片座標），長邊縮到 maxEdge
+function frameCrop(maxEdge){
+  var view = document.querySelector('#ov .view').getBoundingClientRect();
+  var fr = document.querySelector('#ov .frame').getBoundingClientRect();
+  var vw = video.videoWidth, vh = video.videoHeight;
+  var sc = Math.max(view.width / vw, view.height / vh);
+  var ox = (vw*sc - view.width) / 2, oy = (vh*sc - view.height) / 2;
+  var sx = Math.max(0, (fr.left - view.left + ox) / sc), sy = Math.max(0, (fr.top - view.top + oy) / sc);
+  var sw = Math.min(vw - sx, fr.width / sc), sh = Math.min(vh - sy, fr.height / sc);
+  var k = Math.min(1, maxEdge / Math.max(sw, sh));
+  var c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(sw*k)); c.height = Math.max(1, Math.round(sh*k));
+  c.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  return c;
+}
+
+async function openOcrCam(){
+  if(scanning || ocrMode) return;
+  $('ovTitle').textContent = '索書號鏡頭';
+  $('ovMsg').textContent = '要求相機權限中…';
+  $('ov').style.display = 'flex';
+  document.querySelector('#ov .frame').className = 'frame ocr';
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+    track = stream.getVideoTracks()[0];
+    try{ await track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
+    video.srcObject = stream;
+    await video.play();
+    ocrMode = true; ocrLastRead = '';
+    $('ovBar').style.display = 'block';
+    $('ovMsg').textContent = '載入辨識模組…（第一次使用需下載，請稍候）';
+    try{ await getOcrWorker(); }
+    catch(e){ if(ocrMode) $('ovMsg').innerHTML = '<span class="w">' + ((e && e.message) || e) + '</span>'; return; }
+    if(ocrMode){ $('ovMsg').textContent = '把索書號標籤放進框內，拿穩、對焦清楚'; ocrLoop(); }
+  }catch(e){
+    var msg = (e && (e.name + ': ' + e.message)) || String(e);
+    $('ovMsg').innerHTML = '<span class="w">啟動失敗：' + msg + '</span>';
+    stopCamera();
+  }
+}
+
+async function ocrLoop(){
+  if(!ocrMode) return;
+  if(!ocrBusy && video.videoWidth){
+    ocrBusy = true;
+    try{
+      var r = await ocrWorker.recognize(frameCrop(400));
+      if(ocrMode){
+        var P = parseCallNo(r.data.text);
+        if(P.callno){
+          ocrLastRead = P.callno;
+          var parts = ['分類號 ' + (P.cls || '？'), '著者號 ' + (P.author || '？')].concat(P.extra);
+          $('ovMsg').innerHTML = '<div style="font-size:21px;font-weight:bold;line-height:1.5">' + parts.join('<br>') + '</div>' +
+            '<div style="font-size:12px;opacity:.85;margin-top:4px">看起來對就按「採用」，錯字回表單再改</div>';
+        } else {
+          $('ovMsg').textContent = '讀取中…請把標籤放進框內，拿穩';
+        }
+      }
+    }catch(e){}
+    ocrBusy = false;
+  }
+  if(ocrMode) ocrTimer = setTimeout(ocrLoop, 150);
+}
+
+function useReading(){
+  if(!ocrMode) return;
+  if(!ocrLastRead){ $('ovMsg').innerHTML = '<span class="w">還沒有讀到內容，請把標籤放進框內、拿穩一下</span>'; return; }
+  var url = frameCrop(900).toDataURL('image/jpeg', 0.85);
+  var ta = $('callno');
+  ta.value = ta.value.trim() ? (ta.value.replace(/\s+$/, '') + '\n' + ocrLastRead) : ocrLastRead;
+  $('ocrPreview').innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:150px;border-radius:6px;border:1px solid #ddd">';
+  $('ocrHint').innerHTML = '<span class="ok">✓ 已填入</span>，請對照下面的縮圖核對，有錯字直接在文字框修改';
+  closeScan();
+  saveDraft();
 }
 
 window.addEventListener('pagehide', closeScan);
