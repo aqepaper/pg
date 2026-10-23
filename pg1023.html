@@ -64,7 +64,7 @@
 
   <label class="f">索書號</label>
   <div class="with-btn" style="margin-bottom:6px">
-    <button type="button" class="scanbtn" style="width:100%;padding:12px" id="ocrBtn" onclick="openOcrCam()">📷 索書號鏡頭（Google 辨識）</button>
+    <button type="button" class="scanbtn" style="width:100%;padding:12px" id="ocrBtn" onclick="openOcrCam()">📷 索書號鏡頭</button>
   </div>
   <div class="hint" id="ocrHint"></div>
   <div id="ocrPreview" style="margin-bottom:8px"></div>
@@ -362,7 +362,8 @@ function parseCallNo(raw){
   return out;
 }
 
-/* ===== 索書號鏡頭：拍一張框內畫面 → 傳 GAS 用 Google Drive OCR 辨識 → 填入欄位；錯字人工修正 ===== */
+/* ===== 索書號鏡頭：瀏覽器內建 OCR（Tesseract.js），不呼叫任何 API。只讀綠框內、按一次讀一次；錯字人工修正 =====
+   第一次使用要下載辨識模組（數 MB），之後會快取。 */
 var ocrBusy = false, ocrTimer = 0, ocrMode = false;
 
 // 取得取景框內的畫面（依 object-fit: cover 換算回影片座標），長邊縮到 maxEdge
@@ -381,6 +382,63 @@ function frameCrop(maxEdge){
   return c;
 }
 
+var ocrWorker = null, ocrWorkerLoading = null;
+function loadScript(src){
+  return new Promise(function(res, rej){
+    var el = document.createElement('script');
+    el.src = src; el.onload = res;
+    el.onerror = function(){ rej(new Error('辨識模組下載失敗，請確認網路後重試')); };
+    document.head.appendChild(el);
+  });
+}
+function getOcrWorker(){
+  if(ocrWorker) return Promise.resolve(ocrWorker);
+  if(!ocrWorkerLoading){
+    ocrWorkerLoading = (async function(){
+      if(!window.Tesseract) await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+      var w = await Tesseract.createWorker('eng');
+      await w.setParameters({ tessedit_pageseg_mode: '6', tessedit_char_whitelist: '0123456789.ABCV' });
+      ocrWorker = w;
+      return w;
+    })().catch(function(e){ ocrWorkerLoading = null; throw e; });
+  }
+  return ocrWorkerLoading;
+}
+// 閒置時先在背景載入，第一次按鏡頭就不用等
+window.addEventListener('load', function(){ setTimeout(function(){ getOcrWorker().catch(function(){}); }, 3000); });
+
+// 把多次辨識的結果合併成一個：分類號選最像的、著者號選最長的、C/V 取聯集
+// 已知現象：這個引擎遇到連續相同數字（例如 229、225 的「22」）會漏掉一個，分類號變成 2 位數時補回首位數字並提醒
+function mergeCallNo(list){
+  var out = {cls:'', author:'', extra:[], notes:[], warns:[], callno:''};
+  var clsC = [], auC = [];
+  list.forEach(function(P){
+    var t = [P.cls, P.author].filter(Boolean);
+    if(t.length === 1 && t[0].indexOf('.') < 0){ auC.push(t[0]); }
+    else { if(P.cls) clsC.push(P.cls); if(P.author) auC.push(P.author); }
+    P.extra.forEach(function(x){
+      if(!out.extra.some(function(y){ return y.charAt(0) === x.charAt(0); })) out.extra.push(x);
+    });
+    P.notes.forEach(function(n){ if(out.notes.indexOf(n) < 0) out.notes.push(n); });
+  });
+  var best = '', bestScore = -1;
+  clsC.forEach(function(c){
+    var sc = /^\d{3}(\.\d+)?$/.test(c) ? 3 : (/^\d{2}\.\d+$/.test(c) ? 1 : 0);
+    if(sc > bestScore){ best = c; bestScore = sc; }
+  });
+  if(best && bestScore === 1){
+    out.notes.push(best + ' → ' + best.charAt(0) + best + '（分類號少一位，已補上重複的首位數字）');
+    best = best.charAt(0) + best;
+  }
+  out.cls = best;
+  auC.sort(function(a, b){ return b.length - a.length; });
+  out.author = auC[0] || '';
+  if(!out.cls) out.warns.push('找不到分類號，請手動輸入');
+  if(!out.author) out.warns.push('找不到著者號，請手動輸入');
+  if(out.cls || out.author) out.callno = [out.cls, out.author].concat(out.extra).filter(Boolean).join(CALLNO_JOIN);
+  return out;
+}
+
 async function openOcrCam(){
   if(scanning || ocrMode) return;
   $('ovTitle').textContent = '索書號鏡頭';
@@ -396,7 +454,10 @@ async function openOcrCam(){
     await video.play();
     ocrMode = true;
     $('ovBar').style.display = 'block';
-    $('ovMsg').textContent = '把索書號的所有文字對準綠框（只讀框內），手機保持約 20 公分、對焦清楚後按「讀取」';
+    $('ovMsg').textContent = '載入辨識模組…（第一次使用需下載，請稍候）';
+    try{ await getOcrWorker(); }
+    catch(e){ if(ocrMode) $('ovMsg').innerHTML = '<span class="w">' + escHtml((e && e.message) || e) + '</span>'; return; }
+    if(ocrMode) $('ovMsg').textContent = '把索書號的所有文字對準綠框（只讀框內），手機保持約 20 公分、對焦清楚後按「讀取」';
   }catch(e){
     var msg = (e && (e.name + ': ' + e.message)) || String(e);
     $('ovMsg').innerHTML = '<span class="w">啟動失敗：' + msg + '</span>';
@@ -443,44 +504,44 @@ $('cn_cls').addEventListener('input', function(){
   $(id).addEventListener('input', function(){ this.value = this.value.replace(/\D/g, ''); refreshCallnoHint(); });
 });
 
-// 只讀一次：按「讀取」才拍框內畫面送去辨識；每按一次先清空舊資料。成功就填入並關閉鏡頭，沒讀到可調整後再按
+// 只讀一次：按「讀取」才辨識；每按一次先清空舊資料。成功就填入並關閉鏡頭，沒讀到可調整後再按
 async function readOnce(){
   if(!ocrMode || ocrBusy || !video.videoWidth) return;
-  if(!API_URL){ $('ovMsg').innerHTML = '<span class="w">尚未設定後端網址（程式內 API_URL）</span>'; return; }
-  var code = $('acct').value.trim();
-  if(!/^\d{6}$/.test(code)){ $('ovMsg').innerHTML = '<span class="w">請先按「取消」，在表單最上方輸入 6 碼帳號</span>'; return; }
   ocrBusy = true;
   var btn = $('ovReadBtn'); btn.disabled = true;
-  $('ovMsg').textContent = '上傳並辨識中…（約 3～8 秒，請稍候）';
+  $('ovMsg').textContent = '辨識中…';
   clearCallno(); $('ocrPreview').innerHTML = ''; $('ocrHint').innerHTML = '';
-  var t = performance.now();
+  var t = performance.now(), curPsm = '6';
   try{
-    var dataUrl = frameCrop(1400).toDataURL('image/jpeg', 0.9);   // 取景框內、原始解析度（長邊最多 1400）
-    // text/plain 避免瀏覽器預檢（GAS 不處理 OPTIONS）
-    var resp = await fetch(API_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({action: 'ocr', code: code, image: dataUrl, filename: 'callno.jpg'})
-    });
-    var data = await resp.json();
-    if(!data.ok) throw new Error(data.error || '辨識失敗');
+    var w = await getOcrWorker();
+    var thumb = frameCrop(900).toDataURL('image/jpeg', 0.85);   // 先存縮圖，辨識期間手機移動也不影響
+    // 同一個畫面用不同大小與版面模式各試幾次，合併結果；分類號與著者號都讀到就提早結束
+    var tries = [[400,'6'],[320,'6'],[500,'6'],[400,'11'],[320,'11']];
+    var results = [], raws = [], merged = null;
+    for(var i = 0; i < tries.length && ocrMode; i++){
+      if(tries[i][1] !== curPsm){ await w.setParameters({ tessedit_pageseg_mode: tries[i][1] }); curPsm = tries[i][1]; }
+      var r = await w.recognize(frameCrop(tries[i][0]));
+      raws.push(String(r.data.text || '').trim().replace(/\s*\n\s*/g, ' | '));
+      results.push(parseCallNo(r.data.text));
+      merged = mergeCallNo(results);
+      if(merged.cls && /^\d{3}/.test(merged.cls) && merged.author && !merged.notes.some(function(n){ return n.indexOf('補上') >= 0; })) break;
+    }
+    if(curPsm !== '6'){ await w.setParameters({ tessedit_pageseg_mode: '6' }); }
     if(!ocrMode){ ocrBusy = false; return; }
-    var P = parseCallNo(data.text);
-    var raw = escHtml(String(data.text || '').trim().replace(/\s*\n\s*/g, ' | ')).slice(0, 200);
-    if(P.callno){
-      setCallno(P);
-      $('ocrPreview').innerHTML = '<img src="' + dataUrl + '" style="max-width:100%;max-height:150px;border-radius:6px;border:1px solid #ddd">';
+    if(merged && merged.callno){
+      setCallno(merged);
+      $('ocrPreview').innerHTML = '<img src="' + thumb + '" style="max-width:100%;max-height:150px;border-radius:6px;border:1px solid #ddd">';
       $('ocrHint').innerHTML = '<span class="ok">✓ 已填入（' + Math.round((performance.now()-t)/100)/10 + ' 秒）</span>，請對照下面的縮圖核對，有錯字直接在欄位修改' +
-        P.notes.map(function(x){ return '<br><span class="warn">已修正：' + escHtml(x) + '</span>'; }).join('') +
-        P.warns.map(function(x){ return '<br><span class="warn">⚠ ' + x + '</span>'; }).join('') +
-        '<br><span style="color:#999">Google 辨識原文：' + (raw || '（空）') + '</span>';
+        merged.notes.map(function(x){ return '<br><span class="warn">已修正：' + escHtml(x) + '</span>'; }).join('') +
+        merged.warns.map(function(x){ return '<br><span class="warn">⚠ ' + x + '</span>'; }).join('') +
+        '<br><span style="color:#999">辨識原文：' + escHtml(raws.filter(Boolean).slice(0, 2).join('　／　') || '（空）') + '</span>';
       ocrBusy = false; btn.disabled = false;
       closeScan();
       saveDraft();
       return;
     }
-    $('ovMsg').innerHTML = '<span class="w">沒有讀到索書號</span>，請把標籤放滿框內、對焦清楚後再按一次' +
-      '<br><span style="opacity:.7;font-size:12px">辨識原文：' + (raw || '（空）') + '</span>';
+    $('ovMsg').innerHTML = '<span class="w">沒有讀到索書號</span>，請把文字對準綠框、對焦清楚後再按一次，或關閉鏡頭直接輸入' +
+      '<br><span style="opacity:.7;font-size:12px">辨識原文：' + escHtml(raws.filter(Boolean).slice(0, 2).join('　／　') || '（空）') + '</span>';
   }catch(e){
     $('ovMsg').innerHTML = '<span class="w">辨識失敗：' + escHtml((e && e.message) || e) + '</span>';
   }
