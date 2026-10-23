@@ -336,7 +336,7 @@ loadDraft();
 
 /* ===== 後端設定 ===== */
 // 貼上 GAS「網路應用程式」的 /exec 網址
-var API_URL = '';
+var API_URL = 'https://script.google.com/macros/s/AKfycbxZB_m2-mtV6Le4fSjKuCiqPVNuGejtPR8iDSHE_2m8OiZ8FeqfaiHw0Q9hvariAinuow/exec';
 var userName = '';
 
 function api(payload){
@@ -346,7 +346,7 @@ function api(payload){
 async function doLogin(auto){
   var code = $('acct').value, h = $('loginMsg'), btn = $('loginBtn');
   if(code.length !== 6){ h.innerHTML = '<span class="bad">請輸入 6 碼 PIN</span>'; return; }
-  if(!API_URL){ userName = code; enterWork(null); return; }
+  if(!API_URL){ h.innerHTML = '<span class="bad">系統尚未連接後端（API_URL 未設定），無法登入</span>'; return; }
   btn.disabled = true; btn.textContent = '登入中…'; h.innerHTML = '';
   try{
     var r = await api({action:'login', code:code});
