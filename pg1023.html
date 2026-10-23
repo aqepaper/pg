@@ -152,6 +152,9 @@
   #ov .msg .w{color:#ffb74d}
 
   .step-dot{cursor:pointer}
+  .zone-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .zone-btns button{padding:14px 0;font-size:16px;font-weight:bold;border:2px solid #dcdcd6;border-radius:10px;background:#fff;color:#555;cursor:pointer;font-family:inherit}
+  .zone-btns button.on{background:#2e7d32;border-color:#2e7d32;color:#fff;box-shadow:0 3px 8px rgba(46,125,50,.25)}
 </style>
 </head>
 <body>
@@ -185,9 +188,10 @@
 
   <div class="step-card" id="step1">
     <div class="step-title"><div class="step-title-text"><span class="step-number-tag">1</span>分區</div><span class="step-status-icon" id="st1"></span></div>
-    <select id="zone">
-      <option>佛學</option><option>世學</option><option>兒童</option><option>典藏</option>
-    </select>
+    <input type="hidden" id="zone" value="佛學">
+    <div class="zone-btns" id="zoneBtns">
+      <button type="button" data-z="佛學">佛學</button><button type="button" data-z="世學">世學</button><button type="button" data-z="兒童">兒童</button><button type="button" data-z="典藏">典藏</button>
+    </div>
   </div>
 
   <div class="step-card" id="step2">
@@ -591,7 +595,18 @@ function stepDone(n){
   if(n === 5) return !!$('copyright').value.trim();
   return !!$('note').value.trim();
 }
+function syncZone(){
+  var v = $('zone').value;
+  Array.prototype.forEach.call(document.querySelectorAll('#zoneBtns button'), function(b){
+    b.className = (b.getAttribute('data-z') === v) ? 'on' : '';
+  });
+}
+$('zoneBtns').addEventListener('click', function(e){
+  var z = e.target.getAttribute && e.target.getAttribute('data-z');
+  if(z){ $('zone').value = z; syncZone(); saveDraft(); }
+});
 function updateSteps(){
+  syncZone();
   var done = 0, active = 0;
   for(var i = 1; i <= 6; i++){ if(stepDone(i)) done++; else if(!active) active = i; }
   for(var j = 1; j <= 6; j++){
