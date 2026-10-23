@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>圖書登錄（掃描欄位原型）</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif;margin:0;padding:12px;background:#f5f5f3;color:#222;max-width:520px;margin:0 auto}
+  .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  h2{font-size:17px;margin:0 0 10px;color:#2e7d32}
+  label.f{display:block;font-size:13px;font-weight:600;margin:12px 0 4px;color:#444}
+  input[type=text],select,textarea{width:100%;padding:12px;font-size:17px;border:1px solid #dcdcd6;border-radius:8px;background:#fff;font-family:inherit}
+  textarea{height:84px}
+  .with-btn{display:flex;gap:8px}
+  .with-btn input{flex:1;letter-spacing:1px}
+  .scanbtn{flex:0 0 auto;width:92px;background:#2e7d32;color:#fff;border:0;border-radius:8px;font-size:15px;font-weight:bold}
+  .hint{font-size:12px;margin-top:4px;min-height:16px;color:#777}
+  .ok{color:#2e7d32;font-weight:bold}.bad{color:#c62828;font-weight:bold}.warn{color:#e67e22;font-weight:bold}
+  .submit{width:100%;background:#2e7d32;color:#fff;border:0;border-radius:8px;padding:14px;font-size:17px;font-weight:bold;margin-top:14px}
+  pre{white-space:pre-wrap;word-break:break-all;font-size:12px;background:#f7f7f5;padding:10px;border-radius:8px;margin:8px 0 0}
+
+  /* 掃描全螢幕層 */
+  #ov{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column}
+  #ov .top{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;color:#fff}
+  #ov .top b{font-size:17px}
+  #ov .top button{background:#555;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-size:15px}
+  #ov .view{position:relative;flex:1;overflow:hidden}
+  #ov video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  #ov .frame{position:absolute;left:7%;right:7%;top:33%;bottom:33%;border:2px solid #7CFC00;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);pointer-events:none}
+  #ov .frame i{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,60,60,.85)}
+  #ov .msg{padding:12px 14px calc(env(safe-area-inset-bottom) + 14px);color:#fff;font-size:14px;text-align:center;min-height:62px}
+  #ov .msg .w{color:#ffb74d}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>圖書登錄</h2>
+
+  <label class="f">分區</label>
+  <select id="zone">
+    <option>佛學</option><option>世學</option><option>兒童</option><option>典藏</option>
+  </select>
+
+  <label class="f">書標（例：A00012）</label>
+  <div class="with-btn">
+    <input type="text" id="label" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="6" placeholder="掃描或輸入">
+    <button type="button" class="scanbtn" onclick="openScan('label')">📷 掃描</button>
+  </div>
+  <div class="hint" id="labelHint"></div>
+
+  <label class="f">書碼（ISBN／期刊條碼，13 碼）</label>
+  <div class="with-btn">
+    <input type="text" id="isbn" inputmode="numeric" autocomplete="off" maxlength="13" placeholder="掃描或輸入；無書碼可留空">
+    <button type="button" class="scanbtn" onclick="openScan('isbn')">📷 掃描</button>
+  </div>
+  <div class="hint" id="isbnHint"></div>
+
+  <label class="f">索書號（OCR 後貼上，可多行）</label>
+  <textarea id="callno" placeholder="分類號—著者號—冊次"></textarea>
+
+  <label class="f">備註</label>
+  <input type="text" id="note" autocomplete="off">
+
+  <button type="button" class="submit" onclick="demoSubmit()">送出（原型：僅顯示資料）</button>
+  <pre id="out" style="display:none"></pre>
+</div>
+
+<div id="ov">
+  <div class="top"><b id="ovTitle">掃描</b><button type="button" onclick="closeScan()">取消</button></div>
+  <div class="view">
+    <video id="video" playsinline muted autoplay></video>
+    <div class="frame"><i></i></div>
+  </div>
+  <div class="msg" id="ovMsg"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script>
+var $ = function(id){ return document.getElementById(id); };
+
+/* ===== 格式規則（書標、書碼都是固定格式）===== */
+function ean13Valid(s){
+  if(!/^\d{13}$/.test(s)) return false;
+  var sum = 0; for(var i=0;i<12;i++) sum += (+s[i]) * (i%2 ? 3 : 1);
+  return ((10 - sum % 10) % 10) === +s[12];
+}
+var RULES = {
+  label: {
+    name: '書標',
+    norm: function(v){ return String(v).trim().toUpperCase(); },
+    // 回傳 {ok, msg}
+    check: function(v){
+      return /^[A-Z]\d{5}$/.test(v) ? {ok:true, msg:'書標格式正確'} : {ok:false, msg:'書標應為 1 個英文字母加 5 碼數字，例如 A00012'};
+    }
+  },
+  isbn: {
+    name: '書碼',
+    norm: function(v){ return String(v).replace(/[\s-]/g, ''); },
+    check: function(v){
+      if(!/^\d{13}$/.test(v)) return {ok:false, msg:'書碼應為 13 碼數字'};
+      if(!ean13Valid(v)) return {ok:false, msg:'檢查碼錯誤，疑似誤讀或打錯'};
+      if(/^(978|979)/.test(v)) return {ok:true, msg:'圖書 ISBN，檢查碼正確'};
+      if(/^977/.test(v)) return {ok:true, msg:'期刊／雜誌條碼，檢查碼正確'};
+      return {ok:false, msg:'不是圖書(978/979)或期刊(977)條碼'};
+    }
+  }
+};
+
+/* ===== 欄位即時檢查（手動輸入也適用）===== */
+function refreshHint(kind){
+  var el = $(kind), h = $(kind + 'Hint'), v = RULES[kind].norm(el.value);
+  if(!v){ h.innerHTML = ''; return; }
+  var r = RULES[kind].check(v);
+  h.innerHTML = '<span class="' + (r.ok ? 'ok' : 'bad') + '">' + (r.ok ? '✓ ' : '✗ ') + r.msg + '</span>';
+}
+['label','isbn'].forEach(function(k){
+  $(k).addEventListener('input', function(){
+    if(k === 'label') this.value = this.value.toUpperCase();
+    refreshHint(k);
+  });
+});
+
+/* ===== 掃描 ===== */
+var video = $('video'), stream = null, track = null, scanning = false, timer = 0;
+var kindNow = '', nativeDet = null, mfr = null;
+var cv = document.createElement('canvas'), ctx = cv.getContext('2d', {willReadFrequently:true});
+
+async function openScan(kind){
+  if(scanning) return;
+  kindNow = kind;
+  $('ovTitle').textContent = '掃描' + RULES[kind].name;
+  $('ovMsg').textContent = '要求相機權限中…';
+  $('ov').style.display = 'flex';
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+    track = stream.getVideoTracks()[0];
+    try{ await track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
+    video.srcObject = stream;
+    await video.play();
+
+    if('BarcodeDetector' in window){
+      var sup = await BarcodeDetector.getSupportedFormats();
+      var want = ['ean_13','code_128','code_39','qr_code'].filter(function(f){ return sup.indexOf(f)>-1; });
+      nativeDet = new BarcodeDetector({formats:want}); mfr = null;
+    } else if(window.ZXing){
+      var Z = ZXing, h = new Map();
+      h.set(Z.DecodeHintType.TRY_HARDER, true);
+      // 書標可能是 QR / Code128 / Code39；書碼是 EAN-13
+      var fm = (kind === 'isbn') ? [Z.BarcodeFormat.EAN_13] : [Z.BarcodeFormat.QR_CODE, Z.BarcodeFormat.CODE_128, Z.BarcodeFormat.CODE_39];
+      h.set(Z.DecodeHintType.POSSIBLE_FORMATS, fm);
+      mfr = new Z.MultiFormatReader(); mfr.setHints(h); nativeDet = null;
+    } else { throw new Error('沒有可用的掃描引擎（ZXing 未載入，請確認網路）'); }
+
+    scanning = true;
+    $('ovMsg').textContent = (kind === 'isbn') ? '把書背的條碼放進綠框，橫向對齊紅線' : '把書標（QR 或條碼）放進綠框';
+    loop();
+  }catch(e){
+    var msg = (e && (e.name + ': ' + e.message)) || String(e);
+    var tip = /NotAllowed|Permission/i.test(msg) ? '<br>請允許相機權限；若在 LINE／FB 內建瀏覽器開啟，請改用 Safari 或 Chrome。' : '';
+    $('ovMsg').innerHTML = '<span class="w">啟動失敗：' + msg + '</span>' + tip;
+    stopCamera();
+  }
+}
+
+async function loop(){
+  if(!scanning) return;
+  var t = performance.now();
+  try{
+    if(video.readyState >= 2 && video.videoWidth){
+      var raw = null;
+      if(nativeDet){
+        var codes = await nativeDet.detect(video);
+        if(codes.length) raw = codes[0].rawValue;
+      } else {
+        var vw = video.videoWidth, vh = video.videoHeight;
+        // 取中央橫帶（對應綠框），維持高解析，不縮得太小
+        var sx = Math.round(vw*.04), sw = Math.round(vw*.92), sy = Math.round(vh*.22), sh = Math.round(vh*.56);
+        var sc = Math.min(1, 1600/sw);
+        cv.width = Math.round(sw*sc); cv.height = Math.round(sh*sc);
+        ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+        try{
+          var lum = new ZXing.HTMLCanvasElementLuminanceSource(cv);
+          raw = mfr.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(lum))).getText();
+        }catch(e){}
+      }
+      if(raw) handleRaw(raw);
+    }
+  }catch(e){}
+  if(scanning) timer = setTimeout(loop, Math.max(0, 60 - (performance.now() - t)));
+}
+
+function handleRaw(raw){
+  var rule = RULES[kindNow];
+  var v = rule.norm(raw);
+  var r = rule.check(v);
+  if(r.ok){
+    $(kindNow).value = v;
+    refreshHint(kindNow);
+    if(navigator.vibrate) navigator.vibrate(80);
+    closeScan();
+    // 掃完書標，若書碼還是空的，自動接著掃書碼
+    if(kindNow === 'label' && !$('isbn').value) { /* 預留：可改成自動連續掃描 */ }
+  } else {
+    // 讀到了但格式不符 → 不填入，提示後繼續掃
+    $('ovMsg').innerHTML = '<span class="w">讀到「' + String(raw).slice(0,24) + '」：' + r.msg + '</span><br>請對準正確的條碼';
+  }
+}
+
+function stopCamera(){
+  scanning = false; clearTimeout(timer);
+  if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); }
+  stream = null; track = null; video.srcObject = null;
+}
+function closeScan(){ stopCamera(); $('ov').style.display = 'none'; }
+
+/* ===== 原型：送出只顯示資料，尚未連後端 ===== */
+function demoSubmit(){
+  var lab = RULES.label.norm($('label').value), isbn = RULES.isbn.norm($('isbn').value);
+  var errs = [];
+  if(!lab) errs.push('書標必填'); else if(!RULES.label.check(lab).ok) errs.push('書標格式不符');
+  if(isbn && !RULES.isbn.check(isbn).ok) errs.push('書碼格式不符（無書碼請留空）');
+  var out = $('out'); out.style.display = 'block';
+  if(errs.length){ out.textContent = '❌ ' + errs.join('；'); return; }
+  out.textContent = JSON.stringify({
+    分區: $('zone').value, 書標: lab, ISBN: isbn, 索書號: $('callno').value, 備註: $('note').value
+  }, null, 2);
+}
+
+window.addEventListener('pagehide', closeScan);
+</script>
+</body>
+</html>
