@@ -29,7 +29,7 @@
   #ov video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   #ov .frame{position:absolute;left:7%;right:7%;top:33%;bottom:33%;border:2px solid #7CFC00;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);pointer-events:none}
   #ov .frame i{position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,60,60,.85)}
-  #ov .frame.ocr{left:25%;right:25%;top:24%;bottom:24%}   /* 約 50%×52%，形狀接近直式標籤；框外一律不讀 */
+  #ov .frame.ocr{left:37.5%;right:37.5%;top:37%;bottom:37%}   /* 約 25%×26%（前一版 50%×52% 的一半）；框外一律不讀 */
   #ov .frame.ocr i{display:none}
   #ov .msg{padding:12px 14px calc(env(safe-area-inset-bottom) + 14px);color:#fff;font-size:14px;text-align:center;min-height:62px}
   #ov .msg .w{color:#ffb74d}
@@ -396,7 +396,7 @@ async function openOcrCam(){
     await video.play();
     ocrMode = true;
     $('ovBar').style.display = 'block';
-    $('ovMsg').textContent = '讓索書號的數字佔滿綠框（只讀框內），對焦清楚後按「讀取」';
+    $('ovMsg').textContent = '把索書號的所有文字對準綠框（只讀框內），手機保持約 20 公分、對焦清楚後按「讀取」';
   }catch(e){
     var msg = (e && (e.name + ': ' + e.message)) || String(e);
     $('ovMsg').innerHTML = '<span class="w">啟動失敗：' + msg + '</span>';
