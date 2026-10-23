@@ -95,7 +95,7 @@
 
   <label class="f">版權頁內容（全文，可很長）</label>
   <div class="with-btn" style="margin-bottom:8px">
-    <button type="button" class="scanbtn" style="width:100%;padding:12px;background:#1a73e8" onclick="openLens()">📷 開啟 Google 智慧鏡頭（實驗）</button>
+    <button type="button" class="scanbtn" style="width:100%;padding:12px;background:#1a73e8" onclick="openLens()">📷 開啟 Google 智慧鏡頭</button>
   </div>
   <div class="hint" id="lensHint"></div>
   <textarea id="copyright" style="height:200px;font-size:15px;line-height:1.5" placeholder="用手機的 Google 智慧鏡頭掃描版權頁 → 選取全部文字 → 複製 → 貼到這裡"></textarea>
@@ -110,7 +110,6 @@
 
   <button type="button" class="submit" id="submitBtn" onclick="submitRecord()">送出</button>
   <button type="button" class="submit" style="background:#eee;color:#555;margin-top:8px" onclick="clearForm()">取消（清空重填）</button>
-  <div style="text-align:center;margin-top:10px"><a href="#" onclick="clearForm();return false" style="font-size:13px;color:#999">清空表單</a></div>
   <pre id="out" style="display:none"></pre>
 </div>
 
@@ -335,7 +334,7 @@ function openLens(){
 loadDraft();
 
 /* ===== 後端設定 ===== */
-// 貼上 GAS「網路應用程式」的 /exec 網址（留空＝原型模式：只顯示資料、不寫入、不驗證 PIN）
+// 貼上 GAS「網路應用程式」的 /exec 網址
 var API_URL = '';
 var userName = '';
 
@@ -369,9 +368,9 @@ function logout(){
   $('workView').style.display = 'none'; $('loginView').style.display = 'block';
 }
 function showUser(n){
-  $('userBar').innerHTML = '<span class="ok">👤 ' + escHtml(userName) + '</span>　已輸入 <b>' + (n == null ? '—' : n) + '</b> 筆'
-    + (API_URL ? '' : '　<span class="warn">原型模式</span>');
+  $('userBar').innerHTML = '<span class="ok">👤 ' + escHtml(userName) + '</span>　已輸入 <b>' + (n == null ? '—' : n) + '</b> 筆';
 }
+var STRICT = false;   // 測試中：false＝全部欄位可空白、格式不符也能送出；正式上線改 true
 var submitting = false;
 async function submitRecord(){
   if(submitting) return;
