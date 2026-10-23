@@ -98,7 +98,7 @@
   </div>
   <div class="msg" id="ovMsg"></div>
   <div id="ovBar" style="display:none;text-align:center;padding:0 14px calc(env(safe-area-inset-bottom) + 16px)">
-    <button type="button" class="scanbtn" style="width:auto;padding:14px 44px;font-size:17px" onclick="useReading()">✅ 採用這個結果</button>
+    <button type="button" id="ovReadBtn" class="scanbtn" style="width:auto;padding:14px 44px;font-size:17px" onclick="readOnce()">📸 讀取索書號</button>
   </div>
 </div>
 
@@ -420,7 +420,7 @@ async function openOcrCam(){
     $('ovMsg').textContent = '載入辨識模組…（第一次使用需下載，請稍候）';
     try{ await getOcrWorker(); }
     catch(e){ if(ocrMode) $('ovMsg').innerHTML = '<span class="w">' + ((e && e.message) || e) + '</span>'; return; }
-    if(ocrMode){ $('ovMsg').textContent = '把索書號標籤放進框內，拿穩、對焦清楚'; ocrLoop(); }
+    if(ocrMode) $('ovMsg').textContent = '把索書號標籤放進框內，對焦清楚後按「讀取」';
   }catch(e){
     var msg = (e && (e.name + ': ' + e.message)) || String(e);
     $('ovMsg').innerHTML = '<span class="w">啟動失敗：' + msg + '</span>';
@@ -428,39 +428,45 @@ async function openOcrCam(){
   }
 }
 
-async function ocrLoop(){
-  if(!ocrMode) return;
-  if(!ocrBusy && video.videoWidth){
-    ocrBusy = true;
-    try{
-      var r = await ocrWorker.recognize(frameCrop(400));
-      if(ocrMode){
-        var P = parseCallNo(r.data.text);
-        if(P.callno){
-          ocrLastRead = P.callno;
-          var parts = ['分類號 ' + (P.cls || '？'), '著者號 ' + (P.author || '？')].concat(P.extra);
-          $('ovMsg').innerHTML = '<div style="font-size:21px;font-weight:bold;line-height:1.5">' + parts.join('<br>') + '</div>' +
-            '<div style="font-size:12px;opacity:.85;margin-top:4px">看起來對就按「採用」，錯字回表單再改</div>';
-        } else {
-          $('ovMsg').textContent = '讀取中…請把標籤放進框內，拿穩';
-        }
-      }
-    }catch(e){}
-    ocrBusy = false;
+// 只讀一次：按「讀取」才辨識，成功就填入並關閉鏡頭；沒讀到可調整後再按
+async function readOnce(){
+  if(!ocrMode || ocrBusy || !video.videoWidth) return;
+  ocrBusy = true;
+  var btn = $('ovReadBtn'); btn.disabled = true;
+  $('ovMsg').textContent = '辨識中…';
+  // 每按一次「讀取」都先清空舊的索書號、縮圖與提示，再重新讀
+  $('callno').value = ''; $('ocrPreview').innerHTML = ''; $('ocrHint').innerHTML = '';
+  try{
+    var w = await getOcrWorker();
+    var thumb = frameCrop(900).toDataURL('image/jpeg', 0.85);   // 先存縮圖，辨識期間手機移動也不影響
+    var best = null;
+    // 單次拍攝，用幾種大小各試一次，分類號與著者號都讀到就停
+    var sizes = [400, 300, 520];
+    for(var i=0; i<sizes.length && ocrMode; i++){
+      var r = await w.recognize(frameCrop(sizes[i]));
+      var P = parseCallNo(r.data.text);
+      if(P.callno && (!best || (P.cls && P.author && !(best.cls && best.author)))) best = P;
+      if(best && best.cls && best.author) break;
+    }
+    if(!ocrMode) { ocrBusy = false; return; }
+    if(best && best.callno){
+      $('callno').value = best.callno;
+      $('ocrPreview').innerHTML = '<img src="' + thumb + '" style="max-width:100%;max-height:150px;border-radius:6px;border:1px solid #ddd">';
+      var parts = ['分類號 ' + (best.cls || '？'), '著者號 ' + (best.author || '？')].concat(best.extra);
+      $('ocrHint').innerHTML = '<span class="ok">✓ 已填入</span>：' + parts.join('｜') +
+        best.notes.map(function(x){ return '<br><span class="warn">已修正：' + x + '</span>'; }).join('') +
+        best.warns.map(function(x){ return '<br><span class="warn">⚠ ' + x + '</span>'; }).join('') +
+        '<br>請對照下面的縮圖核對，有錯字直接在文字框修改';
+      ocrBusy = false; btn.disabled = false;
+      closeScan();
+      saveDraft();
+      return;
+    }
+    $('ovMsg').innerHTML = '<span class="w">沒有讀到索書號</span>，請把標籤放滿框內、對焦清楚後再按一次';
+  }catch(e){
+    $('ovMsg').innerHTML = '<span class="w">辨識失敗：' + ((e && e.message) || e) + '</span>';
   }
-  if(ocrMode) ocrTimer = setTimeout(ocrLoop, 150);
-}
-
-function useReading(){
-  if(!ocrMode) return;
-  if(!ocrLastRead){ $('ovMsg').innerHTML = '<span class="w">還沒有讀到內容，請把標籤放進框內、拿穩一下</span>'; return; }
-  var url = frameCrop(900).toDataURL('image/jpeg', 0.85);
-  var ta = $('callno');
-  ta.value = ta.value.trim() ? (ta.value.replace(/\s+$/, '') + '\n' + ocrLastRead) : ocrLastRead;
-  $('ocrPreview').innerHTML = '<img src="' + url + '" style="max-width:100%;max-height:150px;border-radius:6px;border:1px solid #ddd">';
-  $('ocrHint').innerHTML = '<span class="ok">✓ 已填入</span>，請對照下面的縮圖核對，有錯字直接在文字框修改';
-  closeScan();
-  saveDraft();
+  ocrBusy = false; btn.disabled = false;
 }
 
 window.addEventListener('pagehide', closeScan);
