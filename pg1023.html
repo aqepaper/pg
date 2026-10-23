@@ -69,12 +69,12 @@
   <div class="hint" id="ocrHint"></div>
   <div id="ocrPreview" style="margin-bottom:8px"></div>
   <div style="display:flex;gap:8px">
+    <div style="flex:2"><label class="f" style="margin-top:0">特藏號（英文）</label><input type="text" id="cn_sp" autocapitalize="characters" autocomplete="off" maxlength="4" placeholder="例 B"></div>
     <div style="flex:3"><label class="f" style="margin-top:0">分類號</label><input type="text" id="cn_cls" inputmode="decimal" autocomplete="off" placeholder="例 226.96"></div>
-    <div style="flex:2"><label class="f" style="margin-top:0">著者號</label><input type="text" id="cn_author" inputmode="numeric" autocomplete="off" placeholder="例 864"></div>
   </div>
   <div style="display:flex;gap:8px">
-    <div style="flex:1"><label class="f">本　C.</label><input type="text" id="cn_c" inputmode="numeric" autocomplete="off" maxlength="3" placeholder="可留空"></div>
-    <div style="flex:1"><label class="f">冊　V.</label><input type="text" id="cn_v" inputmode="numeric" autocomplete="off" maxlength="3" placeholder="可留空"></div>
+    <div style="flex:2"><label class="f">作者號</label><input type="text" id="cn_author" inputmode="numeric" autocomplete="off" placeholder="例 864"></div>
+    <div style="flex:3"><label class="f">複本號（C.本／V.冊）</label><input type="text" id="cn_copy" autocapitalize="characters" autocomplete="off" maxlength="14" placeholder="例 C.2，可留空"></div>
   </div>
   <div class="hint" id="callnoHint"></div>
 
@@ -258,7 +258,7 @@ $('copyright').addEventListener('input', function(){
 });
 
 /* ===== 草稿自動暫存：切到智慧鏡頭再回來、或頁面被系統回收，已填內容都還在 ===== */
-var DRAFT_IDS = ['zone','label','isbn','cn_cls','cn_author','cn_c','cn_v','copyright','note'];
+var DRAFT_IDS = ['zone','label','isbn','cn_sp','cn_cls','cn_author','cn_copy','copyright','note'];
 function saveDraft(){
   try{ var o = {}; DRAFT_IDS.forEach(function(id){ o[id] = $(id).value; }); localStorage.setItem('lib_draft', JSON.stringify(o)); }catch(e){}
 }
@@ -328,18 +328,21 @@ $('acct').addEventListener('input', function(){
 });
 
 /* ===== 索書號標籤解析 =====
-   標籤最多 4 欄：①字母（A/B/C…，由書標得知，略過）②分類號 ③著者號 ④C.n（本）／V.n（冊）
+   標籤最多 4 欄：①特藏號（純英文）②分類號 ③作者號 ④複本號（C.n 本／V.n 冊）
    只取英數，其餘（中文、標點、貼紙）一律忽略 */
 var CALLNO_JOIN = '\n';   // 輸出的分隔：'\n' 每欄一行；改成 ' ' 就是一行
 function parseCallNo(raw){
-  var out = {cls:'', author:'', extra:[], notes:[], warns:[], callno:''};
+  var out = {sp:'', cls:'', author:'', extra:[], notes:[], warns:[], callno:''};
   var numLines = [];
   String(raw).split(/\r?\n/).forEach(function(ln){
     // 全形標點轉半形，再把非英數、非小數點符號的字元（中文等）換成空白
     var s = ln.replace(/[：]/g,':').replace(/[；]/g,';').replace(/[，、]/g,',').replace(/[。．]/g,'.')
               .replace(/[^0-9A-Za-z.,:;\s]/g, ' ').replace(/\s+/g, ' ').trim();
     if(!s) return;
-    if(/^[A-Za-z]$/.test(s)) return;                                   // ① 字母行：不管
+    if(/^[A-Za-z]{1,3}$/.test(s)){                                      // ① 特藏號（純英文）：只認數字行之前的字母行
+      if(!out.sp && !numLines.length) out.sp = s.toUpperCase();
+      return;
+    }
     if(/^(?:[CVcv]\s*[.,:;]?\s*\d+\s*)+$/.test(s)){                    // ④ C.n / V.n（可同一行都有）
       s.replace(/([CVcv])\s*[.,:;]?\s*(\d+)/g, function(_, a, b){ out.extra.push(a.toUpperCase() + '.' + b); });
       return;
@@ -357,8 +360,8 @@ function parseCallNo(raw){
   if(numLines.length > 2) out.warns.push('數字行多於 2 欄（' + numLines.slice(2).join('、') + ' 未採用），請核對');
   if(!out.cls) out.warns.push('找不到分類號');
   else if(!/^\d{3}/.test(out.cls)) out.warns.push('分類號通常是 3 位數開頭，請確認：' + out.cls);
-  if(!out.author) out.warns.push('找不到著者號');
-  if(out.cls || out.author) out.callno = [out.cls, out.author].concat(out.extra).filter(Boolean).join(CALLNO_JOIN);
+  if(!out.author) out.warns.push('找不到作者號');
+  if(out.cls || out.author) out.callno = [out.sp, out.cls, out.author].concat(out.extra).filter(Boolean).join(CALLNO_JOIN);
   return out;
 }
 
@@ -407,12 +410,13 @@ function getOcrWorker(){
 // 閒置時先在背景載入，第一次按鏡頭就不用等
 window.addEventListener('load', function(){ setTimeout(function(){ getOcrWorker().catch(function(){}); }, 3000); });
 
-// 把多次辨識的結果合併成一個：分類號選最像的、著者號選最長的、C/V 取聯集
+// 把多次辨識的結果合併成一個：分類號選最像的、作者號選最長的、C/V 取聯集
 // 已知現象：這個引擎遇到連續相同數字（例如 229、225 的「22」）會漏掉一個，分類號變成 2 位數時補回首位數字並提醒
 function mergeCallNo(list){
-  var out = {cls:'', author:'', extra:[], notes:[], warns:[], callno:''};
-  var clsC = [], auC = [];
+  var out = {sp:'', cls:'', author:'', extra:[], notes:[], warns:[], callno:''};
+  var clsC = [], auC = [], spC = {};
   list.forEach(function(P){
+    if(P.sp) spC[P.sp] = (spC[P.sp] || 0) + 1;
     var t = [P.cls, P.author].filter(Boolean);
     if(t.length === 1 && t[0].indexOf('.') < 0){ auC.push(t[0]); }
     else { if(P.cls) clsC.push(P.cls); if(P.author) auC.push(P.author); }
@@ -431,11 +435,12 @@ function mergeCallNo(list){
     best = best.charAt(0) + best;
   }
   out.cls = best;
+  Object.keys(spC).forEach(function(k){ if(!out.sp || spC[k] > spC[out.sp]) out.sp = k; });
   auC.sort(function(a, b){ return b.length - a.length; });
   out.author = auC[0] || '';
   if(!out.cls) out.warns.push('找不到分類號，請手動輸入');
-  if(!out.author) out.warns.push('找不到著者號，請手動輸入');
-  if(out.cls || out.author) out.callno = [out.cls, out.author].concat(out.extra).filter(Boolean).join(CALLNO_JOIN);
+  if(!out.author) out.warns.push('找不到作者號，請手動輸入');
+  if(out.cls || out.author) out.callno = [out.sp, out.cls, out.author].concat(out.extra).filter(Boolean).join(CALLNO_JOIN);
   return out;
 }
 
@@ -467,41 +472,38 @@ async function openOcrCam(){
 
 function escHtml(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
-// 索書號四個欄位 ⇄ 字串
+// 索書號四個欄位 ⇄ 字串：特藏號（英文）、分類號、作者號、複本號
 function getCallno(){
-  var parts = [$('cn_cls').value.trim(), $('cn_author').value.trim()];
-  var c = $('cn_c').value.trim(), v = $('cn_v').value.trim();
-  if(c) parts.push('C.' + c);
-  if(v) parts.push('V.' + v);
-  return parts.filter(Boolean).join(CALLNO_JOIN);
+  return [$('cn_sp').value.trim(), $('cn_cls').value.trim(), $('cn_author').value.trim(), $('cn_copy').value.trim()]
+    .filter(Boolean).join(CALLNO_JOIN);
 }
-function clearCallno(){ ['cn_cls','cn_author','cn_c','cn_v'].forEach(function(id){ $(id).value = ''; }); refreshCallnoHint(); }
+function clearCallno(){ ['cn_sp','cn_cls','cn_author','cn_copy'].forEach(function(id){ $(id).value = ''; }); refreshCallnoHint(); }
 function setCallno(P){
-  $('cn_cls').value = P.cls || ''; $('cn_author').value = P.author || '';
-  $('cn_c').value = ''; $('cn_v').value = '';
-  P.extra.forEach(function(x){
-    var m = x.match(/^([CV])\.(\d+)$/);
-    if(m) $(m[1] === 'C' ? 'cn_c' : 'cn_v').value = m[2];
-  });
+  $('cn_sp').value = P.sp || ''; $('cn_cls').value = P.cls || ''; $('cn_author').value = P.author || '';
+  $('cn_copy').value = (P.extra || []).join(' ');
   refreshCallnoHint();
 }
 function refreshCallnoHint(){
-  var cls = $('cn_cls').value.trim(), au = $('cn_author').value.trim(), h = $('callnoHint'), w = [];
-  if(!cls && !au && !$('cn_c').value && !$('cn_v').value){ h.innerHTML = ''; return; }
+  var sp = $('cn_sp').value.trim(), cls = $('cn_cls').value.trim(), au = $('cn_author').value.trim(), cp = $('cn_copy').value.trim();
+  var h = $('callnoHint'), w = [];
+  if(!sp && !cls && !au && !cp){ h.innerHTML = ''; return; }
   if(cls && !/^\d+(\.\d+)?$/.test(cls)) w.push('分類號格式不對（應為數字，可含一個小數點）');
   else if(cls && !/^\d{3}/.test(cls)) w.push('分類號通常是 3 位數開頭，請確認');
-  if(!cls || !au) w.push('分類號與著者號通常都要有');
+  if(!cls || !au) w.push('分類號與作者號通常都要有');
+  if(cp && !/^[CV]\.\d+(\s+[CV]\.\d+)*$/.test(cp)) w.push('複本號格式應為 C.數字（本）或 V.數字（冊），例如 C.2');
   h.innerHTML = '<span class="ok">索書號：' + escHtml(getCallno().replace(/\n/g, ' / ')) + '</span>' +
     w.map(function(x){ return '<br><span class="warn">⚠ ' + x + '</span>'; }).join('');
 }
-// 輸入時自動整理：分類號只留數字與一個小數點（: , 自動改成 .），其餘欄位只留數字
+$('cn_sp').addEventListener('input', function(){ this.value = this.value.replace(/[^A-Za-z]/g, '').toUpperCase(); refreshCallnoHint(); });
 $('cn_cls').addEventListener('input', function(){
   var v = this.value.replace(/[：:；;，,。．]/g, '.').replace(/[^0-9.]/g, '');
   var i = v.indexOf('.'); if(i >= 0) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
   this.value = v; refreshCallnoHint();
 });
-['cn_author','cn_c','cn_v'].forEach(function(id){
-  $(id).addEventListener('input', function(){ this.value = this.value.replace(/\D/g, ''); refreshCallnoHint(); });
+$('cn_author').addEventListener('input', function(){ this.value = this.value.replace(/\D/g, ''); refreshCallnoHint(); });
+$('cn_copy').addEventListener('input', function(){ this.value = this.value.toUpperCase().replace(/[^CV0-9. ]/g, ''); refreshCallnoHint(); });
+$('cn_copy').addEventListener('change', function(){
+  this.value = this.value.replace(/([CV])\s*\.?\s*(\d+)/g, '$1.$2').replace(/\s+/g, ' ').trim(); refreshCallnoHint();
 });
 
 // 只讀一次：按「讀取」才辨識；每按一次先清空舊資料。成功就填入並關閉鏡頭，沒讀到可調整後再按
@@ -515,7 +517,7 @@ async function readOnce(){
   try{
     var w = await getOcrWorker();
     var thumb = frameCrop(900).toDataURL('image/jpeg', 0.85);   // 先存縮圖，辨識期間手機移動也不影響
-    // 同一個畫面用不同大小與版面模式各試幾次，合併結果；分類號與著者號都讀到就提早結束
+    // 同一個畫面用不同大小與版面模式各試幾次，合併結果；分類號與作者號都讀到就提早結束
     var tries = [[400,'6'],[320,'6'],[500,'6'],[400,'11'],[320,'11']];
     var results = [], raws = [], merged = null;
     for(var i = 0; i < tries.length && ocrMode; i++){
