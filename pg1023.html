@@ -249,6 +249,16 @@
   </div>
 </div>
 
+<!-- 送出完成畫面 -->
+<div class="card" id="doneView" style="display:none;text-align:center;padding:30px 18px">
+  <div style="font-size:56px;line-height:1">✅</div>
+  <div style="font-size:20px;font-weight:bold;color:#2e7d32;margin:12px 0 4px">送出完成</div>
+  <div id="doneLabel" style="font-size:14px;color:#777"></div>
+  <div style="font-size:19px;margin:18px 0 22px"><b id="doneWho"></b>　已完成 <b id="doneN" style="font-size:30px;color:#2e7d32">0</b> 筆</div>
+  <button type="button" class="submit" onclick="continueWork()">繼續登錄下一本</button>
+  <button type="button" class="submit" style="background:#eee;color:#555;margin-top:10px;box-shadow:none" onclick="logout()">登出</button>
+</div>
+
 <div id="ov">
   <div class="top"><b id="ovTitle">掃描</b><button type="button" onclick="closeScan()">取消</button></div>
   <div class="view">
@@ -497,7 +507,12 @@ function enterWork(count){
   $('loginView').style.display = 'none'; $('workView').style.display = 'block';
   showUser(count); window.scrollTo(0, 0);
 }
+function continueWork(){
+  $('doneView').style.display = 'none'; $('workView').style.display = 'block'; $('out').style.display = 'none';
+  window.scrollTo(0, 0);
+}
 function logout(){
+  $('doneView').style.display = 'none';
   userName = '';
   try{ localStorage.removeItem('lib_code'); }catch(e){}
   $('acct').value = ''; $('loginMsg').innerHTML = ''; $('out').style.display = 'none';
@@ -528,7 +543,11 @@ async function submitRecord(){
   try{
     var r = await api(rec);
     if(r.ok){
-      out.textContent = '✅ 已登錄 ' + (lab || '（無書標）') + '（第 ' + r.row + ' 列）'; showUser(r.count);
+      showUser(r.count);
+      $('doneWho').textContent = userName; $('doneN').textContent = r.count;
+      $('doneLabel').textContent = lab ? ('書標 ' + lab + ' 已寫入') : '';
+      out.style.display = 'none';
+      $('workView').style.display = 'none'; $('doneView').style.display = 'block';
       DRAFT_IDS.forEach(function(id){ if(id !== 'zone') $(id).value = ''; });
       try{ localStorage.removeItem('lib_draft'); }catch(e){}
       refreshHint('label'); refreshHint('isbn'); refreshCallnoHint();
