@@ -543,6 +543,11 @@ function showUser(n){
 }
 var STRICT = false;   // 測試中：false＝全部欄位可空白、格式不符也能送出；正式上線改 true
 var submitting = false;
+
+// 版權頁內容送出前壓成單行：每行去頭尾空白、空行去掉，行與行之間用「、」接起來，省欄位空間
+function compactCopyright_(s){
+  return String(s||'').split(/\r\n|\r|\n/).map(function(l){ return l.trim(); }).filter(function(l){ return l; }).join('、');
+}
 async function submitRecord(){
   if(submitting) return;
   var lab = RULES.label.norm($('label').value), isbn = RULES.isbn.norm($('isbn').value);
@@ -557,7 +562,7 @@ async function submitRecord(){
   if(errs.length){ out.textContent = '❌ ' + errs.join('；'); return; }
   var rec = {action:'add', code:$('acct').value, zone:$('zone').value, label:lab, isbn:isbn,
     sp:$('cn_sp').value.trim(), cls:$('cn_cls').value.trim(), author:$('cn_author').value.trim(), copy:$('cn_copy').value.trim(),
-    copyright:$('copyright').value, note:$('note').value};
+    copyright:compactCopyright_($('copyright').value), note:$('note').value};
   if(!API_URL){ out.textContent = JSON.stringify(rec, null, 2); return; }
   submitting = true; var btn = $('submitBtn'); btn.disabled = true; btn.textContent = '送出中…'; out.textContent = '寫入中…';
   try{
