@@ -225,7 +225,7 @@
     </div>
     <div style="display:flex;gap:8px">
       <div style="flex:2"><label class="f">作者號</label><input type="text" id="cn_author" inputmode="numeric" autocomplete="off" placeholder="例 864"></div>
-      <div style="flex:3"><label class="f">複本號（C.本／V.冊）</label><input type="text" id="cn_copy" autocapitalize="characters" autocomplete="off" maxlength="14" placeholder="例 C.2，可留空"></div>
+      <div style="flex:3"><label class="f">部冊號（C.本／V.冊）</label><input type="text" id="cn_copy" autocapitalize="characters" autocomplete="off" maxlength="14" placeholder="例 C.2，可留空"></div>
     </div>
     <div class="hint" id="callnoHint"></div>
   </div>
@@ -626,7 +626,7 @@ setInterval(updateSteps, 400);
 updateSteps();
 
 /* ===== 索書號標籤解析 =====
-   標籤最多 4 欄：①特藏號（純英文）②分類號 ③作者號 ④複本號（C.n 本／V.n 冊）
+   標籤最多 4 欄：①特藏號（純英文）②分類號 ③作者號 ④部冊號（C.n 本／V.n 冊）
    只取英數，其餘（中文、標點、貼紙）一律忽略 */
 var CALLNO_JOIN = '\n';   // 輸出的分隔：'\n' 每欄一行；改成 ' ' 就是一行
 function parseCallNo(raw){
@@ -770,7 +770,7 @@ async function openOcrCam(){
 
 function escHtml(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 
-// 索書號四個欄位 ⇄ 字串：特藏號（英文）、分類號、作者號、複本號
+// 索書號四個欄位 ⇄ 字串：特藏號（英文）、分類號、作者號、部冊號
 function getCallno(){
   return [$('cn_sp').value.trim(), $('cn_cls').value.trim(), $('cn_author').value.trim(), $('cn_copy').value.trim()]
     .filter(Boolean).join(CALLNO_JOIN);
@@ -788,7 +788,7 @@ function refreshCallnoHint(){
   if(cls && !/^\d+(\.\d+)?$/.test(cls)) w.push('分類號格式不對（應為數字，可含一個小數點）');
   else if(cls && !/^\d{3}/.test(cls)) w.push('分類號通常是 3 位數開頭，請確認');
   if(!cls || !au) w.push('分類號與作者號通常都要有');
-  if(cp && !/^[CV]\.\d+(\s+[CV]\.\d+)*$/.test(cp)) w.push('複本號格式應為 C.數字（本）或 V.數字（冊），例如 C.2');
+  if(cp && !/^[CV]\.\d+(\s+[CV]\.\d+)*$/.test(cp)) w.push('部冊號格式應為 C.數字（本）或 V.數字（冊），例如 C.2');
   h.innerHTML = '<span class="ok">索書號：' + escHtml(getCallno().replace(/\n/g, ' / ')) + '</span>' +
     w.map(function(x){ return '<br><span class="warn">⚠ ' + x + '</span>'; }).join('');
 }
