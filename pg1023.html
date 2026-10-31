@@ -554,8 +554,9 @@ async function submitRecord(){
   var errs = [], out = $('out');
   if($('acct').value.length !== 6) errs.push('請先輸入 6 碼 PIN');
   else if(API_URL && !userName) errs.push('PIN 未通過驗證');
+  if(!lab) errs.push('書標必填');   // 不論 STRICT，書標一定要填才能送出
   if(STRICT){
-    if(!lab) errs.push('書標必填'); else if(!RULES.label.check(lab).ok) errs.push('書標格式不符');
+    if(lab && !RULES.label.check(lab).ok) errs.push('書標格式不符');
     if(isbn && !RULES.isbn.check(isbn).ok) errs.push('書碼格式不符（無書碼請留空）');
   }
   out.style.display = 'block';
