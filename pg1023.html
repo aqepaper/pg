@@ -167,6 +167,7 @@
   <label class="f" style="text-align:center">登入 PIN（6 碼）</label>
   <input type="text" id="acct" style="text-align:center;letter-spacing:4px;font-size:20px" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="請輸入 PIN">
   <button type="button" class="submit" id="loginBtn" onclick="doLogin()">登入</button>
+  <div style="text-align:center;margin-top:10px;color:#2e7d32;font-weight:bold" id="totalCountMsg"></div>
   <div class="hint" id="loginMsg" style="text-align:center;margin-top:10px"></div>
   <div style="text-align:center;color:#aaa;font-size:12px;margin-top:14px">版本 R1</div>
 </div>
@@ -527,6 +528,15 @@ function enterWork(count){
   $('loginView').style.display = 'none'; $('workView').style.display = 'block';
   showUser(count); window.scrollTo(0, 0);
 }
+
+// 登入畫面載入時就顯示全館已登錄本數，不用先登入
+async function loadTotalCount(){
+  if(!API_URL) return;
+  try{
+    var r = await api({action:'totalCount'});
+    if(r.ok) $('totalCountMsg').textContent = '已經登錄 ' + r.count + ' 本書';
+  }catch(e){}
+}
 function continueWork(){
   $('doneView').style.display = 'none'; $('workView').style.display = 'block'; $('out').style.display = 'none';
   window.scrollTo(0, 0);
@@ -590,6 +600,7 @@ try{ $('acct').value = localStorage.getItem('lib_code') || ''; }catch(e){}
 $('acct').addEventListener('input', function(){ this.value = this.value.replace(/\D/g, ''); $('loginMsg').innerHTML = ''; });
 $('acct').addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
 if($('acct').value.length === 6) doLogin(true);
+loadTotalCount();
 
 
 /* ===== 步驟進度：有填內容的步驟標示完成，第一個未完成的步驟高亮 ===== */
