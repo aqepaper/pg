@@ -38,8 +38,8 @@
   .squad-grid-wrap.collapsed{max-height:0;opacity:0}
   .back-btn{display:none;width:100%;padding:13px 16px;font-size:20px;font-family:'Noto Sans TC',sans-serif;font-weight:500;background:transparent;border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--ink);cursor:pointer;margin-bottom:16px;letter-spacing:1px;text-align:left}
   .back-btn.visible{display:block}
-  .search{display:block;width:100%;padding:13px 16px;font-size:20px;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:16px;letter-spacing:.04em;outline:none;-webkit-appearance:none;appearance:none}
-  .search::placeholder{color:#A39D93}
+  .search{display:block;width:100%;padding:13px 16px;font-size:20px;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:16px;letter-spacing:.04em;outline:none;-webkit-appearance:none;appearance:none;text-align:center}
+  .search::placeholder{color:#A39D93;text-align:center}
   .search:focus{border-color:var(--moss)}
   .member-squad{font-size:15px;color:var(--ink-soft);margin-left:10px;flex:0 0 auto}
   mark{background:var(--moss-light);color:var(--ink);border-bottom:2px solid var(--moss);padding:0 1px}
@@ -50,17 +50,17 @@
 <header>
   <h1>大高二座位查詢表</h1>
   <p>--11月12日</p>
-  <p class="upd">更新日期：2026年11月11日 23:57</p>
+  <p class="upd">更新日期：2026年11月12日 00:05</p>
 </header>
 
 <div class="main">
-  <input class="search" id="q" type="text" placeholder="輸入姓名或法名查詢" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
-
   <button class="back-btn" id="backBtn" onclick="clearAll()">← 重新選擇小隊</button>
 
   <div class="squad-grid-wrap" id="squadGridWrap">
     <div class="squad-grid" id="squadGrid"></div>
   </div>
+
+  <input class="search" id="q" type="text" placeholder="輸入姓名或法名查詢" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
 
   <div class="divider"></div>
 
