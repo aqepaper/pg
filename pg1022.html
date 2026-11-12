@@ -54,8 +54,6 @@
 </header>
 
 <div class="main">
-  <button class="back-btn" id="backBtn" onclick="clearAll()">← 重新選擇小隊</button>
-
   <div class="squad-grid-wrap" id="squadGridWrap">
     <div class="squad-grid" id="squadGrid"></div>
   </div>
@@ -66,6 +64,8 @@
 
   <div class="result-info" id="resultInfo"></div>
   <div id="cardList"></div>
+
+  <button class="back-btn" id="backBtn" onclick="clearAll()">← 重新選擇小隊</button>
 </div>
 
 <script>
@@ -438,6 +438,7 @@ function render() {
   const showing = !!(activeSquad || query);
   document.getElementById('squadGridWrap').classList.toggle('collapsed', showing);
   document.getElementById('backBtn').classList.toggle('visible', showing);
+  document.getElementById('q').style.display = activeSquad ? 'none' : 'block';
 
   if(query) {
     const rs = ALL.filter(p => p.name.includes(query) || (p.dharma||'').includes(query))
