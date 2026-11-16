@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>普高圖書館圖資系統</title>
+<style>
+:root{--ink:#1f2d3a;--sub:#66737f;--line:#d8dee5;--bg:#f2f5f8;--card:#fff;--ac:#2a6f4f;--ac2:#e5f2ea;--bad:#b3261e;--badbg:#fdecea;--warn:#a15c00;--warnbg:#fff4dc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;font-size:16px}
+header{background:var(--ac);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px}
+header h1{font-size:1.05rem;margin:0;flex:1}
+header small{opacity:.9}
+header button{background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:6px;padding:6px 10px}
+header{position:sticky;top:0;z-index:20}
+#menuBtn{font-size:1.2rem;line-height:1;padding:6px 11px}
+#side{position:fixed;top:0;bottom:0;left:0;width:216px;background:#fff;border-right:1px solid var(--line);z-index:40;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .2s}
+#side.open{transform:none}
+#side .brand{background:var(--ac);color:#fff;padding:16px 14px;font-weight:700}
+#side .brand small{display:block;font-weight:400;opacity:.9;margin-top:2px}
+nav{display:flex;flex-direction:column;padding:8px 0;overflow-y:auto;flex:1}
+nav button{border:0;background:none;text-align:left;padding:14px 18px;font-size:1.05rem;color:var(--ink);border-left:4px solid transparent}
+nav button.on{color:var(--ac);border-color:var(--ac);background:var(--ac2);font-weight:700}
+#side .foot{padding:12px 14px;border-top:1px solid var(--line)}
+#side .foot button{width:100%}
+#shade{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30}
+@media(min-width:900px){
+  #side{transform:none}#shade{display:none!important}#menuBtn{display:none}#app{padding-left:216px}
+  #app main{max-width:1240px;padding:18px 24px}
+  #repOut{columns:3;column-gap:36px}#repOut h2{margin-top:0;break-after:avoid}#repOut table{break-inside:avoid;margin-bottom:14px}#repOut p{column-span:all}
+  header{padding:12px 24px}header h1{font-size:1.2rem}
+  main section{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  main section>.card,main section>div{margin:0}
+  main section>.full,#mode,#openWarn{grid-column:1/-1}
+  #p-search{grid-template-columns:3fr 2fr}
+  #p-search>.card:first-child{grid-column:1/-1}
+  #sDetail{position:sticky;top:64px}
+  #p-over{grid-template-columns:1fr}
+  #oOut{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+  #p-card>.card:nth-of-type(2){grid-row:span 2}
+  #lOut{max-height:70vh;overflow-y:auto}
+  #circMsgs .msg:first-child{font-size:1.25rem}
+  #scan #reader{max-width:560px}
+  tr.pick{cursor:pointer}tr.pick:hover{background:var(--ac2)}
+  th{color:var(--sub);font-weight:400;font-size:.85rem}
+}
+main{max-width:760px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+h2{font-size:1.05rem;margin:0 0 8px}
+label.f{display:block;font-size:.85rem;color:var(--sub);margin:8px 0 2px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+textarea{min-height:80px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+button.p,button.s,button.d{border:0;border-radius:8px;padding:11px 14px;font:inherit;cursor:pointer}
+button.p{background:var(--ac);color:#fff}button.s{background:var(--ac2);color:var(--ac)}button.d{background:var(--badbg);color:var(--bad)}
+button:disabled{opacity:.5}
+.msg{padding:10px 12px;border-radius:8px;margin:8px 0;white-space:pre-wrap}
+.ok{background:var(--ac2);color:#16482f}.err{background:var(--badbg);color:var(--bad)}.warn{background:var(--warnbg);color:var(--warn)}
+.chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.8rem;background:#eef1f4;color:var(--sub);margin-right:4px}
+.chip.bad{background:var(--badbg);color:var(--bad)}.chip.good{background:var(--ac2);color:var(--ac)}
+.item{padding:10px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}
+.item b{display:block}.sub{color:var(--sub);font-size:.88rem}
+.hidden{display:none!important}
+#scan{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:10px}
+#scan #reader{width:100%;max-width:420px;background:#000}
+#scan .hint{color:#fff;text-align:center}
+#login{max-width:360px;margin:60px auto;padding:0 14px}
+.big{font-size:1.2rem}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:6px;text-align:left;font-size:.92rem}
+.chk{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:1.05rem}
+.chk input{width:26px;height:26px;flex:0 0 auto}
+a.tel{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:8px;background:var(--ac2);color:var(--ac);text-decoration:none;font-weight:700}
+#circMsgs .msg:first-child{font-size:1.12rem;font-weight:700}
+#loading{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:60;background:#1f2d3a;color:#fff;padding:7px 16px;border-radius:99px;font-size:.92rem;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#loading:before{content:'';display:inline-block;width:12px;height:12px;margin-right:8px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;vertical-align:-1px;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#scanResult{width:100%;max-width:420px;min-height:2.6em;padding:10px 12px;border-radius:8px;text-align:center;font-weight:700;background:#fff}
+#scanResult.ok{background:var(--ac2);color:#16482f}#scanResult.err{background:var(--badbg);color:var(--bad)}
+.seg{display:flex;border:1px solid var(--ac);border-radius:8px;overflow:hidden}
+.seg button{flex:1;border:0;background:#fff;color:var(--ac);padding:10px;font:inherit}.seg button.on{background:var(--ac);color:#fff}
+</style>
+</head>
+<body>
+
+<!-- 外部架設（GitHub Pages）時，把 Apps Script「網頁應用程式」網址貼在這裡；直接用 Apps Script 開啟則留空 -->
+<script>var EXEC_URL = 'https://script.google.com/macros/s/AKfycbygK_La-hnG1zMd1WUQAYMRSP4Uma4-kG-QUg3dFOi0NUIpF1MmKvlNV0U_0oemyPvTyQ/exec';</script>
+
+<div id="login">
+  <div class="card">
+    <h2>普高圖書館圖資系統</h2>
+    <label class="f">館員 PIN</label>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="請輸入 PIN" autofocus>
+    <div class="msg err hidden" id="loginErr"></div>
+    <p><button class="p" style="width:100%" id="loginBtn">登入</button></p>
+    <p class="sub" id="apiRow" style="display:none">API 網址：<span id="apiShow"></span> <a href="#" id="apiSet">設定</a></p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header><button id="menuBtn" aria-label="選單">☰</button><h1 id="pageTitle">普高圖書館</h1><small id="who"></small></header>
+  <aside id="side">
+    <div class="brand">普高圖書館<small id="sideWho"></small></div>
+    <nav id="tabs"></nav>
+    <div class="foot"><button class="s" id="logout">登出</button></div>
+  </aside>
+  <div id="shade" class="hidden"></div>
+  <main>
+
+  <!-- 借還書 -->
+  <section id="p-circ">
+    <div class="seg" id="mode"><button data-m="borrow" class="on">借書</button><button data-m="return">還書</button></div>
+    <div id="openWarn" class="msg warn hidden">目前尚未開放借閱（標籤貼完、確認無誤後，由管理員在「管理」頁開啟）。還書與查詢不受影響。</div>
+
+    <div class="card" id="readerBox">
+      <h2>① 讀者</h2>
+      <div id="readerSel" class="hidden"></div>
+      <div id="readerFind">
+        <div class="row"><input id="rq" placeholder="借書證號、姓名或電話"><button class="s" id="rScan" style="flex:0 0 auto">掃描借書證</button></div>
+        <div class="row" style="margin-top:6px"><input id="rb" inputmode="numeric" placeholder="同名時輸入生日月日 (4碼，例 0312)"><button class="p" id="rGo" style="flex:0 0 auto">找人</button></div>
+        <div id="rList"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 id="bookTitle">② 書本</h2>
+      <div class="row"><input id="bk" placeholder="書標 A00012" autocapitalize="characters"><button class="s" id="bScan" style="flex:0 0 auto">相機掃描</button><button class="p" id="bGo" style="flex:0 0 auto">確定</button></div>
+      <div id="circMsgs"></div>
+      <p class="sub">可連續掃多本；借書時直接掃下一位的借書證就會換人。</p>
+      <p><button class="d" id="undo">撤銷我剛才那一筆</button></p>
+    </div>
+  </section>
+
+  <!-- 查館藏 -->
+  <section id="p-search" class="hidden">
+    <div class="card">
+      <h2>藏書查詢</h2>
+      <div class="row"><input id="sq" placeholder="書名、作者、出版者、ISBN、書標、索書號"><button class="p" id="sGo" style="flex:0 0 auto">查詢</button><button class="s" id="sScan" style="flex:0 0 auto">掃描</button></div>
+      <div class="row" style="margin-top:6px">
+        <select id="sZone"><option value="">全部分區</option><option>世學</option><option>佛學</option><option>兒童</option><option>典藏</option></select>
+        <select id="sStat"><option value="">全部狀態</option><option>在架上</option><option>已借出</option><option>遺失</option><option>報廢</option><option>修復中</option><option>下架</option></select>
+      </div>
+    </div>
+    <div id="sOut"></div>
+    <div id="sDetail"></div>
+  </section>
+
+  <!-- 逾期 -->
+  <section id="p-over" class="hidden">
+    <div class="card"><h2>逾期未還（友善提醒名單）</h2><button class="s" id="oGo">重新整理</button><div id="oOut"></div></div>
+  </section>
+
+  <!-- 館藏維護 -->
+  <section id="p-hold" class="hidden">
+    <div class="card">
+      <h2>新增館藏（一冊一筆）</h2>
+      <label class="f">書標（貼在書上的 QR）</label>
+      <div class="row"><input id="hLabel" placeholder="A00012" autocapitalize="characters"><button class="s" id="hScanL" style="flex:0 0 auto">掃描</button></div>
+      <label class="f">書碼 / ISBN（可空白，例如結緣品）</label>
+      <div class="row"><input id="hIsbn" inputmode="numeric" placeholder="978… 或 977…"><button class="s" id="hScanI" style="flex:0 0 auto">掃描</button></div>
+      <div id="hBib" class="sub"></div>
+      <div class="row">
+        <div><label class="f">分區</label><select id="hZone"><option value="">（依書標）</option><option>世學</option><option>佛學</option><option>兒童</option><option>典藏</option></select></div>
+        <div><label class="f">特藏號</label><input id="hSp" placeholder="如 R"></div>
+      </div>
+      <div class="row">
+        <div><label class="f">分類號</label><input id="hCls"></div>
+        <div><label class="f">作者號</label><input id="hAu"></div>
+        <div><label class="f">部冊號</label><input id="hVol"></div>
+      </div>
+      <label class="f">版權頁內容（Google Lens 貼上，可空白）</label>
+      <textarea id="hCol"></textarea>
+      <label class="f">備註</label><input id="hNote">
+      <p><button class="p" id="hAdd" style="width:100%">登錄這一冊</button></p>
+      <div id="hMsg"></div>
+    </div>
+    <div class="card">
+      <h2>修改既有館藏</h2>
+      <div class="row"><input id="eLabel" placeholder="書標" autocapitalize="characters"><button class="p" id="eLoad" style="flex:0 0 auto">載入</button></div>
+      <div id="eForm"></div>
+    </div>
+    <div class="card">
+      <h2>圖資（書目資料）</h2>
+      <p class="sub">一冊一筆，用書標查。通常由「整理圖資（AI 分欄）」自動產生，這裡用來補正錯字，或替沒有版權頁文字的書手動建立。</p>
+      <div class="row"><input id="bIsbn" placeholder="書標 A00012" autocapitalize="characters"><button class="s" id="bScanI" style="flex:0 0 auto">掃描</button><button class="p" id="bLoad" style="flex:0 0 auto">載入</button></div>
+      <div id="bForm"></div>
+    </div>
+  </section>
+
+  <!-- 借書證 -->
+  <section id="p-card" class="hidden">
+    <div class="card">
+      <h2>新辦借書證</h2>
+      <div class="row"><div><label class="f">姓名 *</label><input id="cName"></div><div><label class="f">性別</label><select id="cSex"><option value=""></option><option>男</option><option>女</option></select></div></div>
+      <div class="row"><div><label class="f">生日（年-月-日 或 月日）</label><input id="cBirth" placeholder="1970-03-12"></div><div><label class="f">電話</label><input id="cPhone" inputmode="tel"></div></div>
+      <label class="f">地址</label><input id="cAddr">
+      <label class="f">身分證字號</label><input id="cId" autocapitalize="characters">
+      <label class="f">照片（可用手機拍）</label><input id="cPhoto" type="file" accept="image/*" capture="user">
+      <label class="chk"><input type="checkbox" id="cChk"> 已當面查驗證件</label>
+      <button class="p" id="cAdd" style="width:100%">發證</button>
+      <div id="cMsg"></div>
+    </div>
+    <div class="card">
+      <h2>讀者清單</h2>
+      <div class="row"><input id="lq" placeholder="姓名／電話／證號"><select id="lst"><option value="">全部</option><option>正常</option><option>停用</option><option>掛失</option></select><button class="p" id="lGo" style="flex:0 0 auto">查</button></div>
+      <div id="lOut"></div>
+    </div>
+    <div class="card">
+      <h2>批次匯入讀者</h2>
+      <p class="sub">每行一人，用 Tab 分隔：姓名、電話、生日（月日或年-月-日）、備註。可從試算表直接複製貼上。</p>
+      <textarea id="iText" style="min-height:120px"></textarea>
+      <div class="row" style="margin-top:6px"><button class="s" id="iPre">預覽</button><button class="p" id="iGo">確認匯入</button></div>
+      <div id="iMsg"></div>
+    </div>
+  </section>
+
+  <!-- 管理 -->
+  <section id="p-admin" class="hidden">
+    <div class="card"><h2>開放借閱</h2><div id="openRow"></div></div>
+    <div class="card">
+      <h2>借閱規則</h2>
+      <div class="row"><div><label class="f">借期（天）</label><input id="setDays" inputmode="numeric"></div><div><label class="f">每人可借（冊）</label><input id="setBooks" inputmode="numeric"></div></div>
+      <label class="f">不外借的特藏號（用逗號分開）</label><input id="setSp" placeholder="R,BR,CR,ER">
+      <label class="f">不外借的分區（用逗號分開）</label><input id="setZn" placeholder="典藏">
+      <p><button class="p" id="setSave">儲存規則</button></p><div id="setMsg"></div>
+    </div>
+    <div class="card">
+      <h2>館員管理</h2>
+      <p class="sub">權限選「停用」的人不能登入。PIN 為 6 位數字，每人不同。</p>
+      <div id="stList"></div>
+      <h3 id="stTitle" style="font-size:1rem;margin:14px 0 0">新增館員</h3>
+      <div class="row"><div><label class="f">本名</label><input id="stReal"></div><div><label class="f">法名</label><input id="stDh"></div></div>
+      <div class="row"><div><label class="f">PIN（6 位數字）</label><input id="stPin" inputmode="numeric" maxlength="6"></div>
+        <div><label class="f">權限</label><select id="stRole"><option>借還</option><option>編目員</option><option>管理員</option><option value="">停用</option></select></div></div>
+      <div class="row" style="margin-top:8px"><button class="p" id="stSave">儲存</button><button class="s" id="stNew">清空（改為新增）</button></div>
+      <div id="stMsg"></div>
+    </div>
+    <div class="card full"><h2>報表</h2><button class="s" id="repGo">產生</button><div id="repOut"></div></div>
+    <div class="card"><h2>圖資完整度（編目工作清單）</h2><button class="s" id="cmpGo">檢查</button><div id="cmpOut"></div></div>
+    <div class="card full"><h2>操作紀錄</h2><button class="s" id="logGo">最近 100 筆</button><div id="logOut"></div></div>
+    <div class="card"><h2>系統</h2><div class="row"><button class="s" id="diagGo">系統檢查</button><button class="s" id="bakGo">立即備份</button></div><div id="sysOut"></div></div>
+  </section>
+
+  </main>
+</div>
+
+<div id="loading" class="hidden">處理中…</div>
+<div id="scan" class="hidden">
+  <div id="reader"></div>
+  <div class="hint" id="scanHint">對準條碼或 QR</div>
+  <div id="scanResult" class="hidden"></div>
+  <button class="s" id="scanPhoto">改用拍照辨識</button>
+  <input id="scanFile" type="file" accept="image/*" capture="environment" class="hidden">
+  <button class="d" id="scanClose">取消</button>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" integrity="sha384-c9d8RFSL+u3exBOJ4Yp3HUJXS4znl9f+z66d1y54ig+ea249SpqR+w1wyvXz/lk+" crossorigin="anonymous"></script>
+<script>
+(function () {
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+var PIN = '', ME = null, READER = null, MODE = 'borrow';
+var RANK = { '借還': 1, '編目員': 2, '管理員': 3 };
+
+/* ---------- 呼叫後端 ---------- */
+function lsGet(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function ssGet(k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } }
+function ssSet(k, v) { try { if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} }
+function api() { return (typeof EXEC_URL === 'string' && EXEC_URL) || lsGet('libApi'); }
+function inGas() { return typeof google !== 'undefined' && google.script && google.script.run; }
+var pending = 0;
+function loading(n) { pending = Math.max(0, pending + n); $('loading').classList.toggle('hidden', !pending); }
+function call(fn, args) { loading(1); return rawCall(fn, args).then(function (r) { loading(-1); return r; }, function (e) { loading(-1); throw e; }); }
+function rawCall(fn, args) {
+  return new Promise(function (resolve, reject) {
+    if (inGas()) {
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(function (e) { reject(new Error(e && e.message || e)); })[fn].apply(null, args);
+      return;
+    }
+    var url = api();
+    if (!url) return reject(new Error('尚未設定 API 網址'));
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: fn, args: args }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j.error) reject(new Error(j.error)); else resolve(j.result); })
+      .catch(function (e) { reject(new Error('連線失敗：' + e.message)); });
+  });
+}
+function A(fn) { var a = Array.prototype.slice.call(arguments, 1); return call(fn, [PIN].concat(a)).then(function (r) {
+  if (r && r.authFailed) { doLogout('PIN 已失效，請重新登入'); throw new Error('PIN 已失效'); } return r; }); }
+
+/* ---------- 工具 ---------- */
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function msg(el, ok, text) { el.innerHTML = '<div class="msg ' + (ok ? 'ok' : 'err') + '">' + esc(text) + '</div>'; }
+function busy(btn, p) { btn.disabled = true; return p.then(function (r) { btn.disabled = false; return r; }, function (e) { btn.disabled = false; throw e; }); }
+function fail(el) { return function (e) { msg(el, false, e.message || String(e)); }; }
+function beep(ok) { try { var c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator(); o.frequency.value = ok ? 880 : 220; o.connect(c.destination); o.start(); setTimeout(function () { o.stop(); c.close(); }, ok ? 90 : 300); } catch (e) {} if (navigator.vibrate) navigator.vibrate(ok ? 40 : 200); }
+function up(s) { return String(s || '').trim().toUpperCase(); }
+function statusChip(s) { return '<span class="chip ' + (s === '在架上' || s === '正常' ? 'good' : 'bad') + '">' + esc(s) + '</span>'; }
+
+/* ---------- 登入 ---------- */
+function showApiRow() {
+  if (inGas() || (typeof EXEC_URL === 'string' && EXEC_URL)) return;
+  $('apiRow').style.display = ''; $('apiShow').textContent = api() || '（未設定）';
+}
+$('apiSet').onclick = function (e) { e.preventDefault(); var v = prompt('貼上 Apps Script 網頁應用程式網址（結尾 /exec）', api()); if (v != null) { lsSet('libApi', v.trim()); showApiRow(); } };
+function doLogin() {
+  var p = $('pin').value.trim(); if (!p) return;
+  $('loginErr').classList.add('hidden');
+  busy($('loginBtn'), call('login', [p])).then(function (r) {
+    if (!r || !r.success) { $('loginErr').textContent = (r && r.message) || '登入失敗'; $('loginErr').classList.remove('hidden'); return; }
+    PIN = p; ME = r; $('pin').value = ''; lastAct = Date.now(); saveSess(); start();
+  }).catch(function (e) { $('loginErr').textContent = e.message; $('loginErr').classList.remove('hidden'); });
+}
+$('loginBtn').onclick = doLogin;
+$('pin').onkeydown = function (e) { if (e.key === 'Enter') doLogin(); };
+var IDLE_MIN = 30, lastAct = Date.now(), lastSaved = 0;
+function saveSess() { lastSaved = Date.now(); ssSet('libSess', PIN ? JSON.stringify({ pin: PIN, me: ME, t: lastAct }) : null); }
+function touch() { lastAct = Date.now(); if (PIN && lastAct - lastSaved > 10000) saveSess(); }
+['click', 'keydown', 'touchstart', 'input'].forEach(function (ev) { document.addEventListener(ev, touch, true); });
+function idleCheck() { if (PIN && Date.now() - lastAct > IDLE_MIN * 60000) { closeScan(); doLogout('閒置超過 ' + IDLE_MIN + ' 分鐘，已自動登出，請重新輸入 PIN'); } }
+setInterval(idleCheck, 30000);
+document.addEventListener('visibilitychange', function () { if (!document.hidden) idleCheck(); });   // 手機鎖屏後回來立即檢查
+function doLogout(m) { sideOpen(false); setReader(null); $('circMsgs').innerHTML = ''; ['sOut', 'sDetail', 'oOut', 'lOut', 'logOut', 'repOut', 'eForm', 'bForm', 'stList', 'sysOut'].forEach(function (k) { $(k).innerHTML = ''; });
+  PIN = ''; ME = null; READER = null; ssSet('libSess', null); ssSet('libTab', null); ssSet('libDraft', null); $('app').classList.add('hidden'); $('login').classList.remove('hidden'); if (m) { $('loginErr').textContent = m; $('loginErr').classList.remove('hidden'); } }
+$('logout').onclick = function () { doLogout(); };
+
+/* ---------- 分頁 ---------- */
+var TABS = [['circ', '借還書', 1], ['search', '查館藏', 1], ['over', '逾期', 1], ['hold', '館藏維護', 2], ['card', '借書證', 3], ['admin', '管理', 3]];
+function start() {
+  $('login').classList.add('hidden'); $('app').classList.remove('hidden');
+  $('who').textContent = ME.name; $('sideWho').textContent = ME.name + '（' + ME.role + '）';
+  var nav = $('tabs'); nav.innerHTML = '';
+  TABS.forEach(function (t) {
+    if (RANK[ME.role] < t[2]) return;
+    var b = document.createElement('button'); b.textContent = t[1]; b.dataset.t = t[0]; b.onclick = function () { showTab(t[0]); }; nav.appendChild(b);
+  });
+  var want = ssGet('libTab'), okTab = TABS.filter(function (t) { return t[0] === want && RANK[ME.role] >= t[2]; }).length;
+  showTab(okTab ? want : 'circ'); refreshSettings(); restoreDraft();
+}
+function sideOpen(on) { $('side').classList.toggle('open', on); $('shade').classList.toggle('hidden', !on); }
+$('menuBtn').onclick = function () { sideOpen(!$('side').classList.contains('open')); };
+$('shade').onclick = function () { sideOpen(false); };
+function isDesk() { return !!(window.matchMedia && window.matchMedia('(min-width:900px)').matches); }
+function showTab(id) {
+  sideOpen(false); ssSet('libTab', id);
+  TABS.forEach(function (t) { $('p-' + t[0]).classList.toggle('hidden', t[0] !== id); if (t[0] === id) $('pageTitle').textContent = t[1]; });
+  Array.prototype.forEach.call($('tabs').children, function (b) { b.classList.toggle('on', b.dataset.t === id); });
+  if (id === 'circ' && isDesk()) setTimeout(function () { (MODE === 'borrow' && !READER ? $('rq') : $('bk')).focus(); }, 0);
+  if (id === 'search' && isDesk()) setTimeout(function () { $('sq').focus(); }, 0);
+  if (id === 'over') loadOver();
+  if (id === 'admin') { renderOpen(); loadStaff(); }
+}
+var SETTINGS = null;
+function refreshSettings() {
+  return A('getSettingsInfo').then(function (r) { if (r && r.success) { SETTINGS = r; $('openWarn').classList.toggle('hidden', !!r.open); } });
+}
+
+/* ---------- 掃描 ---------- */
+var scanner = null, scanCb = null, scanAccept = null, scanKeep = false, scanLast = { t: '', at: 0 };
+// keep=true：連續掃描，掃到後不關閉，結果顯示在相機下方
+function openScan(hint, accept, cb, keep) {
+  scanCb = cb; scanAccept = accept; scanKeep = !!keep; scanLast = { t: '', at: 0 };
+  $('scanHint').textContent = hint; $('scan').classList.remove('hidden');
+  $('scanResult').className = keep ? '' : 'hidden'; $('scanResult').textContent = keep ? '等待掃描…' : '';
+  $('scanClose').textContent = keep ? '完成' : '取消';
+  if (typeof Html5Qrcode === 'undefined') { $('scanHint').textContent = '相機元件未載入，請用「拍照辨識」或直接輸入'; return; }
+  try {
+    scanner = new Html5Qrcode('reader');
+    scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 260, height: 160 } }, function (text) { handleScan(text); }, function () {})
+      .catch(function () { $('scanHint').textContent = '無法開啟相機（需在 https 外部網頁使用並允許相機）。可改用「拍照辨識」。'; });
+  } catch (e) { $('scanHint').textContent = '無法開啟相機：' + e.message; }
+}
+function handleScan(text) {
+  if (!scanCb) return;                      // 已經掃到了，忽略相機後續送來的畫格
+  text = String(text || '').trim();
+  var now = Date.now();
+  if (text === scanLast.t && now - scanLast.at < 3000) return;          // 同一個碼停在鏡頭前，不重複處理
+  scanLast = { t: text, at: now };
+  if (scanAccept && !scanAccept(text)) { $('scanHint').textContent = '掃到「' + text + '」，格式不符，請再試'; beep(false); return; }
+  if (scanKeep) {
+    $('scanResult').className = ''; $('scanResult').textContent = text + ' 處理中…';
+    Promise.resolve(scanCb(text)).then(function (r) { if (!r || $('scan').classList.contains('hidden')) return; $('scanResult').className = r.ok ? 'ok' : 'err'; $('scanResult').textContent = r.text; });
+    return;
+  }
+  beep(true); var cb = scanCb; closeScan(); if (cb) cb(text);
+}
+function closeScan() {
+  $('scan').classList.add('hidden'); scanCb = null;
+  if (scanner) { var s = scanner; scanner = null; s.stop().then(function () { s.clear(); }).catch(function () {}); }
+}
+$('scanClose').onclick = closeScan;
+$('scanPhoto').onclick = function () { $('scanFile').click(); };
+$('scanFile').onchange = function () {
+  var f = this.files[0]; this.value = ''; if (!f || typeof Html5Qrcode === 'undefined') return;
+  var h = new Html5Qrcode('reader');
+  h.scanFile(f, false).then(function (t) { h.clear(); handleScan(t); }).catch(function () { $('scanHint').textContent = '這張照片辨識不到，請靠近、對焦後再拍一次'; });
+};
+var isLabel = function (t) { return /^[A-Za-z]\d{5}$/.test(t); };
+var isReaderNo = function (t) { return /^R\d{4,}$/i.test(t); };
+var isIsbn = function (t) { return /^\d{9}[\dXx]$|^\d{13}$/.test(t.replace(/-/g, '')); };
+
+/* ---------- 借還 ---------- */
+document.querySelectorAll('#mode button').forEach(function (b) {
+  b.onclick = function () {
+    MODE = b.dataset.m;
+    document.querySelectorAll('#mode button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    $('readerBox').classList.toggle('hidden', MODE === 'return');
+    $('bookTitle').textContent = MODE === 'return' ? '掃描歸還的書' : '② 書本';
+    $('bk').focus();
+  };
+});
+function setReader(r) {
+  READER = r;
+  if (!r) { $('readerSel').classList.add('hidden'); $('readerFind').classList.remove('hidden'); return; }
+  $('readerFind').classList.add('hidden'); $('readerSel').classList.remove('hidden');
+  var warn = r.status !== '正常' ? '<div class="msg err">借書證狀態：' + esc(r.status) + '，不能借書</div>' : '';
+  if (r.overdue > 0) warn += '<div class="msg warn">此讀者尚有 ' + r.overdue + ' 本逾期未還</div>';
+  $('readerSel').innerHTML = '<div class="big"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(r.id) + '</span></div><div class="sub">借閱中 ' + r.active + ' 本</div>' + warn + '<button class="s" id="rChange">換人</button>';
+  $('rChange').onclick = function () { setReader(null); $('rq').value = ''; $('rb').value = ''; $('rList').innerHTML = ''; };
+  if ($('scan').classList.contains('hidden')) $('bk').focus();
+}
+function pickReader(id) {
+  return A('lookupReader', id).then(function (r) {
+    if (!r.success) { msg($('rList'), false, r.message); beep(false); return { ok: false, text: r.message }; }
+    beep(true); setReader(r.reader);
+    return { ok: r.reader.status === '正常', text: '讀者：' + r.reader.name + '（' + r.reader.id + '）' + (r.reader.status !== '正常' ? ' ' + r.reader.status : '') };
+  });
+}
+$('rScan').onclick = function () { openScan('掃描借書證 QR', isReaderNo, function (t) { pickReader(t.toUpperCase()); }); };
+function findReader() {
+  var q = $('rq').value.trim(); if (!q) return;
+  if (isReaderNo(q)) { pickReader(q.toUpperCase()); return; }
+  busy($('rGo'), A('searchReaders', q, $('rb').value.trim())).then(function (r) {
+    if (!r.success) return msg($('rList'), false, r.message);
+    if (!r.list.length) return msg($('rList'), false, '找不到。同名時請確認生日月日，或改用電話／借書證號。');
+    var h = r.list.length > 1 ? '<div class="msg warn">有 ' + r.list.length + ' 位符合，請與讀者確認（同名請問生日月日）</div>' : '';
+    $('rList').innerHTML = h + r.list.map(function (x) {
+      return '<div class="item"><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + (x.sameName > 1 ? '<span class="chip bad">同名 ' + x.sameName + ' 人</span>' : '') + '</b><span class="sub">電話末三碼 ' + esc(x.phoneTail) + ' ' + (x.status !== '正常' ? esc(x.status) : '') + '</span> <button class="p" data-id="' + esc(x.id) + '">選這位</button></div>';
+    }).join('');
+    Array.prototype.forEach.call($('rList').querySelectorAll('button[data-id]'), function (b) { b.onclick = function () { pickReader(b.dataset.id); }; });
+  }).catch(fail($('rList')));
+}
+$('rGo').onclick = findReader;
+$('rq').onkeydown = function (e) { if (e.key === 'Enter') findReader(); };
+function pushCirc(ok, text) {
+  var d = document.createElement('div'); d.className = 'msg ' + (ok ? 'ok' : 'err'); d.textContent = text;
+  $('circMsgs').insertBefore(d, $('circMsgs').firstChild);
+  while ($('circMsgs').children.length > 8) $('circMsgs').removeChild($('circMsgs').lastChild);
+  beep(ok);
+  return { ok: ok, text: text };
+}
+var inflight = {}, lastOk = { k: '', t: 0 };
+// 回傳 Promise<{ok,text}|null>；null 表示重複送出已忽略
+function doBook(label) {
+  label = up(label); if (!label) return Promise.resolve(null);
+  if (isReaderNo(label)) {                                    // 掃到的是借書證
+    if (MODE !== 'borrow') return Promise.resolve(pushCirc(false, label + ' 是借書證；還書請掃書上的書標'));
+    return pickReader(label).then(function (r) { if (r && !r.ok && READER && READER.id !== label) pushCirc(false, r.text); return r; });
+  }
+  if (!isLabel(label)) return Promise.resolve(pushCirc(false, '「' + label + '」不是書標格式（應為 1 個字母加 5 位數字）'));
+  if (MODE === 'borrow' && !READER) return Promise.resolve(pushCirc(false, '請先選擇讀者（掃借書證或輸入姓名）'));
+  var rd = MODE === 'borrow' ? READER : null, key = MODE + '|' + (rd ? rd.id : '') + '|' + label;
+  if (inflight[key] || (key === lastOk.k && Date.now() - lastOk.t < 4000)) return Promise.resolve(null);   // 連按、掃描槍連發
+  inflight[key] = 1;
+  var req = rd ? A('borrowBook', rd.id, label) : A('returnBook', label);
+  return req.then(function (r) {
+    delete inflight[key];
+    if (r.success) { lastOk = { k: key, t: Date.now() }; if (rd) { rd.active++; if (READER === rd) setReader(rd); } }
+    return pushCirc(r.success, r.message);
+  }, function (e) { delete inflight[key]; return pushCirc(false, e.message); });
+}
+function submitBook() { var v = $('bk').value; $('bk').value = ''; doBook(v).then(function () { if ($('scan').classList.contains('hidden')) $('bk').focus(); }); }
+$('bGo').onclick = submitBook;
+$('bk').onkeydown = function (e) { if (e.key === 'Enter') submitBook(); };
+$('bScan').onclick = function () { openScan(MODE === 'borrow' ? '連續掃描：書標，或下一位的借書證' : '連續掃描要歸還的書標', function (t) { return isLabel(t) || isReaderNo(t); }, function (t) { return doBook(t); }, true); };
+$('undo').onclick = function () { busy($('undo'), A('undoLast')).then(function (r) { pushCirc(r.success, r.message); if (r.success && READER) pickReader(READER.id); }).catch(function (e) { pushCirc(false, e.message); }); };
+
+/* ---------- 查館藏 ---------- */
+function doSearch() {
+  busy($('sGo'), A('searchHoldings', $('sq').value, { zone: $('sZone').value, status: $('sStat').value })).then(function (r) {
+    if (!r.success) return msg($('sOut'), false, r.message);
+    $('sDetail').innerHTML = '';
+    var head = '<div class="sub">共 ' + r.total + ' 冊' + (r.total > r.items.length ? '，僅顯示前 ' + r.items.length : '') + '</div>';
+    if (isDesk()) {
+      $('sOut').innerHTML = '<div class="card">' + head + '<table><tr><th>書標</th><th>書名</th><th>作者</th><th>分區</th><th>索書號</th><th>狀態</th></tr>' + r.items.map(function (x) {
+        return '<tr class="item pick" data-l="' + esc(x.label) + '"><td>' + esc(x.label) + '</td><td><b style="display:inline">' + esc(x.title || x.note || '（未建書目）') + '</b></td><td>' + esc(x.author) + '</td><td>' + esc(x.zone) + '</td><td>' + esc(x.callNo) + '</td><td>' + statusChip(x.status) + '</td></tr>';
+      }).join('') + '</table></div>';
+    } else {
+      $('sOut').innerHTML = '<div class="card">' + head + r.items.map(function (x) {
+        return '<div class="item" data-l="' + esc(x.label) + '" style="cursor:pointer"><b>' + esc(x.title || x.note || '（未建書目）') + '</b><span class="sub">' + esc(x.author) + '</span><br><span class="chip">' + esc(x.label) + '</span><span class="chip">' + esc(x.zone) + '</span><span class="chip">' + esc(x.callNo) + '</span>' + statusChip(x.status) + '</div>';
+      }).join('') + '</div>';
+    }
+    Array.prototype.forEach.call($('sOut').querySelectorAll('.item'), function (it) { it.onclick = function () { showDetail(it.dataset.l); }; });
+  }).catch(fail($('sOut')));
+}
+function showDetail(label) {
+  A('getHolding', label).then(function (r) {
+    if (!r.success) return msg($('sDetail'), false, r.message);
+    var h = r.holding, b = r.bib || {};
+    var cur = r.current ? '<div class="msg warn">借出中：' + esc(r.current.name) + '（' + esc(r.current.readerId) + '），應還 ' + esc(r.current.due) + '</div>' : '';
+    var hist = r.history.length ? '<h2>近期借閱</h2>' + r.history.map(function (x) { return '<div class="sub">' + esc(x.out) + ' ' + esc(x.name) + ' → ' + esc(x.back || x.status) + '</div>'; }).join('') : '';
+    $('sDetail').innerHTML = '<div class="card"><h2>' + esc(b.title || '（圖資未建檔）') + '</h2>' + (b.subtitle ? '<div>' + esc(b.subtitle) + '</div>' : '') +
+      '<div class="sub">' + esc([b.author, b.publisher, b.year].filter(Boolean).join('　')) + '</div>' +
+      '<p><span class="chip">' + esc(h.label) + '</span><span class="chip">' + esc(h.zone) + '</span>' + statusChip(h.status) + '</p>' +
+      '<div>索書號：' + esc([h.special, h.cls, h.authorNo, h.vol].filter(Boolean).join(' ')) + '</div>' +
+      '<div>ISBN：' + esc(h.isbn) + '</div>' + (h.note ? '<div>備註：' + esc(h.note) + '</div>' : '') + cur + hist + '</div>';
+    if (!isDesk()) $('sDetail').scrollIntoView({ behavior: 'smooth' });
+  }).catch(fail($('sDetail')));
+}
+$('sGo').onclick = doSearch; $('sq').onkeydown = function (e) { if (e.key === 'Enter') doSearch(); };
+$('sScan').onclick = function () { openScan('掃描書標或 ISBN 條碼', function (t) { return isLabel(t) || isIsbn(t); }, function (t) { $('sq').value = t.replace(/-/g, ''); doSearch(); }); };
+
+/* ---------- 逾期 ---------- */
+function loadOver() {
+  A('getOverdue').then(function (r) {
+    if (!r.success) return msg($('oOut'), false, r.message);
+    if (!r.list.length) { $('oOut').innerHTML = '<div class="msg ok">目前沒有逾期</div>'; return; }
+    $('oOut').innerHTML = r.list.map(function (x) {
+      var last = x.last ? '<div class="sub">上次：' + esc(x.last.time) + ' ' + esc(x.last.staff) + ' ' + esc(x.last.result) + (x.last.promise ? '，約定 ' + esc(x.last.promise) : '') + '</div>' : '';
+      return '<div class="item"><b>' + esc(x.name) + ' <span class="chip bad">逾期 ' + x.days + ' 天</span></b>《' + esc(x.title || x.label) + '》 <span class="chip">' + esc(x.label) + '</span><div class="sub">應還 ' + esc(x.due) + '</div>' + (x.phone ? '<a class="tel" href="tel:' + esc(x.phone) + '">撥打 ' + esc(x.phone) + '</a>' : '<div class="sub">（沒有登記電話）</div>') + last +
+        '<div class="row" style="margin-top:6px"><select data-r="' + esc(x.loanId) + '"><option>已聯絡</option><option>未接</option><option>無法聯絡</option><option>約定歸還</option></select><input data-p="' + esc(x.loanId) + '" placeholder="約定日期／備註"><button class="s" data-c="' + esc(x.loanId) + '" style="flex:0 0 auto">記錄</button></div></div>';
+    }).join('');
+    Array.prototype.forEach.call($('oOut').querySelectorAll('button[data-c]'), function (b) {
+      b.onclick = function () {
+        var id = b.dataset.c, res = $('oOut').querySelector('select[data-r="' + id + '"]').value, note = $('oOut').querySelector('input[data-p="' + id + '"]').value;
+        busy(b, A('logContact', id, res, note, res === '約定歸還' ? note : '')).then(function (r) { if (r.success) loadOver(); else alert(r.message); });
+      };
+    });
+  }).catch(fail($('oOut')));
+}
+$('oGo').onclick = loadOver;
+
+/* ---------- 館藏維護 ---------- */
+$('hScanL').onclick = function () { openScan('掃描書標', isLabel, function (t) { $('hLabel').value = t.toUpperCase(); saveDraft(); }); };
+$('hScanI').onclick = function () { openScan('掃描 ISBN 條碼（978/977 開頭）', isIsbn, function (t) { $('hIsbn').value = t.replace(/-/g, ''); saveDraft(); chkIsbn(); }); };
+function chkIsbn() {
+  var v = $('hIsbn').value.trim(); if (!v) { $('hBib').textContent = ''; return; }
+  A('bibLookup', v).then(function (r) {
+    if (!r.valid) $('hBib').innerHTML = '<span style="color:var(--bad)">ISBN 檢查碼不正確，請重掃</span>';
+    else if (r.found) $('hBib').innerHTML = '圖資已有：<b>' + esc(r.title) + '</b> ' + esc(r.author) + '（目前館藏 ' + r.copies + ' 冊）';
+    else $('hBib').innerHTML = '<span style="color:var(--warn)">圖資尚無此 ISBN 的書目，仍可先登錄；書名之後由「整理圖資」產生，或在本頁下方「圖資」手動補上</span>';
+  });
+}
+$('hIsbn').onchange = chkIsbn;
+var DRAFT = ['hLabel', 'hIsbn', 'hZone', 'hSp', 'hCls', 'hAu', 'hVol', 'hCol', 'hNote'];
+function saveDraft() { var d = {}, any = false; DRAFT.forEach(function (k) { d[k] = $(k).value; if (d[k]) any = true; }); ssSet('libDraft', any ? JSON.stringify(d) : null); }
+function restoreDraft() { try { var d = JSON.parse(ssGet('libDraft') || 'null'); if (d) DRAFT.forEach(function (k) { if (d[k]) $(k).value = d[k]; }); } catch (e) {} }
+DRAFT.forEach(function (k) { $(k).addEventListener('input', saveDraft); $(k).addEventListener('change', saveDraft); });
+$('hAdd').onclick = function () {
+  var d = { label: $('hLabel').value, isbn: $('hIsbn').value, zone: $('hZone').value, special: $('hSp').value, cls: $('hCls').value, authorNo: $('hAu').value, vol: $('hVol').value, colophon: $('hCol').value, note: $('hNote').value };
+  busy($('hAdd'), A('addHolding', d)).then(function (r) {
+    msg($('hMsg'), r.success, r.message); beep(r.success);
+    if (r.success) { ['hLabel', 'hIsbn', 'hVol', 'hCol', 'hNote'].forEach(function (k) { $(k).value = ''; }); $('hBib').textContent = ''; saveDraft(); }
+  }).catch(fail($('hMsg')));
+};
+$('eLoad').onclick = function () {
+  var l = up($('eLabel').value);
+  A('getHolding', l).then(function (r) {
+    if (!r.success) return msg($('eForm'), false, r.message);
+    var h = r.holding, st = ['在架上', '遺失', '報廢', '修復中', '下架'];
+    if (st.indexOf(h.status) < 0) st.unshift(h.status);
+    $('eForm').innerHTML = '<p>' + esc((r.bib && r.bib.title) || '（圖資未建檔）') + ' ' + statusChip(h.status) + '</p>' +
+      '<div class="row"><div><label class="f">分區</label><input id="e_zone" value="' + esc(h.zone) + '"></div><div><label class="f">特藏號</label><input id="e_sp" value="' + esc(h.special) + '"></div></div>' +
+      '<div class="row"><div><label class="f">分類號</label><input id="e_cls" value="' + esc(h.cls) + '"></div><div><label class="f">作者號</label><input id="e_au" value="' + esc(h.authorNo) + '"></div><div><label class="f">部冊號</label><input id="e_vol" value="' + esc(h.vol) + '"></div></div>' +
+      '<label class="f">ISBN</label><input id="e_isbn" value="' + esc(h.isbn) + '"><label class="f">備註</label><input id="e_note" value="' + esc(h.note) + '">' +
+      '<label class="f">館藏狀態</label><select id="e_st">' + st.map(function (s) { return '<option' + (s === h.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' +
+      (r.current ? '<div class="msg warn">此書借出中；只有「遺失」可直接改，其餘請先辦理還書。</div>' : '') +
+      '<p><button class="p" id="eSave" style="width:100%">儲存修改</button></p><div id="eMsg"></div>' +
+      (ME.role === '管理員' ? '<label class="f">更正書標（貼錯或登錄錯時；借閱紀錄會一併更新）</label><div class="row"><input id="e_newLabel" placeholder="新書標" autocapitalize="characters"><button class="d" id="eRelabel" style="flex:0 0 auto">更正書標</button></div>' : '');
+    if ($('eRelabel')) $('eRelabel').onclick = function () {
+      var nl = up($('e_newLabel').value); if (!nl) return;
+      if (!confirm('把書標 ' + l + ' 改成 ' + nl + '？')) return;
+      busy($('eRelabel'), A('changeLabel', l, nl)).then(function (x) { msg($('eMsg'), x.success, x.message); if (x.success) { $('eLabel').value = nl; $('eLoad').click(); } }).catch(fail($('eMsg')));
+    };
+    $('eSave').onclick = function () {
+      var now = { zone: $('e_zone').value, special: $('e_sp').value, cls: $('e_cls').value, authorNo: $('e_au').value, vol: $('e_vol').value, isbn: $('e_isbn').value, note: $('e_note').value, status: $('e_st').value };
+      var was = { zone: h.zone, special: h.special, cls: h.cls, authorNo: h.authorNo, vol: h.vol, isbn: h.isbn, note: h.note, status: h.status }, f = {}, any = false;
+      Object.keys(now).forEach(function (k) { if (String(now[k]).trim() !== String(was[k]).trim()) { f[k] = now[k]; any = true; } });   // 只送有改的欄位
+      if (!any) return msg($('eMsg'), true, '沒有變更');
+      busy($('eSave'), A('updateHolding', l, f)).then(function (x) { msg($('eMsg'), x.success, x.message); if (x.success) Object.keys(f).forEach(function (k) { h[k] = now[k]; }); }).catch(fail($('eMsg')));
+    };
+  }).catch(fail($('eForm')));
+};
+
+/* ---------- 借書證 ---------- */
+function fileToDataUrl(file, maxW) {
+  return new Promise(function (res, rej) {
+    var fr = new FileReader();
+    fr.onload = function () {
+      var img = new Image();
+      img.onload = function () { var s = Math.min(1, maxW / img.width), c = document.createElement('canvas'); c.width = img.width * s; c.height = img.height * s; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', .8)); };
+      img.onerror = function () { rej(new Error('照片無法讀取')); }; img.src = fr.result;
+    };
+    fr.onerror = function () { rej(new Error('照片無法讀取')); }; fr.readAsDataURL(file);
+  });
+}
+$('cAdd').onclick = function () {
+  var d = { name: $('cName').value, gender: $('cSex').value, birth: $('cBirth').value, phone: $('cPhone').value, address: $('cAddr').value, idNo: $('cId').value, idChecked: $('cChk').checked };
+  var f = $('cPhoto').files[0];
+  var pr = f ? fileToDataUrl(f, 600) : Promise.resolve('');
+  busy($('cAdd'), pr.then(function (u) { return A('issueReader', d, u); })).then(function (r) {
+    msg($('cMsg'), r.success, r.message + (r.success ? '\n請列印借書證 QR：' + r.id : ''));
+    if (r.success) ['cName', 'cBirth', 'cPhone', 'cAddr', 'cId'].forEach(function (k) { $(k).value = ''; }), $('cChk').checked = false, $('cPhoto').value = '', $('cSex').value = '';
+  }).catch(fail($('cMsg')));
+};
+function loadReaders() {
+  A('listReaders', $('lq').value, $('lst').value).then(function (r) {
+    if (!r.success) return msg($('lOut'), false, r.message);
+    $('lOut').innerHTML = '<div class="sub">共 ' + r.items.length + ' 筆</div>' + r.items.map(function (x) {
+      return '<div class="item"><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + '</b><div class="sub">' + esc(x.phone) + ' ／ ' + esc(x.idMasked) + ' ／ ' + esc(x.address) + (x.photo ? ' ／ <a href="' + esc(x.photo) + '" target="_blank" rel="noopener">照片</a>' : '') + '</div>' +
+        (/^已換證/.test(x.status) ? '' : '<div class="row" style="margin-top:6px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div><div class="row" style="margin-top:6px"><button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="d" data-re="' + esc(x.id) + '">補發新證</button></div><div data-form="' + esc(x.id) + '"></div>') + '</div>';
+    }).join('');
+    Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-set]'), function (b) { b.onclick = function () { var id = b.dataset.set; A('setReaderStatus', id, $('lOut').querySelector('select[data-s="' + id + '"]').value, '').then(function (x) { alert(x.message); loadReaders(); }); }; });
+    Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-ed]'), function (b) { b.onclick = function () { editReader(r.items.filter(function (x) { return x.id === b.dataset.ed; })[0]); }; });
+    Array.prototype.forEach.call($('lOut').querySelectorAll('select[data-s]'), function (sel) { var it = r.items.filter(function (x) { return x.id === sel.dataset.s; })[0]; if (it) sel.value = it.status; });
+    Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-re]'), function (b) { b.onclick = function () { if (!confirm('補發後舊證立即失效，借閱中的書會轉到新證。確定？')) return; A('reissueReader', b.dataset.re, '遺失補發').then(function (x) { alert(x.message); loadReaders(); }); }; });
+  }).catch(fail($('lOut')));
+}
+function editReader(x) {
+  var box = $('lOut').querySelector('div[data-form="' + x.id + '"]');
+  if (box.innerHTML) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="row"><div><label class="f">姓名</label><input data-k="name" value="' + esc(x.name) + '"></div><div><label class="f">性別</label><select data-k="gender"><option value=""></option><option>男</option><option>女</option></select></div></div>' +
+    '<div class="row"><div><label class="f">生日</label><input data-k="birth" value="' + esc(x.birth) + '"></div><div><label class="f">電話</label><input data-k="phone" inputmode="tel" value="' + esc(x.phone) + '"></div></div>' +
+    '<label class="f">地址</label><input data-k="address" value="' + esc(x.address) + '">' +
+    '<label class="f">身分證字號（目前 ' + esc(x.idMasked || '未登記') + '；留空＝不變）</label><input data-k="idNo" autocapitalize="characters">' +
+    '<label class="f">備註</label><input data-k="note" value="' + esc(x.note) + '">' +
+    '<label class="f">更換照片</label><input data-k="photo" type="file" accept="image/*" capture="user">' +
+    '<p><button class="p" data-k="save">儲存</button></p><div data-k="msg"></div>';
+  var q = function (k) { return box.querySelector('[data-k="' + k + '"]'); };
+  q('gender').value = x.gender;
+  q('save').onclick = function () {
+    var d = {}, was = { name: x.name, gender: x.gender, birth: x.birth, phone: x.phone, address: x.address, note: x.note };
+    Object.keys(was).forEach(function (k) { if (q(k).value.trim() !== String(was[k]).trim()) d[k] = q(k).value; });
+    if (q('idNo').value.trim()) d.idNo = q('idNo').value;
+    var f = q('photo').files[0], pr = f ? fileToDataUrl(f, 600) : Promise.resolve('');
+    busy(q('save'), pr.then(function (u) { return A('updateReader', x.id, d, u); })).then(function (r) {
+      msg(q('msg'), r.success, r.message); if (r.success && r.message !== '沒有變更') setTimeout(loadReaders, 900);
+    }).catch(fail(q('msg')));
+  };
+}
+$('lGo').onclick = loadReaders;
+function doImport(dry) {
+  busy(dry ? $('iPre') : $('iGo'), A('importReaders', $('iText').value, dry)).then(function (r) {
+    var extra = (r.skipped || []).concat(r.warnings || []).map(function (x) { return '・' + x; }).join('\n');
+    msg($('iMsg'), r.success, r.message + (extra ? '\n' + extra : ''));
+  }).catch(fail($('iMsg')));
+}
+$('iPre').onclick = function () { doImport(true); };
+$('iGo').onclick = function () { if (confirm('確定匯入？')) doImport(false); };
+
+/* ---------- 管理 ---------- */
+function renderOpen() {
+  refreshSettings().then(function () {
+    var o = SETTINGS && SETTINGS.open;
+    $('openRow').innerHTML = '<p>目前：<b>' + (o ? '已開放借閱' : '尚未開放') + '</b>　借期 ' + (SETTINGS ? SETTINGS.days : '?') + ' 天，上限 ' + (SETTINGS ? SETTINGS.books : '?') + ' 本<br><span class="sub">不外借：分區 ' + esc((SETTINGS && SETTINGS.noZone || []).join('、')) + '；特藏號 ' + esc((SETTINGS && SETTINGS.noSpecial || []).join('、')) + '</span></p><button class="' + (o ? 'd' : 'p') + '" id="openBtn">' + (o ? '關閉借閱' : '開放借閱') + '</button>';
+    fillSettings();
+    $('openBtn').onclick = function () { A('setLendingOpen', !o).then(function (r) { if (!r.success) alert(r.message); renderOpen(); }); };
+  });
+}
+$('repGo').onclick = function () {
+  A('getReport').then(function (r) {
+    if (!r.success) return msg($('repOut'), false, r.message);
+    var kv = function (o) { return Object.keys(o).map(function (k) { return '<tr><td>' + esc(k) + '</td><td>' + o[k] + '</td></tr>'; }).join(''); };
+    $('repOut').innerHTML = '<p>館藏 <b>' + r.holdings + '</b> 冊；累計借閱 ' + r.loansAll + ' 次，本月 ' + r.loansThisMonth + ' 次；借出中 ' + r.active + ' 本，其中逾期 ' + r.overdue + ' 本</p>' +
+      '<h2>各分區</h2><table>' + kv(r.byZone) + '</table><h2>館藏狀態</h2><table>' + kv(r.byStatus) + '</table><h2>借書證</h2><table>' + kv(r.readers) + '</table>' +
+      '<h2>近月借閱</h2><table>' + r.months.map(function (m) { return '<tr><td>' + esc(m.month) + '</td><td>' + m.count + '</td></tr>'; }).join('') + '</table>' +
+      '<h2>熱門書</h2><table>' + r.top.map(function (m) { return '<tr><td>' + esc(m.title) + '</td><td>' + m.count + '</td></tr>'; }).join('') + '</table>';
+  }).catch(fail($('repOut')));
+};
+$('cmpGo').onclick = function () {
+  A('getCompleteness').then(function (r) {
+    if (!r.success) return msg($('cmpOut'), false, r.message);
+    var sec = function (t, o, fmt) { return '<h2>' + t + '：' + o.count + '</h2>' + (o.count ? '<div class="sub">' + o.items.map(fmt || esc).join('、') + (o.count > o.items.length ? '…' : '') + '</div>' : ''); };
+    $('cmpOut').innerHTML = '<p>館藏共 ' + r.total + ' 筆</p>' + sec('沒有 ISBN', r.noIsbn) + sec('ISBN 檢查碼錯誤', r.badIsbn) +
+      sec('還沒有書名（圖資未建）', r.notInBib) + sec('沒有分類號', r.noCall) + sec('書標格式不符（掃不到）', r.badLabel) + sec('書標重複', r.dupes);
+  }).catch(fail($('cmpOut')));
+};
+$('logGo').onclick = function () {
+  A('getLog', 100).then(function (r) {
+    if (!r.success) return msg($('logOut'), false, r.message);
+    if (isDesk()) { $('logOut').innerHTML = '<table><tr><th>時間</th><th>館員</th><th>動作</th><th>書標</th><th>借書證</th><th>內容</th></tr>' + r.items.map(function (x) { return '<tr><td style="white-space:nowrap">' + esc(x.time) + '</td><td>' + esc(x.staff) + '</td><td>' + esc(x.action) + (x.note ? ' <span class="chip bad">' + esc(x.note) + '</span>' : '') + '</td><td>' + esc(x.label) + '</td><td>' + esc(x.reader) + '</td><td>' + esc(x.detail) + '</td></tr>'; }).join('') + '</table>'; return; }
+    $('logOut').innerHTML = r.items.map(function (x) { return '<div class="item"><b>' + esc(x.action) + (x.note ? ' <span class="chip bad">' + esc(x.note) + '</span>' : '') + '</b><div>' + esc([x.label, x.reader, x.detail].filter(Boolean).join('　')) + '</div><div class="sub">' + esc(x.time) + '　' + esc(x.staff) + '</div></div>'; }).join('') || '<div class="sub">還沒有紀錄</div>';
+  }).catch(fail($('logOut')));
+};
+
+/* ---------- 圖資 ---------- */
+$('bScanI').onclick = function () { openScan('掃描書標', isLabel, function (t) { $('bIsbn').value = t.toUpperCase(); loadBib(); }); };
+function loadBib() {
+  var v = $('bIsbn').value.trim(); if (!v) return;
+  busy($('bLoad'), A('getBib', v)).then(function (r) {
+    if (!r.success) return msg($('bForm'), false, r.message);
+    var long = { '主題標題': 1, '備註': 1 };
+    $('bForm').innerHTML = '<div class="msg ' + (r.found ? 'ok' : 'warn') + '">' + esc(r.label) + '：' + (r.found ? '已有圖資，可直接修改' : (r.prefilled ? '這一冊還沒有圖資；同 ISBN 的另一冊已有，內容已帶入，確認後按儲存' : '這一冊還沒有圖資，填好後儲存即新增')) + '</div>' +
+      r.fields.map(function (f, i) { return '<label class="f">' + esc(f.name) + '</label>' + (long[f.name] ? '<textarea data-b="' + i + '">' + esc(f.value) + '</textarea>' : '<input data-b="' + i + '" value="' + esc(f.value) + '">'); }).join('') +
+      '<p><button class="p" id="bSave" style="width:100%">儲存圖資</button></p><div id="bMsg"></div>';
+    $('bSave').onclick = function () {
+      var vals = {}, any = false;
+      r.fields.forEach(function (f, i) { var nv = $('bForm').querySelector('[data-b="' + i + '"]').value; if (r.found ? nv.trim() !== String(f.value).trim() : nv.trim()) { vals[f.name] = nv; any = true; } });   // 新增時送出所有有填的欄位
+      if (!any) return msg($('bMsg'), true, '沒有變更');
+      busy($('bSave'), A('saveBib', r.label, vals)).then(function (x) {
+        msg($('bMsg'), x.success, x.message);
+        if (x.success) { r.found = true; r.fields.forEach(function (f) { if (vals[f.name] !== undefined) f.value = vals[f.name]; }); }
+      }).catch(fail($('bMsg')));
+    };
+  }).catch(fail($('bForm')));
+}
+$('bLoad').onclick = loadBib;
+$('bIsbn').onkeydown = function (e) { if (e.key === 'Enter') loadBib(); };
+
+/* ---------- 借閱規則 ---------- */
+function fillSettings() {
+  if (!SETTINGS) return;
+  $('setDays').value = SETTINGS.days; $('setBooks').value = SETTINGS.books;
+  $('setSp').value = (SETTINGS.noSpecial || []).join(','); $('setZn').value = (SETTINGS.noZone || []).join(',');
+}
+$('setSave').onclick = function () {
+  busy($('setSave'), A('saveSettings', { days: $('setDays').value, books: $('setBooks').value, noSpecial: $('setSp').value, noZone: $('setZn').value })).then(function (r) {
+    msg($('setMsg'), r.success, r.message); if (r.success) renderOpen();
+  }).catch(fail($('setMsg')));
+};
+
+/* ---------- 館員管理 ---------- */
+var stEdit = null;
+function stForm(x) {
+  stEdit = x || null;
+  $('stTitle').textContent = x ? '修改：' + (x.real || x.dharma) : '新增館員';
+  $('stReal').value = x ? x.real : ''; $('stDh').value = x ? x.dharma : ''; $('stPin').value = x ? x.pin : ''; $('stRole').value = x ? x.role : '借還';
+}
+function loadStaff() {
+  return A('listStaff').then(function (r) {
+    if (!r.success) return msg($('stList'), false, r.message);
+    $('stList').innerHTML = r.items.map(function (x, i) {
+      return '<div class="item"><b>' + esc([x.real, x.dharma].filter(Boolean).join(' / ') || '（未填姓名）') + ' <span class="chip ' + (x.role ? 'good' : 'bad') + '">' + esc(x.role || '停用') + '</span></b><span class="sub">PIN ' + esc(x.pin || '（無）') + '</span> <button class="s" data-st="' + i + '">修改</button></div>';
+    }).join('') || '<div class="sub">名單是空的</div>';
+    Array.prototype.forEach.call($('stList').querySelectorAll('button[data-st]'), function (b) { b.onclick = function () { stForm(r.items[+b.dataset.st]); $('stReal').focus(); }; });
+  }).catch(fail($('stList')));
+}
+$('stNew').onclick = function () { stForm(null); $('stMsg').innerHTML = ''; };
+$('stSave').onclick = function () {
+  var d = { real: $('stReal').value, dharma: $('stDh').value, pin: $('stPin').value.trim(), role: $('stRole').value };
+  if (stEdit) { d.row = stEdit.row; d.oldPin = stEdit.pin; }
+  var mine = stEdit && stEdit.pin === PIN;
+  if (mine && d.role !== '管理員' && !confirm('您正在降低自己的權限，儲存後將無法再進入管理頁。確定？')) return;
+  busy($('stSave'), A('saveStaff', d)).then(function (r) {
+    msg($('stMsg'), r.success, r.message);
+    if (!r.success) return;
+    if (mine) { doLogout('您的 PIN 或權限已變更，請重新登入'); return; }
+    stForm(null); loadStaff();
+  }).catch(fail($('stMsg')));
+};
+
+/* ---------- 系統 ---------- */
+$('diagGo').onclick = function () { busy($('diagGo'), A('runDiagnose')).then(function (r) { if (r.success) $('sysOut').innerHTML = '<pre style="white-space:pre-wrap;font:inherit;font-size:.9rem">' + esc(r.text) + '</pre>'; else msg($('sysOut'), false, r.message); }).catch(fail($('sysOut'))); };
+$('bakGo').onclick = function () { busy($('bakGo'), A('runBackup')).then(function (r) { msg($('sysOut'), r.success, r.message); }).catch(fail($('sysOut'))); };
+
+showApiRow();
+(function restore() {
+  try {
+    var v = JSON.parse(ssGet('libSess') || 'null');
+    if (v && v.pin && v.me && Date.now() - v.t < IDLE_MIN * 60000) { PIN = v.pin; ME = v.me; lastAct = v.t; start(); }
+    else ssSet('libSess', null);
+  } catch (e) {}
+})();
+})();
+</script>
+</body>
+</html>
