@@ -40,6 +40,7 @@ nav button.on{color:var(--ac);border-color:var(--ac);background:var(--ac2);font-
   #p-card>.card:nth-of-type(2){grid-row:span 2}
   #lOut{max-height:70vh;overflow-y:auto}
   #circMsgs .msg:first-child{font-size:1.25rem}
+#circMsgs .msg:not(:first-child){opacity:.7}
   #scan #reader{max-width:560px}
   tr.pick{cursor:pointer}tr.pick:hover{background:var(--ac2)}
   th{color:var(--sub);font-weight:400;font-size:.85rem}
@@ -402,6 +403,7 @@ var isIsbn = function (t) { return /^\d{9}[\dXx]$|^\d{13}$/.test(t.replace(/-/g,
 /* ---------- 借還 ---------- */
 document.querySelectorAll('#mode button').forEach(function (b) {
   b.onclick = function () {
+    if (MODE !== b.dataset.m) $('circMsgs').innerHTML = '';          // 借書／還書各自從乾淨的訊息開始
     MODE = b.dataset.m;
     document.querySelectorAll('#mode button').forEach(function (x) { x.classList.toggle('on', x === b); });
     $('readerBox').classList.toggle('hidden', MODE === 'return');
@@ -410,6 +412,7 @@ document.querySelectorAll('#mode button').forEach(function (b) {
   };
 });
 function setReader(r) {
+  if (!r || !READER || READER.id !== r.id) $('circMsgs').innerHTML = '';   // 換人時清掉上一位的訊息
   READER = r;
   if (!r) { $('readerSel').classList.add('hidden'); $('readerFind').classList.remove('hidden'); return; }
   $('readerFind').classList.add('hidden'); $('readerSel').classList.remove('hidden');
@@ -443,7 +446,8 @@ function findReader() {
 $('rGo').onclick = findReader;
 $('rq').onkeydown = function (e) { if (e.key === 'Enter') findReader(); };
 function pushCirc(ok, text) {
-  var d = document.createElement('div'); d.className = 'msg ' + (ok ? 'ok' : 'err'); d.textContent = text;
+  var d = document.createElement('div'); d.className = 'msg ' + (ok ? 'ok' : 'err');
+  var tm = new Date(); d.textContent = ('0' + tm.getHours()).slice(-2) + ':' + ('0' + tm.getMinutes()).slice(-2) + '　' + text;
   $('circMsgs').insertBefore(d, $('circMsgs').firstChild);
   while ($('circMsgs').children.length > 8) $('circMsgs').removeChild($('circMsgs').lastChild);
   beep(ok);
@@ -723,22 +727,40 @@ $('setSave').onclick = function () {
 var stEdit = null;
 function stForm(x) {
   stEdit = x || null;
-  $('stTitle').textContent = x ? '修改：' + (x.real || x.dharma) : '新增館員';
-  $('stReal').value = x ? x.real : ''; $('stDh').value = x ? x.dharma : ''; $('stPin').value = x ? x.pin : ''; $('stRole').value = x ? x.role : '借還';
+  $('stTitle').textContent = x ? (x.role ? '修改：' : '授權：') + (x.real || x.dharma) : '新增館員';
+  $('stReal').value = x ? x.real : ''; $('stDh').value = x ? x.dharma : '';
+  var keep = !!(x && !x.role && x.pinSet);                       // 名單裡既有的人：沿用原 PIN，不顯示
+  $('stPin').value = x && !keep ? x.pin : '';
+  $('stPin').placeholder = keep ? '留空＝沿用名單原本的 PIN' : '';
+  $('stRole').value = x && x.role ? x.role : '借還';
 }
 function loadStaff() {
   return A('listStaff').then(function (r) {
     if (!r.success) return msg($('stList'), false, r.message);
-    $('stList').innerHTML = r.items.map(function (x, i) {
-      return '<div class="item"><b>' + esc([x.real, x.dharma].filter(Boolean).join(' / ') || '（未填姓名）') + ' <span class="chip ' + (x.role ? 'good' : 'bad') + '">' + esc(x.role || '停用') + '</span></b><span class="sub">PIN ' + esc(x.pin || '（無）') + '</span> <button class="s" data-st="' + i + '">修改</button></div>';
-    }).join('') || '<div class="sub">名單是空的</div>';
+    var on = [], off = [];
+    r.items.forEach(function (x, i) { (x.role ? on : off).push(i); });
+    var nm = function (x) { return esc([x.real, x.dharma].filter(Boolean).join(' / ') || '（未填姓名）'); };
+    $('stList').innerHTML = (on.map(function (i) {
+      var x = r.items[i];
+      return '<div class="item"><b>' + nm(x) + ' <span class="chip good">' + esc(x.role) + '</span></b><span class="sub">PIN <span class="pinv" data-pin="' + esc(x.pin) + '">••••••</span> <a href="#" class="pint">顯示</a></span> <button class="s" data-st="' + i + '">修改</button></div>';
+    }).join('') || '<div class="sub">還沒有館員。請從下方新增，或在「名單內其他人」按「授權」。</div>') +
+      (off.length ? '<details style="margin-top:10px"><summary class="sub">名單內其他 ' + off.length + ' 人（尚未授權，不能登入；PIN 不顯示）</summary>' + off.map(function (i) {
+        var x = r.items[i];
+        return '<div class="item"><b>' + nm(x) + '</b> <button class="s" data-st="' + i + '">授權</button></div>';
+      }).join('') + '</details>' : '');
     Array.prototype.forEach.call($('stList').querySelectorAll('button[data-st]'), function (b) { b.onclick = function () { stForm(r.items[+b.dataset.st]); $('stReal').focus(); }; });
+    Array.prototype.forEach.call($('stList').querySelectorAll('a.pint'), function (a) {
+      a.onclick = function (e) { e.preventDefault(); var v = a.previousElementSibling; var sh = v.textContent !== '••••••'; v.textContent = sh ? '••••••' : v.dataset.pin; a.textContent = sh ? '顯示' : '隱藏'; };
+    });
   }).catch(fail($('stList')));
 }
 $('stNew').onclick = function () { stForm(null); $('stMsg').innerHTML = ''; };
 $('stSave').onclick = function () {
   var d = { real: $('stReal').value, dharma: $('stDh').value, pin: $('stPin').value.trim(), role: $('stRole').value };
-  if (stEdit) { d.row = stEdit.row; d.oldPin = stEdit.pin; }
+  if (stEdit) {
+    d.row = stEdit.row; d.oldPin = stEdit.pin;
+    if (!stEdit.role && stEdit.pinSet && !d.pin) { d.keepPin = true; d.oldReal = stEdit.real; d.oldDharma = stEdit.dharma; }   // 授權既有的人，沿用原 PIN
+  }
   var mine = stEdit && stEdit.pin === PIN;
   if (mine && d.role !== '管理員' && !confirm('您正在降低自己的權限，儲存後將無法再進入管理頁。確定？')) return;
   busy($('stSave'), A('saveStaff', d)).then(function (r) {
