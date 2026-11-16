@@ -5,95 +5,216 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>普高圖書館圖資系統</title>
 <style>
-:root{--ink:#1f2d3a;--sub:#66737f;--line:#d8dee5;--bg:#f2f5f8;--card:#fff;--ac:#2a6f4f;--ac2:#e5f2ea;--bad:#b3261e;--badbg:#fdecea;--warn:#a15c00;--warnbg:#fff4dc}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;font-size:16px}
-header{background:var(--ac);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px}
-header h1{font-size:1.05rem;margin:0;flex:1}
-header small{opacity:.9}
-header button{background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:6px;padding:6px 10px}
-header{position:sticky;top:0;z-index:20}
-#menuBtn{font-size:1.2rem;line-height:1;padding:6px 11px}
-#side{position:fixed;top:0;bottom:0;left:0;width:216px;background:#fff;border-right:1px solid var(--line);z-index:40;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .2s}
-#side.open{transform:none}
-#side .brand{background:var(--ac);color:#fff;padding:16px 14px;font-weight:700}
-#side .brand small{display:block;font-weight:400;opacity:.9;margin-top:2px}
-nav{display:flex;flex-direction:column;padding:8px 0;overflow-y:auto;flex:1}
-nav button{border:0;background:none;text-align:left;padding:14px 18px;font-size:1.05rem;color:var(--ink);border-left:4px solid transparent}
-nav button.on{color:var(--ac);border-color:var(--ac);background:var(--ac2);font-weight:700}
-#side .foot{padding:12px 14px;border-top:1px solid var(--line)}
-#side .foot button{width:100%}
-#shade{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30}
-@media(min-width:900px){
-  #side{transform:none}#shade{display:none!important}#menuBtn{display:none}#app{padding-left:216px}
-  #app main{max-width:1240px;padding:18px 24px}
-  #repOut{columns:3;column-gap:36px}#repOut h2{margin-top:0;break-after:avoid}#repOut table{break-inside:avoid;margin-bottom:14px}#repOut p{column-span:all}
-  header{padding:12px 24px}header h1{font-size:1.2rem}
-  main section{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-  main section>.card,main section>div{margin:0}
-  main section>.full,#mode,#openWarn{grid-column:1/-1}
-  #p-search{grid-template-columns:3fr 2fr}
-  #p-search>.card:first-child{grid-column:1/-1}
-  #sDetail{position:sticky;top:64px}
-  #p-over{grid-template-columns:1fr}
-  #oOut{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
-  #p-card>.card:nth-of-type(2){grid-row:span 2}
-  #lOut{max-height:70vh;overflow-y:auto}
-  #circMsgs .msg:first-child{font-size:1.25rem}
-#circMsgs .msg:not(:first-child){opacity:.7}
-  #scan #reader{max-width:560px}
-  tr.pick{cursor:pointer}tr.pick:hover{background:var(--ac2)}
-  th{color:var(--sub);font-weight:400;font-size:.85rem}
+:root {
+  --ink: #232b28;
+  --sub: #646e6a;
+  --line: #e4e1d8;
+  --bg: #f6f5f0;
+  --card: #ffffff;
+  --ac: #265c42;
+  --ac-hover: #1d4733;
+  --ac2: #e8f1ec;
+  --bad: #b5332a;
+  --badbg: #fdf0ef;
+  --warn: #9c5a14;
+  --warnbg: #fcf4e6;
+  --shadow: 0 2px 10px rgba(35, 43, 40, 0.04);
 }
-main{max-width:760px;margin:0 auto;padding:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
-h2{font-size:1.05rem;margin:0 0 8px}
-label.f{display:block;font-size:.85rem;color:var(--sub);margin:8px 0 2px}
-input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
-textarea{min-height:80px}
-.row{display:flex;gap:8px}.row>*{flex:1}
-button.p,button.s,button.d{border:0;border-radius:8px;padding:11px 14px;font:inherit;cursor:pointer}
-button.p{background:var(--ac);color:#fff}button.s{background:var(--ac2);color:var(--ac)}button.d{background:var(--badbg);color:var(--bad)}
-button:disabled{opacity:.5}
-.msg{padding:10px 12px;border-radius:8px;margin:8px 0;white-space:pre-wrap}
-.ok{background:var(--ac2);color:#16482f}.err{background:var(--badbg);color:var(--bad)}.warn{background:var(--warnbg);color:var(--warn)}
-.chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.8rem;background:#eef1f4;color:var(--sub);margin-right:4px}
-.chip.bad{background:var(--badbg);color:var(--bad)}.chip.good{background:var(--ac2);color:var(--ac)}
-.item{padding:10px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}
-.item b{display:block}.sub{color:var(--sub);font-size:.88rem}
-.hidden{display:none!important}
-#scan{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:10px}
-#scan #reader{width:100%;max-width:420px;background:#000}
-#scan .hint{color:#fff;text-align:center}
-#login{max-width:360px;margin:60px auto;padding:0 14px}
-.big{font-size:1.2rem}
-table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:6px;text-align:left;font-size:.92rem}
-.chk{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:1.05rem}
-.chk input{width:26px;height:26px;flex:0 0 auto}
-a.tel{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:8px;background:var(--ac2);color:var(--ac);text-decoration:none;font-weight:700}
-#circMsgs .msg:first-child{font-size:1.12rem;font-weight:700}
-#loading{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:60;background:#1f2d3a;color:#fff;padding:7px 16px;border-radius:99px;font-size:.92rem;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-#loading:before{content:'';display:inline-block;width:12px;height:12px;margin-right:8px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;vertical-align:-1px;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-#scanResult{width:100%;max-width:420px;min-height:2.6em;padding:10px 12px;border-radius:8px;text-align:center;font-weight:700;background:#fff}
-#scanResult.ok{background:var(--ac2);color:#16482f}#scanResult.err{background:var(--badbg);color:var(--bad)}
-.seg{display:flex;border:1px solid var(--ac);border-radius:8px;overflow:hidden}
-.seg button{flex:1;border:0;background:#fff;color:var(--ac);padding:10px;font:inherit}.seg button.on{background:var(--ac);color:#fff}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 頂部與側邊導覽 */
+header {
+  background: var(--ac);
+  color: #fff;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+header h1 { font-size: 1.1rem; margin: 0; flex: 1; letter-spacing: 0.03em; }
+header small { opacity: .9; font-size: .88rem; }
+header button { background: rgba(255, 255, 255, .18); color: #fff; border: 0; border-radius: 8px; padding: 6px 11px; cursor: pointer; }
+#menuBtn { font-size: 1.25rem; line-height: 1; padding: 6px 12px; }
+
+#side {
+  position: fixed; top: 0; bottom: 0; left: 0; width: 224px;
+  background: var(--card); border-right: 1px solid var(--line);
+  z-index: 40; display: flex; flex-direction: column;
+  transform: translateX(-100%); transition: transform .22s cubic-bezier(.4, 0, .2, 1);
+}
+#side.open { transform: none; }
+#side .brand { background: var(--ac); color: #fff; padding: 20px 18px; font-weight: 700; font-size: 1.1rem; letter-spacing: 0.04em; }
+#side .brand small { display: block; font-weight: 400; opacity: .88; margin-top: 4px; font-size: .85rem; }
+nav { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; flex: 1; }
+nav button {
+  border: 0; background: none; text-align: left; padding: 14px 20px;
+  font-size: 1.02rem; color: var(--ink); border-left: 4px solid transparent;
+  cursor: pointer; transition: background .15s, color .15s;
+}
+nav button:hover { background: #faf9f5; }
+nav button.on { color: var(--ac); border-color: var(--ac); background: var(--ac2); font-weight: 700; }
+#side .foot { padding: 14px 16px; border-top: 1px solid var(--line); }
+#side .foot button { width: 100%; }
+#shade { position: fixed; inset: 0; background: rgba(20, 26, 23, .45); backdrop-filter: blur(2px); z-index: 30; }
+
+/* 卡片與表單元件 */
+main { max-width: 760px; margin: 0 auto; padding: 14px; }
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 12px; padding: 16px; margin: 12px 0;
+  box-shadow: var(--shadow);
+}
+h2 { font-size: 1.08rem; margin: 0 0 12px; color: var(--ac); }
+label.f { display: block; font-size: .86rem; color: var(--sub); margin: 10px 0 4px; font-weight: 500; }
+input, select, textarea {
+  width: 100%; min-height: 44px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 8px;
+  font: inherit; background: #fff; color: var(--ink);
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--ac);
+  box-shadow: 0 0 0 3px rgba(38, 92, 66, 0.14);
+}
+textarea { min-height: 84px; line-height: 1.5; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row > * { flex: 1; min-width: 0; }
+
+/* 按鈕系統 */
+button.p, button.s, button.d, button.ghost {
+  border: 0; border-radius: 8px; min-height: 44px; padding: 10px 16px;
+  font: inherit; font-weight: 500; cursor: pointer;
+  transition: background .15s, transform .05s, opacity .15s;
+}
+button:active:not(:disabled) { transform: scale(0.98); }
+button.p { background: var(--ac); color: #fff; }
+button.p:hover:not(:disabled) { background: var(--ac-hover); }
+button.s { background: var(--ac2); color: var(--ac); }
+button.s:hover:not(:disabled) { background: #dce9e2; }
+button.d { background: var(--badbg); color: var(--bad); }
+button.d:hover:not(:disabled) { background: #fae1df; }
+button.ghost { background: transparent; color: var(--sub); border: 1px solid var(--line); font-size: .92rem; min-height: 38px; padding: 6px 12px; }
+button.ghost:hover:not(:disabled) { background: var(--badbg); color: var(--bad); border-color: #f3c6c3; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 訊息與標籤 */
+.msg { padding: 11px 14px; border-radius: 8px; margin: 10px 0; white-space: pre-wrap; border-left: 4px solid transparent; transition: opacity .2s; }
+.ok { background: var(--ac2); color: #16482f; border-left-color: var(--ac); }
+.err { background: var(--badbg); color: var(--bad); border-left-color: var(--bad); }
+.warn { background: var(--warnbg); color: var(--warn); border-left-color: #d9822b; }
+
+.chip { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: .8rem; background: #efede6; color: var(--sub); margin-right: 4px; vertical-align: middle; }
+.chip.bad { background: var(--badbg); color: var(--bad); font-weight: 500; }
+.chip.good { background: var(--ac2); color: var(--ac); font-weight: 500; }
+
+.item { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.item:last-child { border: 0; padding-bottom: 2px; }
+.item.flex-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.item b { display: block; margin-bottom: 2px; }
+.sub { color: var(--sub); font-size: .88rem; }
+.hidden { display: none !important; }
+
+/* 借還模式切換器 */
+.seg { display: flex; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 4px; gap: 4px; box-shadow: var(--shadow); }
+.seg button { flex: 1; border: 0; border-radius: 7px; background: transparent; color: var(--sub); padding: 10px; font: inherit; font-weight: 700; cursor: pointer; transition: all .15s; }
+.seg button.on { background: var(--ac); color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+
+/* 掃描與登入 */
+#scan { position: fixed; inset: 0; background: rgba(15, 20, 18, .88); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; gap: 12px; }
+#scan #reader { width: 100%; max-width: 420px; background: #000; border-radius: 12px; overflow: hidden; }
+#scan .hint { color: #fff; text-align: center; font-size: .95rem; }
+#login { max-width: 380px; margin: 72px auto; padding: 0 16px; }
+#login .card { padding: 24px 20px; }
+#login h2 { text-align: center; font-size: 1.25rem; margin-bottom: 18px; }
+
+.big { font-size: 1.2rem; }
+table { border-collapse: collapse; width: 100%; }
+td, th { border-bottom: 1px solid var(--line); padding: 9px 8px; text-align: left; font-size: .93rem; }
+th { color: var(--sub); font-weight: 500; font-size: .85rem; background: #faf9f5; }
+.chk { display: flex; align-items: center; gap: 10px; margin: 14px 0; font-size: 1.02rem; cursor: pointer; }
+.chk input { width: 22px; height: 22px; min-height: auto; flex: 0 0 auto; accent-color: var(--ac); }
+a.tel { display: inline-block; margin-top: 6px; padding: 8px 14px; border-radius: 8px; background: var(--ac2); color: var(--ac); text-decoration: none; font-weight: 700; font-size: .92rem; }
+a.pint { color: var(--ac); text-decoration: none; font-size: .84rem; margin-left: 4px; border-bottom: 1px dashed var(--ac); }
+#circMsgs .msg:first-child { font-size: 1.12rem; font-weight: 700; }
+#circMsgs .msg:not(:first-child) { opacity: .68; font-size: .94rem; }
+
+#loading { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 60; background: var(--ink); color: #fff; padding: 8px 18px; border-radius: 99px; font-size: .9rem; box-shadow: 0 4px 12px rgba(0, 0, 0, .2); }
+#loading:before { content: ''; display: inline-block; width: 12px; height: 12px; margin-right: 8px; border: 2px solid #fff; border-right-color: transparent; border-radius: 50%; vertical-align: -1px; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#scanResult { width: 100%; max-width: 420px; min-height: 2.8em; padding: 12px 14px; border-radius: 8px; text-align: center; font-weight: 700; background: #fff; }
+#scanResult.ok { background: var(--ac2); color: #16482f; }
+#scanResult.err { background: var(--badbg); color: var(--bad); }
+details summary { cursor: pointer; padding: 6px 0; user-select: none; }
+
+/* 桌面版 RWD 合理化排版 */
+@media (min-width: 900px) {
+  #side { transform: none; }
+  #shade { display: none !important; }
+  #menuBtn { display: none; }
+  #app { padding-left: 224px; }
+  #app main { max-width: 1180px; padding: 22px 28px; }
+  header { padding: 14px 28px; }
+  header h1 { font-size: 1.2rem; }
+
+  /* 借還書：左右對稱雙欄 */
+  #p-circ { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  #p-circ > .card { margin: 0; }
+  #mode, #openWarn { grid-column: 1 / -1; }
+  #circMsgs .msg:first-child { font-size: 1.22rem; }
+
+  /* 查館藏：左清單、右固定詳情 */
+  #p-search { display: grid; grid-template-columns: 3fr 2fr; gap: 18px; align-items: start; }
+  #p-search > .card:first-child { grid-column: 1 / -1; margin: 0; }
+  #sOut > .card, #sDetail > .card { margin: 0; }
+  #sDetail { position: sticky; top: 72px; }
+  tr.pick { cursor: pointer; transition: background .12s; }
+  tr.pick:hover { background: var(--ac2); }
+
+  /* 逾期名單：雙欄卡片流 */
+  #oOut { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+
+  /* 借書證：左辦證與匯入、右讀者清單 */
+  #p-card { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  #p-card > .card { margin: 0; }
+  #p-card > .card:nth-of-type(2) { grid-row: span 2; }
+  #lOut { max-height: 72vh; overflow-y: auto; padding-right: 4px; }
+
+  /* 館藏維護與管理：卡片高度差異大，改為單欄居中閱讀動線，避免高低差留白 */
+  #p-hold, #p-admin { max-width: 820px; margin: 0 auto; }
+  #repOut { columns: 2; column-gap: 32px; margin-top: 12px; }
+  #repOut h2 { margin-top: 12px; break-after: avoid; }
+  #repOut table { break-inside: avoid; margin-bottom: 14px; }
+  #repOut p { column-span: all; }
+  #scan #reader { max-width: 520px; }
+}
 </style>
 </head>
 <body>
 
-<!-- 外部架設（GitHub Pages）時，把 Apps Script「網頁應用程式」網址貼在這裡；直接用 Apps Script 開啟則留空 -->
 <script>var EXEC_URL = 'https://script.google.com/macros/s/AKfycbygK_La-hnG1zMd1WUQAYMRSP4Uma4-kG-QUg3dFOi0NUIpF1MmKvlNV0U_0oemyPvTyQ/exec';</script>
 
 <div id="login">
   <div class="card">
     <h2>普高圖書館圖資系統</h2>
-    <label class="f">館員 PIN</label>
-    <input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="請輸入 PIN" autofocus>
+    <label class="f">館員 PIN 碼</label>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="請輸入 6 位數 PIN" autofocus>
     <div class="msg err hidden" id="loginErr"></div>
-    <p><button class="p" style="width:100%" id="loginBtn">登入</button></p>
-    <p class="sub" id="apiRow" style="display:none">API 網址：<span id="apiShow"></span> <a href="#" id="apiSet">設定</a></p>
+    <p style="margin-top:16px"><button class="p" style="width:100%" id="loginBtn">登入系統</button></p>
+    <p class="sub" id="apiRow" style="display:none;text-align:center">API 網址：<span id="apiShow"></span> <a href="#" id="apiSet">設定</a></p>
   </div>
 </div>
 
@@ -102,32 +223,34 @@ a.tel{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:8px;bac
   <aside id="side">
     <div class="brand">普高圖書館<small id="sideWho"></small></div>
     <nav id="tabs"></nav>
-    <div class="foot"><button class="s" id="logout">登出</button></div>
+    <div class="foot"><button class="s" id="logout">登出系統</button></div>
   </aside>
   <div id="shade" class="hidden"></div>
   <main>
 
   <!-- 借還書 -->
   <section id="p-circ">
-    <div class="seg" id="mode"><button data-m="borrow" class="on">借書</button><button data-m="return">還書</button></div>
+    <div class="seg" id="mode"><button data-m="borrow" class="on">借書作業</button><button data-m="return">還書作業</button></div>
     <div id="openWarn" class="msg warn hidden">目前尚未開放借閱（標籤貼完、確認無誤後，由管理員在「管理」頁開啟）。還書與查詢不受影響。</div>
 
     <div class="card" id="readerBox">
-      <h2>① 讀者</h2>
+      <h2>① 確認讀者</h2>
       <div id="readerSel" class="hidden"></div>
       <div id="readerFind">
         <div class="row"><input id="rq" placeholder="借書證號、姓名或電話"><button class="s" id="rScan" style="flex:0 0 auto">掃描借書證</button></div>
-        <div class="row" style="margin-top:6px"><input id="rb" inputmode="numeric" placeholder="同名時輸入生日月日 (4碼，例 0312)"><button class="p" id="rGo" style="flex:0 0 auto">找人</button></div>
+        <div class="row" style="margin-top:8px"><input id="rb" inputmode="numeric" placeholder="同名時輸入生日月日 (4碼，例 0312)"><button class="p" id="rGo" style="flex:0 0 auto">查詢讀者</button></div>
         <div id="rList"></div>
       </div>
     </div>
 
     <div class="card">
-      <h2 id="bookTitle">② 書本</h2>
+      <h2 id="bookTitle">② 掃描書本</h2>
       <div class="row"><input id="bk" placeholder="書標 A00012" autocapitalize="characters"><button class="s" id="bScan" style="flex:0 0 auto">相機掃描</button><button class="p" id="bGo" style="flex:0 0 auto">確定</button></div>
       <div id="circMsgs"></div>
-      <p class="sub">可連續掃多本；借書時直接掃下一位的借書證就會換人。</p>
-      <p><button class="d" id="undo">撤銷我剛才那一筆</button></p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px;flex-wrap:wrap">
+        <span class="sub">可連續掃多本；借書時直接掃下一位借書證即換人。</span>
+        <button class="ghost" id="undo">撤銷上一筆</button>
+      </div>
     </div>
   </section>
 
@@ -136,7 +259,7 @@ a.tel{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:8px;bac
     <div class="card">
       <h2>藏書查詢</h2>
       <div class="row"><input id="sq" placeholder="書名、作者、出版者、ISBN、書標、索書號"><button class="p" id="sGo" style="flex:0 0 auto">查詢</button><button class="s" id="sScan" style="flex:0 0 auto">掃描</button></div>
-      <div class="row" style="margin-top:6px">
+      <div class="row" style="margin-top:8px">
         <select id="sZone"><option value="">全部分區</option><option>世學</option><option>佛學</option><option>兒童</option><option>典藏</option></select>
         <select id="sStat"><option value="">全部狀態</option><option>在架上</option><option>已借出</option><option>遺失</option><option>報廢</option><option>修復中</option><option>下架</option></select>
       </div>
@@ -147,7 +270,13 @@ a.tel{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:8px;bac
 
   <!-- 逾期 -->
   <section id="p-over" class="hidden">
-    <div class="card"><h2>逾期未還（友善提醒名單）</h2><button class="s" id="oGo">重新整理</button><div id="oOut"></div></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h2 style="margin:0">逾期未還（友善提醒名單）</h2>
+        <button class="s" id="oGo">重新整理</button>
+      </div>
+      <div id="oOut"></div>
+    </div>
   </section>
 
   <!-- 館藏維護 -->
@@ -158,7 +287,7 @@ a.tel{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:8px;bac
       <div class="row"><input id="hLabel" placeholder="A00012" autocapitalize="characters"><button class="s" id="hScanL" style="flex:0 0 auto">掃描</button></div>
       <label class="f">書碼 / ISBN（可空白，例如結緣品）</label>
       <div class="row"><input id="hIsbn" inputmode="numeric" placeholder="978… 或 977…"><button class="s" id="hScanI" style="flex:0 0 auto">掃描</button></div>
-      <div id="hBib" class="sub"></div>
+      <div id="hBib" class="sub" style="margin-top:4px"></div>
       <div class="row">
         <div><label class="f">分區</label><select id="hZone"><option value="">（依書標）</option><option>世學</option><option>佛學</option><option>兒童</option><option>典藏</option></select></div>
         <div><label class="f">特藏號</label><input id="hSp" placeholder="如 R"></div>
@@ -171,12 +300,12 @@ a.tel{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:8px;bac
       <label class="f">版權頁內容（Google Lens 貼上，可空白）</label>
       <textarea id="hCol"></textarea>
       <label class="f">備註</label><input id="hNote">
-      <p><button class="p" id="hAdd" style="width:100%">登錄這一冊</button></p>
+      <p style="margin-top:16px"><button class="p" id="hAdd" style="width:100%">登錄這一冊</button></p>
       <div id="hMsg"></div>
     </div>
     <div class="card">
       <h2>修改既有館藏</h2>
-      <div class="row"><input id="eLabel" placeholder="書標" autocapitalize="characters"><button class="p" id="eLoad" style="flex:0 0 auto">載入</button></div>
+      <div class="row"><input id="eLabel" placeholder="輸入書標" autocapitalize="characters"><button class="p" id="eLoad" style="flex:0 0 auto">載入</button></div>
       <div id="eForm"></div>
     </div>
     <div class="card">
@@ -197,48 +326,48 @@ a.tel{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:8px;bac
       <label class="f">身分證字號</label><input id="cId" autocapitalize="characters">
       <label class="f">照片（可用手機拍）</label><input id="cPhoto" type="file" accept="image/*" capture="user">
       <label class="chk"><input type="checkbox" id="cChk"> 已當面查驗證件</label>
-      <button class="p" id="cAdd" style="width:100%">發證</button>
+      <button class="p" id="cAdd" style="width:100%">核發借書證</button>
       <div id="cMsg"></div>
     </div>
     <div class="card">
       <h2>讀者清單</h2>
-      <div class="row"><input id="lq" placeholder="姓名／電話／證號"><select id="lst"><option value="">全部</option><option>正常</option><option>停用</option><option>掛失</option></select><button class="p" id="lGo" style="flex:0 0 auto">查</button></div>
-      <div id="lOut"></div>
+      <div class="row"><input id="lq" placeholder="姓名／電話／證號"><select id="lst"><option value="">全部狀態</option><option>正常</option><option>停用</option><option>掛失</option></select><button class="p" id="lGo" style="flex:0 0 auto">查詢</button></div>
+      <div id="lOut"><p class="sub" style="margin-top:12px">請輸入關鍵字或直接按「查詢」瀏覽讀者名冊。</p></div>
     </div>
     <div class="card">
       <h2>批次匯入讀者</h2>
       <p class="sub">每行一人，用 Tab 分隔：姓名、電話、生日（月日或年-月-日）、備註。可從試算表直接複製貼上。</p>
-      <textarea id="iText" style="min-height:120px"></textarea>
-      <div class="row" style="margin-top:6px"><button class="s" id="iPre">預覽</button><button class="p" id="iGo">確認匯入</button></div>
+      <textarea id="iText" style="min-height:110px"></textarea>
+      <div class="row" style="margin-top:8px"><button class="s" id="iPre">預覽檢查</button><button class="p" id="iGo">確認匯入</button></div>
       <div id="iMsg"></div>
     </div>
   </section>
 
   <!-- 管理 -->
   <section id="p-admin" class="hidden">
-    <div class="card"><h2>開放借閱</h2><div id="openRow"></div></div>
+    <div class="card"><h2>開放借閱設定</h2><div id="openRow"></div></div>
     <div class="card">
       <h2>借閱規則</h2>
       <div class="row"><div><label class="f">借期（天）</label><input id="setDays" inputmode="numeric"></div><div><label class="f">每人可借（冊）</label><input id="setBooks" inputmode="numeric"></div></div>
       <label class="f">不外借的特藏號（用逗號分開）</label><input id="setSp" placeholder="R,BR,CR,ER">
       <label class="f">不外借的分區（用逗號分開）</label><input id="setZn" placeholder="典藏">
-      <p><button class="p" id="setSave">儲存規則</button></p><div id="setMsg"></div>
+      <p style="margin-top:14px"><button class="p" id="setSave">儲存規則</button></p><div id="setMsg"></div>
     </div>
     <div class="card">
       <h2>館員管理</h2>
       <p class="sub">權限選「停用」的人不能登入。PIN 為 6 位數字，每人不同。</p>
       <div id="stList"></div>
-      <h3 id="stTitle" style="font-size:1rem;margin:14px 0 0">新增館員</h3>
+      <h3 id="stTitle" style="font-size:1rem;margin:16px 0 4px;color:var(--ac)">新增館員</h3>
       <div class="row"><div><label class="f">本名</label><input id="stReal"></div><div><label class="f">法名</label><input id="stDh"></div></div>
       <div class="row"><div><label class="f">PIN（6 位數字）</label><input id="stPin" inputmode="numeric" maxlength="6"></div>
         <div><label class="f">權限</label><select id="stRole"><option>借還</option><option>編目員</option><option>管理員</option><option value="">停用</option></select></div></div>
-      <div class="row" style="margin-top:8px"><button class="p" id="stSave">儲存</button><button class="s" id="stNew">清空（改為新增）</button></div>
+      <div class="row" style="margin-top:12px"><button class="p" id="stSave">儲存館員</button><button class="s" id="stNew">清空（改為新增）</button></div>
       <div id="stMsg"></div>
     </div>
-    <div class="card full"><h2>報表</h2><button class="s" id="repGo">產生</button><div id="repOut"></div></div>
-    <div class="card"><h2>圖資完整度（編目工作清單）</h2><button class="s" id="cmpGo">檢查</button><div id="cmpOut"></div></div>
-    <div class="card full"><h2>操作紀錄</h2><button class="s" id="logGo">最近 100 筆</button><div id="logOut"></div></div>
-    <div class="card"><h2>系統</h2><div class="row"><button class="s" id="diagGo">系統檢查</button><button class="s" id="bakGo">立即備份</button></div><div id="sysOut"></div></div>
+    <div class="card"><h2>館藏與借閱報表</h2><button class="s" id="repGo">產生報表</button><div id="repOut"></div></div>
+    <div class="card"><h2>圖資完整度（編目工作清單）</h2><button class="s" id="cmpGo">開始檢查</button><div id="cmpOut"></div></div>
+    <div class="card"><h2>操作紀錄</h2><button class="s" id="logGo">載入最近 100 筆</button><div id="logOut" style="margin-top:10px"></div></div>
+    <div class="card"><h2>系統維護</h2><div class="row"><button class="s" id="diagGo">系統檢查</button><button class="s" id="bakGo">立即備份</button></div><div id="sysOut"></div></div>
   </section>
 
   </main>
@@ -742,11 +871,11 @@ function loadStaff() {
     var nm = function (x) { return esc([x.real, x.dharma].filter(Boolean).join(' / ') || '（未填姓名）'); };
     $('stList').innerHTML = (on.map(function (i) {
       var x = r.items[i];
-      return '<div class="item"><b>' + nm(x) + ' <span class="chip good">' + esc(x.role) + '</span></b><span class="sub">PIN <span class="pinv" data-pin="' + esc(x.pin) + '">••••••</span> <a href="#" class="pint">顯示</a></span> <button class="s" data-st="' + i + '">修改</button></div>';
+      return '<div class="item flex-row"><div><b>' + nm(x) + ' <span class="chip good">' + esc(x.role) + '</span></b><span class="sub">PIN <span class="pinv" data-pin="' + esc(x.pin) + '">••••••</span> <a href="#" class="pint">顯示</a></span></div><button class="s" data-st="' + i + '">修改</button></div>';
     }).join('') || '<div class="sub">還沒有館員。請從下方新增，或在「名單內其他人」按「授權」。</div>') +
       (off.length ? '<details style="margin-top:10px"><summary class="sub">名單內其他 ' + off.length + ' 人（尚未授權，不能登入；PIN 不顯示）</summary>' + off.map(function (i) {
         var x = r.items[i];
-        return '<div class="item"><b>' + nm(x) + '</b> <button class="s" data-st="' + i + '">授權</button></div>';
+        return '<div class="item flex-row"><b>' + nm(x) + '</b><button class="s" data-st="' + i + '">授權</button></div>';
       }).join('') + '</details>' : '');
     Array.prototype.forEach.call($('stList').querySelectorAll('button[data-st]'), function (b) { b.onclick = function () { stForm(r.items[+b.dataset.st]); $('stReal').focus(); }; });
     Array.prototype.forEach.call($('stList').querySelectorAll('a.pint'), function (a) {
