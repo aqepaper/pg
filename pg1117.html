@@ -72,6 +72,8 @@ nav button {
 }
 nav button svg { width: 22px; height: 22px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
 nav button.on svg { opacity: 1; }
+nav .grp { padding: 12px 14px 4px; font-size: .78rem; color: var(--sub); letter-spacing: .08em; }
+nav button.sub1 { padding-left: 26px; }
 nav button:hover { background: #fcf6ef; }
 nav button.on { color: var(--act); border-color: var(--ac); background: var(--ac2); font-weight: 700; }
 #side .foot { padding: 14px 16px; border-top: 1px solid var(--line); }
@@ -210,9 +212,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
   #oOut { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
 
   /* 借書證：左辦證與匯入、右讀者清單 */
-  #p-card { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-  #p-card > .card { margin: 0; }
-  #p-card > .card:nth-of-type(2) { grid-row: span 2; }
+  #p-cnew, #p-cimp, #p-cone, #p-call { max-width: 760px; }
   #lOut { max-height: 72vh; overflow-y: auto; padding-right: 4px; }
 
   /* 館藏維護與管理：卡片高度差異大，改為單欄居中閱讀動線，避免高低差留白 */
@@ -338,9 +338,9 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
   </section>
 
   <!-- 借書證 -->
-  <section id="p-card" class="hidden">
+  <section id="p-cnew" class="hidden">
     <div class="card">
-      <h2>新辦借書證</h2>
+      <h2>新辦核發借書證</h2>
       <div class="row"><div><label class="f">姓名 *</label><input id="cName"></div><div><label class="f">性別</label><select id="cSex"><option value=""></option><option>男</option><option>女</option></select></div></div>
       <div class="row"><div><label class="f">生日（年-月-日 或 月日）</label><input id="cBirth" placeholder="1970-03-12"></div><div><label class="f">電話</label><input id="cPhone" inputmode="tel"></div></div>
       <label class="f">地址</label><input id="cAddr">
@@ -350,17 +350,30 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
       <button class="p" id="cAdd" style="width:100%">核發借書證</button>
       <div id="cMsg"></div>
     </div>
-    <div class="card">
-      <h2>讀者清單</h2>
-      <div class="row"><input id="lq" placeholder="姓名／電話／證號"><select id="lst"><option value="">全部狀態</option><option>正常</option><option>停用</option><option>掛失</option></select><button class="p" id="lGo" style="flex:0 0 auto">查詢</button></div>
-      <div id="lOut"><p class="sub" style="margin-top:12px">請輸入關鍵字或直接按「查詢」瀏覽讀者名冊。</p></div>
-    </div>
+  </section>
+  <section id="p-cimp" class="hidden">
     <div class="card">
       <h2>批次匯入讀者</h2>
       <p class="sub">每行一人，用 Tab 分隔：姓名、電話、生日（月日或年-月-日）、備註。可從試算表直接複製貼上。</p>
       <textarea id="iText" style="min-height:110px"></textarea>
       <div class="row" style="margin-top:8px"><button class="s" id="iPre">預覽檢查</button><button class="p" id="iGo">確認匯入</button></div>
       <div id="iMsg"></div>
+    </div>
+  </section>
+  <section id="p-cone" class="hidden">
+    <div class="card">
+      <h2>個別清單：查詢單一讀者</h2>
+      <div class="row"><input id="lq" placeholder="姓名／電話／證號"><select id="lst"><option value="">不限狀態</option><option>正常</option><option>停用</option><option>掛失</option></select><button class="p" id="lGo" style="flex:0 0 auto">查詢</button></div>
+      <div id="lOut"><p class="sub" style="margin-top:12px">請輸入姓名、電話或證號，查出這一位再做編輯、改狀態、補拍照片、補發或看借閱紀錄。要瀏覽所有人請到「全部清單」。</p></div>
+    </div>
+  </section>
+  <section id="p-call" class="hidden">
+    <div class="card">
+      <h2>全部清單：所有讀者</h2>
+      <div class="row"><input id="aq" placeholder="篩選：姓名／電話／證號（可空白）"><select id="ast"><option value="">全部狀態</option><option>正常</option><option>停用</option><option>掛失</option></select><button class="p" id="aGo" style="flex:0 0 auto">列出</button></div>
+      <div id="aInfo" class="sub" style="margin-top:10px"></div>
+      <div id="aOut"></div>
+      <div class="row" style="margin-top:10px"><button class="s" id="aPrev">上一頁</button><button class="s" id="aNext">下一頁</button></div>
     </div>
   </section>
 
@@ -478,7 +491,7 @@ function touch() { lastAct = Date.now(); if (PIN && lastAct - lastSaved > 10000)
 function idleCheck() { if (PIN && Date.now() - lastAct > IDLE_MIN * 60000) { closeScan(); doLogout('閒置超過 ' + IDLE_MIN + ' 分鐘，已自動登出，請重新輸入 PIN'); } }
 setInterval(idleCheck, 30000);
 document.addEventListener('visibilitychange', function () { if (!document.hidden) idleCheck(); });   // 手機鎖屏後回來立即檢查
-function doLogout(m) { sideOpen(false); setReader(null); $('circMsgs').innerHTML = ''; ['sOut', 'sDetail', 'oOut', 'lOut', 'logOut', 'repOut', 'eForm', 'bForm', 'stList', 'sysOut'].forEach(function (k) { $(k).innerHTML = ''; });
+function doLogout(m) { sideOpen(false); setReader(null); $('circMsgs').innerHTML = ''; ['sOut', 'sDetail', 'oOut', 'lOut', 'aOut', 'logOut', 'repOut', 'eForm', 'bForm', 'stList', 'sysOut'].forEach(function (k) { $(k).innerHTML = ''; });
   PIN = ''; ME = null; READER = null; ssSet('libSess', null); ssSet('libTab', null); ssSet('libDraft', null); $('app').classList.add('hidden'); $('login').classList.remove('hidden'); if (m) { $('loginErr').textContent = m; $('loginErr').classList.remove('hidden'); } }
 $('logout').onclick = function () { doLogout(); };
 
@@ -490,16 +503,23 @@ var ICONS = {
   over: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   hold: '<path d="M4 19.5V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z"/><path d="M4 19.5A2 2 0 0 0 6 21h13v-3"/><path d="M9 7h6"/>',
   card: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2"/><path d="M15 10h3M15 14h3"/>',
+  cnew: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  cimp: '<path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/>',
+  cone: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/>',
+  call: '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
   admin: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
 };
-var TABS = [['borrow', '借出書', 1], ['ret', '歸還書', 1], ['search', '查館藏', 1], ['over', '逾期', 1], ['hold', '館藏維護', 2], ['card', '借書證', 3], ['admin', '管理', 3]];
+var TABS = [['borrow', '借出書', 1], ['ret', '歸還書', 1], ['search', '查館藏', 1], ['over', '逾期', 1], ['hold', '館藏維護', 2], ['cnew', '新辦核發', 3, '借書證'], ['cimp', '批次匯入', 3, '借書證'], ['cone', '個別清單', 3, '借書證'], ['call', '全部清單', 3, '借書證'], ['admin', '管理', 3]];
 function start() {
   $('login').classList.add('hidden'); $('app').classList.remove('hidden');
   $('who').textContent = ME.name; $('sideWho').textContent = ME.name + '（' + ME.role + '）';
   var nav = $('tabs'); nav.innerHTML = '';
+  var lastGrp = '';
   TABS.forEach(function (t) {
     if (RANK[ME.role] < t[2]) return;
-    var b = document.createElement('button'); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[t[0]] || '') + '</svg><span>' + t[1] + '</span>'; b.dataset.t = t[0]; b.onclick = function () { showTab(t[0]); }; nav.appendChild(b);
+    if (t[3] && t[3] !== lastGrp) { var gh = document.createElement('div'); gh.className = 'grp'; gh.textContent = t[3]; nav.appendChild(gh); }
+    lastGrp = t[3] || '';
+    var b = document.createElement('button'); if (t[3]) b.className = 'sub1'; b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[t[0]] || '') + '</svg><span>' + t[1] + '</span>'; b.dataset.t = t[0]; b.onclick = function () { showTab(t[0]); }; nav.appendChild(b);
   });
   var want = ssGet('libTab'), okTab = TABS.filter(function (t) { return t[0] === want && RANK[ME.role] >= t[2]; }).length;
   showTab(okTab ? want : 'borrow'); refreshSettings(); restoreDraft();
@@ -511,12 +531,14 @@ function isDesk() { return !!(window.matchMedia && window.matchMedia('(min-width
 function showTab(id) {
   sideOpen(false); ssSet('libTab', id);
   var pg = function (k) { return k === 'borrow' || k === 'ret' ? 'circ' : k; };         // 借出書、歸還書共用同一組畫面元件，各自獨立成頁
-  TABS.forEach(function (t) { $('p-' + pg(t[0])).classList.toggle('hidden', pg(t[0]) !== pg(id)); if (t[0] === id) $('pageTitle').textContent = t[1]; });
+  TABS.forEach(function (t) { $('p-' + pg(t[0])).classList.toggle('hidden', pg(t[0]) !== pg(id)); if (t[0] === id) $('pageTitle').textContent = (t[3] ? t[3] + '・' : '') + t[1]; });
   Array.prototype.forEach.call($('tabs').children, function (b) { b.classList.toggle('on', b.dataset.t === id); });
   if (id === 'borrow' || id === 'ret') setMode(id === 'borrow' ? 'borrow' : 'return');
   if ((id === 'borrow' || id === 'ret') && isDesk()) setTimeout(function () { (MODE === 'borrow' && !READER ? $('rq') : $('bk')).focus(); }, 0);
   if (id === 'search' && isDesk()) setTimeout(function () { $('sq').focus(); }, 0);
   if (id === 'over') loadOver();
+  if (id === 'cone' && isDesk()) setTimeout(function () { $('lq').focus(); }, 0);
+  if (id === 'call') loadAll(0);
   if (id === 'admin') { renderOpen(); loadStaff(); }
 }
 var SETTINGS = null;
@@ -676,7 +698,7 @@ function doBook(label) {
   var req = rd ? A('borrowBook', rd.id, label) : A('returnBook', label);
   return req.then(function (r) {
     delete inflight[key];
-    if (r.success) { lastOk = { k: key, t: Date.now() }; if (rd) { rd.active++; if (READER === rd) setReader(rd); refreshReader(rd.id); } }   // 先加一讓畫面立刻有反應，再以伺服器數字為準
+    if (r.success) { lastOk = { k: key, t: Date.now() }; if (rd) { rd.active++; if (READER === rd) updateBookLock(); refreshReader(rd.id); } }   // 先加一讓畫面立刻有反應，再以伺服器數字為準
     return pushCirc(r.success, r.message);
   }, function (e) { delete inflight[key]; return pushCirc(false, e.message); });
 }
@@ -856,10 +878,29 @@ $('cAdd').onclick = function () {
     if (r.success) ['cName', 'cBirth', 'cPhone', 'cAddr', 'cId'].forEach(function (k) { $(k).value = ''; }), $('cChk').checked = false, $('cSex').value = '', CARD_PHOTO = '', showCardPhoto();
   }).catch(fail($('cMsg')));
 };
+var ALL_OFF = 0;
+function loadAll(off) {
+  ALL_OFF = Math.max(off || 0, 0);
+  A('listReaders', $('aq').value, $('ast').value, ALL_OFF).then(function (r) {
+    if (!r.success) return msg($('aOut'), false, r.message);
+    var to = ALL_OFF + r.items.length;
+    $('aInfo').textContent = '共 ' + r.total + ' 人' + (r.total ? '，顯示第 ' + (ALL_OFF + 1) + '–' + to + ' 位' : '');
+    $('aOut').innerHTML = r.items.map(function (x) {
+      return '<div class="item flex-row"><div><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + '</b><span class="sub">' + esc(x.phone) + (x.issuedAt ? ' ／ 建立 ' + esc(x.issuedAt) : '') + '</span></div><button class="s" data-pick="' + esc(x.id) + '">個別處理</button></div>';
+    }).join('') || '<div class="sub">沒有符合的讀者</div>';
+    $('aPrev').disabled = ALL_OFF <= 0; $('aNext').disabled = to >= r.total;
+    Array.prototype.forEach.call($('aOut').querySelectorAll('button[data-pick]'), function (b) { b.onclick = function () { showTab('cone'); $('lq').value = b.dataset.pick; $('lst').value = ''; loadReaders(); }; });
+  }).catch(fail($('aOut')));
+}
+$('aGo').onclick = function () { loadAll(0); };
+$('aq').onkeydown = function (e) { if (e.key === 'Enter') loadAll(0); };
+$('aPrev').onclick = function () { loadAll(ALL_OFF - 100); };
+$('aNext').onclick = function () { loadAll(ALL_OFF + 100); };
 function loadReaders() {
+  if (!$('lq').value.trim()) return msg($('lOut'), false, '請輸入姓名、電話或證號');
   A('listReaders', $('lq').value, $('lst').value).then(function (r) {
     if (!r.success) return msg($('lOut'), false, r.message);
-    $('lOut').innerHTML = '<div class="sub">共 ' + r.items.length + ' 筆</div>' + r.items.map(function (x) {
+    $('lOut').innerHTML = '<div class="sub">共 ' + r.total + ' 筆' + (r.total > r.items.length ? '（只列前 ' + r.items.length + ' 筆，請再輸入更完整的關鍵字）' : '') + '</div>' + r.items.map(function (x) {
       return '<div class="item"><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + '</b><div class="sub">' + esc(x.phone) + ' ／ ' + esc(x.idMasked) + ' ／ ' + esc(x.address) + (x.photo ? ' ／ <a href="' + esc(x.photo) + '" target="_blank" rel="noopener">照片</a>' : '') + '</div>' +
         (/^已換證/.test(x.status) ? '' : '<div class="row" style="margin-top:6px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div><div class="row" style="margin-top:6px"><button class="s" data-lo="' + esc(x.id) + '">借閱紀錄</button><button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="s" data-ph="' + esc(x.id) + '">' + (x.photo ? '重拍照片' : '補拍照片') + '</button><button class="d" data-re="' + esc(x.id) + '">補發新證</button></div><div data-loans="' + esc(x.id) + '"></div><div data-form="' + esc(x.id) + '"></div>') + '</div>';
     }).join('');
