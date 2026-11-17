@@ -168,6 +168,19 @@ a.pint { color: var(--act); text-decoration: none; font-size: .84rem; margin-lef
 #scanResult.err { background: var(--badbg); color: var(--bad); }
 details summary { cursor: pointer; padding: 6px 0; user-select: none; }
 
+/* 大頭照相機 */
+#cam { position: fixed; inset: 0; z-index: 55; background: rgba(35, 25, 16, .985); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 12px; }
+#cam .stage { position: relative; display: inline-block; line-height: 0; border-radius: 12px; overflow: hidden; background: #000; }
+#cam video, #cam img.snap { max-width: 100%; max-height: 66vh; display: block; }
+#cam video { transform: scaleX(-1); }
+#cam .frame { position: absolute; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 9999px rgba(0, 0, 0, .55); pointer-events: none; }
+#cam .hint { color: #fff; text-align: center; font-size: .98rem; line-height: 1.5; max-width: 420px; }
+#cam .btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+#cam .btns button { min-width: 110px; }
+.photoBox { display: flex; align-items: center; gap: 12px; margin: 6px 0; }
+.photoBox img { width: 72px; height: 96px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); background: #fbf6ef; }
+.photoBox .ph { width: 72px; height: 96px; border-radius: 8px; border: 1px dashed var(--line); background: #fbf6ef; color: var(--sub); font-size: .8rem; display: flex; align-items: center; justify-content: center; text-align: center; }
+
 /* 桌面版 RWD 合理化排版 */
 @media (min-width: 900px) {
   #side { transform: none; }
@@ -332,7 +345,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
       <div class="row"><div><label class="f">生日（年-月-日 或 月日）</label><input id="cBirth" placeholder="1970-03-12"></div><div><label class="f">電話</label><input id="cPhone" inputmode="tel"></div></div>
       <label class="f">地址</label><input id="cAddr">
       <label class="f">身分證字號</label><input id="cId" autocapitalize="characters">
-      <label class="f">照片（可用手機拍）</label><input id="cPhoto" type="file" accept="image/*" capture="user">
+      <label class="f">大頭照 *（用手機鏡頭拍，只拍頭部）</label><div class="photoBox"><div id="cPhotoView" class="ph">尚未拍照</div><button type="button" class="s" id="cCam">拍大頭照</button></div>
       <label class="chk"><input type="checkbox" id="cChk"> 已當面查驗證件</label>
       <button class="p" id="cAdd" style="width:100%">核發借書證</button>
       <div id="cMsg"></div>
@@ -382,6 +395,13 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
 </div>
 
 <div id="loading" class="hidden">處理中…</div>
+<div id="cam" class="hidden">
+  <div class="stage" id="camStage"><video id="camVideo" autoplay playsinline muted></video><img id="camSnap" class="snap hidden" alt=""><div class="frame" id="camFrame"></div></div>
+  <div class="hint" id="camHint">請把頭部對準橢圓框，臉部置中、正面看鏡頭<br>不戴帽子與口罩，光線充足</div>
+  <div class="btns" id="camBtns1"><button class="p" id="camShot">拍攝</button><button class="s" id="camAlt">改用系統相機</button><button class="d" id="camCancel">取消</button></div>
+  <div class="btns hidden" id="camBtns2"><button class="p" id="camUse">使用這張</button><button class="s" id="camRetry">重拍</button></div>
+  <input id="camFile" type="file" accept="image/*" capture="user" class="hidden">
+</div>
 <div id="scan" class="hidden">
   <div id="reader"></div>
   <div class="hint" id="scanHint">對準條碼或 QR</div>
@@ -542,7 +562,7 @@ $('scanFile').onchange = function () {
   h.scanFile(f, false).then(function (t) { h.clear(); handleScan(t); }).catch(function () { $('scanHint').textContent = '這張照片辨識不到，請靠近、對焦後再拍一次'; });
 };
 var isLabel = function (t) { return /^[A-Za-z]\d{5}$/.test(t); };
-var isReaderNo = function (t) { return /^R\d{4,}$/i.test(t); };
+var isReaderNo = function (t) { return /^PGLR\d{5}$/i.test(t) || /^\d{9}$/.test(t) || /^\d{3}[A-Z]{2,3}\d{4}$/i.test(t) || /^R\d{4,}$/i.test(t); };   // 新證 PGLR＋流水碼＋檢查碼／上課證 9 碼或 114DSA0334 型／舊版 R0001
 var isIsbn = function (t) { return /^\d{9}[\dXx]$|^\d{13}$/.test(t.replace(/-/g, '')); };
 
 /* ---------- 借還 ---------- */
@@ -731,6 +751,49 @@ $('eLoad').onclick = function () {
   }).catch(fail($('eForm')));
 };
 
+/* ---------- 大頭照相機（鏡頭上有人頭框，拍完依框裁切成 3:4） ---------- */
+var CARD_PHOTO = '', camStream = null, camCb = null, camBox = null, camShotUrl = '';
+function camStop() { if (camStream) { camStream.getTracks().forEach(function (t) { t.stop(); }); camStream = null; } }
+function camClose() { camStop(); $('cam').classList.add('hidden'); camCb = null; }
+function camSetMode(shot) {
+  $('camVideo').classList.toggle('hidden', shot); $('camSnap').classList.toggle('hidden', !shot); $('camFrame').classList.toggle('hidden', shot);
+  $('camBtns1').classList.toggle('hidden', shot); $('camBtns2').classList.toggle('hidden', !shot);
+}
+// 以 3:4 直式、約佔畫面 88% 高度算出裁切範圍
+function camCropBox(vw, vh) { var ch = Math.min(vh * 0.88, vw * 0.9 / 0.75), cw = ch * 0.75; return { x: (vw - cw) / 2, y: (vh - ch) / 2, w: cw, h: ch, vw: vw, vh: vh }; }
+function camCropToUrl(src, vw, vh) {
+  var b = camCropBox(vw, vh), c = document.createElement('canvas'); c.width = 480; c.height = 640;
+  c.getContext('2d').drawImage(src, b.x, b.y, b.w, b.h, 0, 0, 480, 640);
+  return c.toDataURL('image/jpeg', .85);
+}
+function openCam(cb) {
+  camCb = cb; camShotUrl = ''; camSetMode(false); $('cam').classList.remove('hidden');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $('camHint').textContent = '這個瀏覽器無法開啟內建相機，請按「改用系統相機」'; return; }
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false }).then(function (st) {
+    camStream = st; var v = $('camVideo'); v.srcObject = st;
+    v.onloadedmetadata = function () {
+      camBox = camCropBox(v.videoWidth, v.videoHeight); var f = $('camFrame');
+      f.style.left = (camBox.x / camBox.vw * 100) + '%'; f.style.top = (camBox.y / camBox.vh * 100) + '%';
+      f.style.width = (camBox.w / camBox.vw * 100) + '%'; f.style.height = (camBox.h / camBox.vh * 100) + '%';
+    };
+  }).catch(function () { $('camHint').textContent = '無法使用相機（可能未允許權限），請按「改用系統相機」'; });
+}
+$('camShot').onclick = function () {
+  var v = $('camVideo'); if (!v.videoWidth) return;
+  camShotUrl = camCropToUrl(v, v.videoWidth, v.videoHeight); $('camSnap').src = camShotUrl; camStop(); camSetMode(true);
+};
+$('camRetry').onclick = function () { var cb = camCb; camClose(); openCam(cb); };
+$('camUse').onclick = function () { var cb = camCb, u = camShotUrl; camClose(); if (cb && u) cb(u); };
+$('camCancel').onclick = camClose;
+$('camAlt').onclick = function () { $('camFile').value = ''; $('camFile').click(); };
+$('camFile').onchange = function () {
+  var f = this.files[0]; if (!f) return; var fr = new FileReader();
+  fr.onload = function () { var img = new Image(); img.onload = function () { camShotUrl = camCropToUrl(img, img.width, img.height); $('camSnap').src = camShotUrl; camStop(); camSetMode(true); }; img.onerror = function () { alert('照片無法讀取'); }; img.src = fr.result; };
+  fr.readAsDataURL(f);
+};
+function showCardPhoto() { $('cPhotoView').outerHTML = CARD_PHOTO ? '<img id="cPhotoView" src="' + CARD_PHOTO + '" alt="大頭照">' : '<div id="cPhotoView" class="ph">尚未拍照</div>'; $('cCam').textContent = CARD_PHOTO ? '重拍' : '拍大頭照'; }
+$('cCam').onclick = function () { openCam(function (u) { CARD_PHOTO = u; showCardPhoto(); }); };
+
 /* ---------- 借書證 ---------- */
 function fileToDataUrl(file, maxW) {
   return new Promise(function (res, rej) {
@@ -745,11 +808,10 @@ function fileToDataUrl(file, maxW) {
 }
 $('cAdd').onclick = function () {
   var d = { name: $('cName').value, gender: $('cSex').value, birth: $('cBirth').value, phone: $('cPhone').value, address: $('cAddr').value, idNo: $('cId').value, idChecked: $('cChk').checked };
-  var f = $('cPhoto').files[0];
-  var pr = f ? fileToDataUrl(f, 600) : Promise.resolve('');
-  busy($('cAdd'), pr.then(function (u) { return A('issueReader', d, u); })).then(function (r) {
+  if (!CARD_PHOTO) return msg($('cMsg'), false, '請先拍大頭照');
+  busy($('cAdd'), A('issueReader', d, CARD_PHOTO)).then(function (r) {
     msg($('cMsg'), r.success, r.message + (r.success ? '\n請列印借書證 QR：' + r.id : ''));
-    if (r.success) ['cName', 'cBirth', 'cPhone', 'cAddr', 'cId'].forEach(function (k) { $(k).value = ''; }), $('cChk').checked = false, $('cPhoto').value = '', $('cSex').value = '';
+    if (r.success) ['cName', 'cBirth', 'cPhone', 'cAddr', 'cId'].forEach(function (k) { $(k).value = ''; }), $('cChk').checked = false, $('cSex').value = '', CARD_PHOTO = '', showCardPhoto();
   }).catch(fail($('cMsg')));
 };
 function loadReaders() {
@@ -757,9 +819,10 @@ function loadReaders() {
     if (!r.success) return msg($('lOut'), false, r.message);
     $('lOut').innerHTML = '<div class="sub">共 ' + r.items.length + ' 筆</div>' + r.items.map(function (x) {
       return '<div class="item"><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + '</b><div class="sub">' + esc(x.phone) + ' ／ ' + esc(x.idMasked) + ' ／ ' + esc(x.address) + (x.photo ? ' ／ <a href="' + esc(x.photo) + '" target="_blank" rel="noopener">照片</a>' : '') + '</div>' +
-        (/^已換證/.test(x.status) ? '' : '<div class="row" style="margin-top:6px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div><div class="row" style="margin-top:6px"><button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="d" data-re="' + esc(x.id) + '">補發新證</button></div><div data-form="' + esc(x.id) + '"></div>') + '</div>';
+        (/^已換證/.test(x.status) ? '' : '<div class="row" style="margin-top:6px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div><div class="row" style="margin-top:6px"><button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="s" data-ph="' + esc(x.id) + '">' + (x.photo ? '重拍照片' : '補拍照片') + '</button><button class="d" data-re="' + esc(x.id) + '">補發新證</button></div><div data-form="' + esc(x.id) + '"></div>') + '</div>';
     }).join('');
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-set]'), function (b) { b.onclick = function () { var id = b.dataset.set; A('setReaderStatus', id, $('lOut').querySelector('select[data-s="' + id + '"]').value, '').then(function (x) { alert(x.message); loadReaders(); }); }; });
+    Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-ph]'), function (b) { b.onclick = function () { var id = b.dataset.ph; openCam(function (u) { A('setReaderPhoto', id, u).then(function (x) { alert(x.message); loadReaders(); }).catch(function (e) { alert(e.message); }); }); }; });
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-ed]'), function (b) { b.onclick = function () { editReader(r.items.filter(function (x) { return x.id === b.dataset.ed; })[0]); }; });
     Array.prototype.forEach.call($('lOut').querySelectorAll('select[data-s]'), function (sel) { var it = r.items.filter(function (x) { return x.id === sel.dataset.s; })[0]; if (it) sel.value = it.status; });
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-re]'), function (b) { b.onclick = function () { if (!confirm('補發後舊證立即失效，借閱中的書會轉到新證。確定？')) return; A('reissueReader', b.dataset.re, '遺失補發').then(function (x) { alert(x.message); loadReaders(); }); }; });
