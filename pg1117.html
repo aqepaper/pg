@@ -39,7 +39,8 @@ body {
 header {
   background: var(--hd);
   color: #fff;
-  padding: 12px 16px;
+  height: 64px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -60,14 +61,17 @@ header button { background: rgba(255, 255, 255, .18); color: #fff; border: 0; bo
   transform: translateX(-100%); transition: transform .22s cubic-bezier(.4, 0, .2, 1);
 }
 #side.open { transform: none; }
-#side .brand { background: var(--hd); color: #fff; padding: 20px 18px; font-weight: 700; font-size: 1.1rem; letter-spacing: 0.04em; }
-#side .brand small { display: block; font-weight: 400; opacity: .88; margin-top: 4px; font-size: .85rem; }
+#side .brand { background: var(--hd); color: #fff; height: 64px; padding: 0 18px; display: flex; flex-direction: column; justify-content: center; font-weight: 700; font-size: 1.1rem; line-height: 1.3; letter-spacing: 0.04em; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
+#side .brand small { display: block; font-weight: 400; opacity: .88; margin-top: 2px; font-size: .82rem; }
 nav { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; flex: 1; }
 nav button {
+  display: flex; align-items: center; gap: 12px;
   border: 0; background: none; text-align: left; padding: 14px 20px;
   font-size: 1.02rem; color: var(--ink); border-left: 4px solid transparent;
   cursor: pointer; transition: background .15s, color .15s;
 }
+nav button svg { width: 22px; height: 22px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
+nav button.on svg { opacity: 1; }
 nav button:hover { background: #fcf6ef; }
 nav button.on { color: var(--act); border-color: var(--ac); background: var(--ac2); font-weight: 700; }
 #side .foot { padding: 14px 16px; border-top: 1px solid var(--line); }
@@ -171,7 +175,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
   #menuBtn { display: none; }
   #app { padding-left: 224px; }
   #app main { max-width: 1180px; padding: 22px 28px; }
-  header { padding: 14px 28px; }
+  header { padding: 0 28px; }
   header h1 { font-size: 1.2rem; }
 
   /* 借還書：左右對稱雙欄 */
@@ -459,6 +463,14 @@ function doLogout(m) { sideOpen(false); setReader(null); $('circMsgs').innerHTML
 $('logout').onclick = function () { doLogout(); };
 
 /* ---------- 分頁 ---------- */
+var ICONS = {
+  circ: '<path d="M17 3l4 4-4 4"/><path d="M21 7H8"/><path d="M7 21l-4-4 4-4"/><path d="M3 17h13"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  over: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  hold: '<path d="M4 19.5V5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2z"/><path d="M4 19.5A2 2 0 0 0 6 21h13v-3"/><path d="M9 7h6"/>',
+  card: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2"/><path d="M15 10h3M15 14h3"/>',
+  admin: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
+};
 var TABS = [['circ', '借還書', 1], ['search', '查館藏', 1], ['over', '逾期', 1], ['hold', '館藏維護', 2], ['card', '借書證', 3], ['admin', '管理', 3]];
 function start() {
   $('login').classList.add('hidden'); $('app').classList.remove('hidden');
@@ -466,7 +478,7 @@ function start() {
   var nav = $('tabs'); nav.innerHTML = '';
   TABS.forEach(function (t) {
     if (RANK[ME.role] < t[2]) return;
-    var b = document.createElement('button'); b.textContent = t[1]; b.dataset.t = t[0]; b.onclick = function () { showTab(t[0]); }; nav.appendChild(b);
+    var b = document.createElement('button'); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[t[0]] || '') + '</svg><span>' + t[1] + '</span>'; b.dataset.t = t[0]; b.onclick = function () { showTab(t[0]); }; nav.appendChild(b);
   });
   var want = ssGet('libTab'), okTab = TABS.filter(function (t) { return t[0] === want && RANK[ME.role] >= t[2]; }).length;
   showTab(okTab ? want : 'circ'); refreshSettings(); restoreDraft();
