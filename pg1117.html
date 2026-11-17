@@ -576,14 +576,31 @@ document.querySelectorAll('#mode button').forEach(function (b) {
     $('bk').focus();
   };
 });
+var LOANS_OPEN = false;
+function loansHtml(items) {
+  if (!items.length) return '<div class="sub">沒有紀錄</div>';
+  return items.map(function (x) {
+    var chip = x.overdue ? '<span class="chip bad">逾期</span>' : (x.status === '借出中' ? '<span class="chip good">借出中</span>' : '<span class="chip">' + esc(x.status) + '</span>');
+    return '<div class="item"><b>' + esc(x.title) + '</b><span class="sub">' + esc(x.label) + ' ／ 借 ' + esc(x.out) + ' ／ 應還 ' + esc(x.due) + (x.back ? ' ／ 已還 ' + esc(x.back) : '') + '</span> ' + chip + '</div>';
+  }).join('');
+}
+function showLoans(id, all, box) {
+  box.innerHTML = '<div class="sub">讀取中…</div>';
+  return A('readerLoans', id, !!all).then(function (r) {
+    if (!r.success) return msg(box, false, r.message);
+    box.innerHTML = '<div class="sub">' + (all ? '借過的書共 ' : '借閱中 ') + r.total + ' 本' + (r.total > r.items.length ? '（只列最近 ' + r.items.length + ' 本）' : '') + '</div>' + loansHtml(r.items);
+  }).catch(fail(box));
+}
 function setReader(r) {
-  if (!r || !READER || READER.id !== r.id) $('circMsgs').innerHTML = '';   // 換人時清掉上一位的訊息
+  if (!r || !READER || READER.id !== r.id) { $('circMsgs').innerHTML = ''; LOANS_OPEN = false; }   // 換人時清掉上一位的訊息
   READER = r;
   if (!r) { $('readerSel').classList.add('hidden'); $('readerFind').classList.remove('hidden'); return; }
   $('readerFind').classList.add('hidden'); $('readerSel').classList.remove('hidden');
   var warn = r.status !== '正常' ? '<div class="msg err">借書證狀態：' + esc(r.status) + '，不能借書</div>' : '';
   if (r.overdue > 0) warn += '<div class="msg warn">此讀者尚有 ' + r.overdue + ' 本逾期未還</div>';
-  $('readerSel').innerHTML = '<div class="big"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(r.id) + '</span></div><div class="sub">借閱中 ' + r.active + ' 本</div>' + warn + '<button class="s" id="rChange">換人</button>';
+  $('readerSel').innerHTML = '<div class="big"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(r.id) + '</span></div><div class="sub">借閱中 ' + r.active + ' 本</div>' + warn + '<button class="s" id="rChange">換人</button> <button class="s" id="rLoans">' + (LOANS_OPEN ? '收起借閱清單' : '借了什麼書') + '</button><div id="rLoansBox"></div>';
+  if (LOANS_OPEN) showLoans(r.id, false, $('rLoansBox'));
+  $('rLoans').onclick = function () { LOANS_OPEN = !LOANS_OPEN; $('rLoans').textContent = LOANS_OPEN ? '收起借閱清單' : '借了什麼書'; if (LOANS_OPEN) showLoans(r.id, false, $('rLoansBox')); else $('rLoansBox').innerHTML = ''; };
   $('rChange').onclick = function () { setReader(null); $('rq').value = ''; $('rb').value = ''; $('rList').innerHTML = ''; };
   if ($('scan').classList.contains('hidden')) $('bk').focus();
 }
@@ -819,10 +836,11 @@ function loadReaders() {
     if (!r.success) return msg($('lOut'), false, r.message);
     $('lOut').innerHTML = '<div class="sub">共 ' + r.items.length + ' 筆</div>' + r.items.map(function (x) {
       return '<div class="item"><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + '</b><div class="sub">' + esc(x.phone) + ' ／ ' + esc(x.idMasked) + ' ／ ' + esc(x.address) + (x.photo ? ' ／ <a href="' + esc(x.photo) + '" target="_blank" rel="noopener">照片</a>' : '') + '</div>' +
-        (/^已換證/.test(x.status) ? '' : '<div class="row" style="margin-top:6px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div><div class="row" style="margin-top:6px"><button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="s" data-ph="' + esc(x.id) + '">' + (x.photo ? '重拍照片' : '補拍照片') + '</button><button class="d" data-re="' + esc(x.id) + '">補發新證</button></div><div data-form="' + esc(x.id) + '"></div>') + '</div>';
+        (/^已換證/.test(x.status) ? '' : '<div class="row" style="margin-top:6px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div><div class="row" style="margin-top:6px"><button class="s" data-lo="' + esc(x.id) + '">借閱紀錄</button><button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="s" data-ph="' + esc(x.id) + '">' + (x.photo ? '重拍照片' : '補拍照片') + '</button><button class="d" data-re="' + esc(x.id) + '">補發新證</button></div><div data-loans="' + esc(x.id) + '"></div><div data-form="' + esc(x.id) + '"></div>') + '</div>';
     }).join('');
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-set]'), function (b) { b.onclick = function () { var id = b.dataset.set; A('setReaderStatus', id, $('lOut').querySelector('select[data-s="' + id + '"]').value, '').then(function (x) { alert(x.message); loadReaders(); }); }; });
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-ph]'), function (b) { b.onclick = function () { var id = b.dataset.ph; openCam(function (u) { A('setReaderPhoto', id, u).then(function (x) { alert(x.message); loadReaders(); }).catch(function (e) { alert(e.message); }); }); }; });
+    Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-lo]'), function (b) { b.onclick = function () { var box = $('lOut').querySelector('div[data-loans="' + b.dataset.lo + '"]'); if (box.innerHTML) { box.innerHTML = ''; return; } showLoans(b.dataset.lo, true, box); }; });
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-ed]'), function (b) { b.onclick = function () { editReader(r.items.filter(function (x) { return x.id === b.dataset.ed; })[0]); }; });
     Array.prototype.forEach.call($('lOut').querySelectorAll('select[data-s]'), function (sel) { var it = r.items.filter(function (x) { return x.id === sel.dataset.s; })[0]; if (it) sel.value = it.status; });
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-re]'), function (b) { b.onclick = function () { if (!confirm('補發後舊證立即失效，借閱中的書會轉到新證。確定？')) return; A('reissueReader', b.dataset.re, '遺失補發').then(function (x) { alert(x.message); loadReaders(); }); }; });
