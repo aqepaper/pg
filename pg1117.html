@@ -580,31 +580,34 @@ function setMode(m) {
   $('bk').placeholder = '書標 A00012';
   applyOpenWarn();
 }
-var LOANS_OPEN = false;
-function loansHtml(items) {
-  if (!items.length) return '<div class="sub">沒有紀錄</div>';
+var LOANS_CACHE = { id: '', html: '' };
+function loansHtml(items, all) {
+  if (!items.length) return '<div class="sub">' + (all ? '沒有借閱紀錄' : '目前沒有借閱中的書') + '</div>';
   return items.map(function (x) {
     var chip = x.overdue ? '<span class="chip bad">逾期</span>' : (x.status === '借出中' ? '<span class="chip good">借出中</span>' : '<span class="chip">' + esc(x.status) + '</span>');
     return '<div class="item"><b>' + esc(x.title) + '</b><span class="sub">' + esc(x.label) + ' ／ 借 ' + esc(x.out) + ' ／ 應還 ' + esc(x.due) + (x.back ? ' ／ 已還 ' + esc(x.back) : '') + '</span> ' + chip + '</div>';
   }).join('');
 }
-function showLoans(id, all, box) {
-  box.innerHTML = '<div class="sub">讀取中…</div>';
+// all=false：借出中的書（借書頁，確認讀者後自動顯示）；all=true：全部紀錄（管理頁）。quiet＝不顯示「讀取中」，直接換內容
+function showLoans(id, all, box, quiet) {
+  if (!quiet) box.innerHTML = '<div class="sub">讀取中…</div>';
   return A('readerLoans', id, !!all).then(function (r) {
     if (!r.success) return msg(box, false, r.message);
-    box.innerHTML = '<div class="sub">' + (all ? '借過的書共 ' : '借閱中 ') + r.total + ' 本' + (r.total > r.items.length ? '（只列最近 ' + r.items.length + ' 本）' : '') + '</div>' + loansHtml(r.items);
+    var h = '<div class="sub" style="margin-top:10px"><b>' + (all ? '借過的書共 ' : '目前借閱中 ') + r.total + ' 本</b>' + (r.total > r.items.length ? '（只列最近 ' + r.items.length + ' 本）' : '') + '</div>' + loansHtml(r.items, all);
+    if (!all) { LOANS_CACHE = { id: id, html: h }; if (READER && READER.id === id && $('rLoansBox')) box = $('rLoansBox'); }
+    box.innerHTML = h;
   }).catch(fail(box));
 }
 function setReader(r) {
-  if (!r || !READER || READER.id !== r.id) { $('circMsgs').innerHTML = ''; LOANS_OPEN = false; }   // 換人時清掉上一位的訊息
+  if (!r || !READER || READER.id !== r.id) { $('circMsgs').innerHTML = ''; LOANS_CACHE = { id: '', html: '' }; }   // 換人時清掉上一位的訊息
   READER = r;
   if (!r) { $('readerSel').classList.add('hidden'); $('readerFind').classList.remove('hidden'); return; }
   $('readerFind').classList.add('hidden'); $('readerSel').classList.remove('hidden');
   var warn = r.status !== '正常' ? '<div class="msg err">借書證狀態：' + esc(r.status) + '，不能借書</div>' : '';
   if (r.overdue > 0) warn += '<div class="msg warn">此讀者尚有 ' + r.overdue + ' 本逾期未還</div>';
-  $('readerSel').innerHTML = '<div class="big"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(r.id) + '</span></div><div class="sub">借閱中 ' + r.active + ' 本</div>' + warn + '<button class="s" id="rChange">換人</button> <button class="s" id="rLoans">' + (LOANS_OPEN ? '收起借閱清單' : '借了什麼書') + '</button><div id="rLoansBox"></div>';
-  if (LOANS_OPEN) showLoans(r.id, false, $('rLoansBox'));
-  $('rLoans').onclick = function () { LOANS_OPEN = !LOANS_OPEN; $('rLoans').textContent = LOANS_OPEN ? '收起借閱清單' : '借了什麼書'; if (LOANS_OPEN) showLoans(r.id, false, $('rLoansBox')); else $('rLoansBox').innerHTML = ''; };
+  var cached = LOANS_CACHE.id === r.id;
+  $('readerSel').innerHTML = '<div class="item flex-row" style="padding-top:0"><div class="big"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(r.id) + '</span></div><button class="s" id="rChange">換人</button></div>' + warn + '<div id="rLoansBox">' + (cached ? LOANS_CACHE.html : '') + '</div>';
+  showLoans(r.id, false, $('rLoansBox'), cached);                 // 確認讀者後自動顯示已借的書
   $('rChange').onclick = function () { setReader(null); $('rq').value = ''; $('rb').value = ''; $('rList').innerHTML = ''; };
   if ($('scan').classList.contains('hidden')) $('bk').focus();
 }
