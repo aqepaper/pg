@@ -935,9 +935,9 @@ $('setSave').onclick = function () {
 var stEdit = null;
 function stForm(x) {
   stEdit = x || null;
-  $('stTitle').textContent = x ? (x.role ? '修改：' : '授權：') + (x.real || x.dharma) : '新增館員';
+  $('stTitle').textContent = x ? (x.role ? '修改：' : '啟用：') + (x.real || x.dharma) : '新增館員';
   $('stReal').value = x ? x.real : ''; $('stDh').value = x ? x.dharma : '';
-  var keep = !!(x && !x.role && x.pinSet);                       // 名單裡既有的人：沿用原 PIN，不顯示
+  var keep = !!(x && x.keep && x.pinSet);                        // 名單裡既有的人：沿用原 PIN，不顯示
   $('stPin').value = x && !keep ? x.pin : '';
   $('stPin').placeholder = keep ? '留空＝沿用名單原本的 PIN' : '';
   $('stRole').value = x && x.role ? x.role : '借還';
@@ -950,11 +950,11 @@ function loadStaff() {
     var nm = function (x) { return esc([x.real, x.dharma].filter(Boolean).join(' / ') || '（未填姓名）'); };
     $('stList').innerHTML = (on.map(function (i) {
       var x = r.items[i];
-      return '<div class="item flex-row"><div><b>' + nm(x) + ' <span class="chip good">' + esc(x.role) + '</span></b><span class="sub">PIN <span class="pinv" data-pin="' + esc(x.pin) + '">••••••</span> <a href="#" class="pint">顯示</a></span></div><button class="s" data-st="' + i + '">修改</button></div>';
-    }).join('') || '<div class="sub">還沒有館員。請從下方新增，或在「名單內其他人」按「授權」。</div>') +
-      (off.length ? '<details style="margin-top:10px"><summary class="sub">名單內其他 ' + off.length + ' 人（尚未授權，不能登入；PIN 不顯示）</summary>' + off.map(function (i) {
+      return '<div class="item flex-row"><div><b>' + nm(x) + ' <span class="chip good">' + esc(x.role) + '</span></b><span class="sub">' + (x.keep ? '預設「借還」，PIN 沿用名單（不顯示）' : 'PIN <span class="pinv" data-pin="' + esc(x.pin) + '">••••••</span> <a href="#" class="pint">顯示</a>') + '</span></div><button class="s" data-st="' + i + '">修改</button></div>';
+    }).join('') || '<div class="sub">還沒有館員。請從下方新增。</div>') +
+      (off.length ? '<details style="margin-top:10px"><summary class="sub">已停用或沒有 PIN 的 ' + off.length + ' 人（不能登入）</summary>' + off.map(function (i) {
         var x = r.items[i];
-        return '<div class="item flex-row"><b>' + nm(x) + '</b><button class="s" data-st="' + i + '">授權</button></div>';
+        return '<div class="item flex-row"><b>' + nm(x) + '</b><button class="s" data-st="' + i + '">啟用</button></div>';
       }).join('') + '</details>' : '');
     Array.prototype.forEach.call($('stList').querySelectorAll('button[data-st]'), function (b) { b.onclick = function () { stForm(r.items[+b.dataset.st]); $('stReal').focus(); }; });
     Array.prototype.forEach.call($('stList').querySelectorAll('a.pint'), function (a) {
@@ -967,7 +967,7 @@ $('stSave').onclick = function () {
   var d = { real: $('stReal').value, dharma: $('stDh').value, pin: $('stPin').value.trim(), role: $('stRole').value };
   if (stEdit) {
     d.row = stEdit.row; d.oldPin = stEdit.pin;
-    if (!stEdit.role && stEdit.pinSet && !d.pin) { d.keepPin = true; d.oldReal = stEdit.real; d.oldDharma = stEdit.dharma; }   // 授權既有的人，沿用原 PIN
+    if (stEdit.keep && stEdit.pinSet && !d.pin) { d.keepPin = true; d.oldReal = stEdit.real; d.oldDharma = stEdit.dharma; }   // 授權既有的人，沿用原 PIN
   }
   var mine = stEdit && stEdit.pin === PIN;
   if (mine && d.role !== '管理員' && !confirm('您正在降低自己的權限，儲存後將無法再進入管理頁。確定？')) return;
