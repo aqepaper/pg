@@ -521,7 +521,7 @@ function showTab(id) {
 }
 var SETTINGS = null;
 function refreshSettings() {
-  return A('getSettingsInfo').then(function (r) { if (r && r.success) { SETTINGS = r; applyOpenWarn(); } });
+  return A('getSettingsInfo').then(function (r) { if (r && r.success) { SETTINGS = r; applyOpenWarn(); updateBookLock(); } });
 }
 
 /* ---------- 掃描 ---------- */
@@ -569,6 +569,19 @@ var isReaderNo = function (t) { return /^PGLR\d{5}$/i.test(t) || /^\d{9}$/.test(
 var isIsbn = function (t) { return /^\d{9}[\dXx]$|^\d{13}$/.test(t.replace(/-/g, '')); };
 
 /* ---------- 借還 ---------- */
+// 借書頁：讀者已達借閱上限（或證件停用、掛失）時，不用再掃書：書標會被擋下並提示，仍可掃下一位借書證
+function bookLockReason() {
+  if (MODE !== 'borrow' || !READER) return '';
+  if (READER.status !== '正常') return '借書證狀態：' + READER.status + '，不能借書';
+  if (SETTINGS && READER.active >= SETTINGS.books) return '已達借閱上限（' + READER.active + ' / ' + SETTINGS.books + ' 本），請先還書';
+  return '';
+}
+function updateBookLock() {
+  var why = bookLockReason();                       // 不鎖住輸入框：還要能掃下一位的借書證換人；只擋書標
+  $('bk').placeholder = why ? '不用掃書。請先還書，或掃下一位借書證' : '書標 A00012';
+  $('bk').style.opacity = why ? '.55' : '';
+  if (why) $('bk').value = '';
+}
 function applyOpenWarn() { $('openWarn').classList.toggle('hidden', !SETTINGS || !!SETTINGS.open || MODE === 'return'); }
 function setMode(m) {
   if (MODE !== m) $('circMsgs').innerHTML = '';                      // 借出、歸還各自從乾淨的訊息開始
@@ -577,8 +590,7 @@ function setMode(m) {
   $('readerBox').classList.toggle('hidden', m === 'return');          // 還書不需要借書證
   $('bookTitle').textContent = m === 'return' ? '掃描歸還的書' : '② 掃描書本';
   $('circHint').textContent = m === 'return' ? '還書不需要借書證，掃書標即可；可連續掃多本。' : '可連續掃多本；直接掃下一位借書證即換人。';
-  $('bk').placeholder = '書標 A00012';
-  applyOpenWarn();
+  applyOpenWarn(); updateBookLock();
 }
 var LOANS_CACHE = { id: '', html: '' };
 function loansHtml(items, all) {
@@ -601,12 +613,14 @@ function showLoans(id, all, box, quiet) {
 function setReader(r) {
   if (!r || !READER || READER.id !== r.id) { $('circMsgs').innerHTML = ''; LOANS_CACHE = { id: '', html: '' }; }   // 換人時清掉上一位的訊息
   READER = r;
-  if (!r) { $('readerSel').classList.add('hidden'); $('readerFind').classList.remove('hidden'); return; }
+  if (!r) { $('readerSel').classList.add('hidden'); $('readerFind').classList.remove('hidden'); updateBookLock(); return; }
   $('readerFind').classList.add('hidden'); $('readerSel').classList.remove('hidden');
   var warn = r.status !== '正常' ? '<div class="msg err">借書證狀態：' + esc(r.status) + '，不能借書</div>' : '';
   if (r.overdue > 0) warn += '<div class="msg warn">此讀者尚有 ' + r.overdue + ' 本逾期未還</div>';
   var cached = LOANS_CACHE.id === r.id;
   $('readerSel').innerHTML = '<div class="item flex-row" style="padding-top:0"><div class="big"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(r.id) + '</span></div><button class="s" id="rChange">換人</button></div>' + warn + '<div id="rLoansBox">' + (cached ? LOANS_CACHE.html : '') + '</div>';
+  if (SETTINGS && r.status === '正常' && r.active >= SETTINGS.books) $('readerSel').insertAdjacentHTML('beforeend', '<div class="msg err">已達借閱上限（已借 ' + r.active + ' 本 / 上限 ' + SETTINGS.books + ' 本）。請先辦理還書，不需要再掃書。</div>');
+  updateBookLock();
   showLoans(r.id, false, $('rLoansBox'), cached);                 // 確認讀者後自動顯示已借的書
   $('rChange').onclick = function () { setReader(null); $('rq').value = ''; $('rb').value = ''; $('rList').innerHTML = ''; };
   if ($('scan').classList.contains('hidden')) $('bk').focus();
@@ -655,6 +669,7 @@ function doBook(label) {
   }
   if (!isLabel(label)) return Promise.resolve(pushCirc(false, '「' + label + '」不是書標格式（應為 1 個字母加 5 位數字）'));
   if (MODE === 'borrow' && !READER) return Promise.resolve(pushCirc(false, '請先選擇讀者（掃借書證或輸入姓名）'));
+  var lockWhy = bookLockReason(); if (lockWhy) return Promise.resolve(pushCirc(false, lockWhy));
   var rd = MODE === 'borrow' ? READER : null, key = MODE + '|' + (rd ? rd.id : '') + '|' + label;
   if (inflight[key] || (key === lastOk.k && Date.now() - lastOk.t < 4000)) return Promise.resolve(null);   // 連按、掃描槍連發
   inflight[key] = 1;
