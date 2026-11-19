@@ -350,7 +350,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
   <!-- 借書證 -->
   <section id="p-cnew" class="hidden">
     <div class="card">
-      <h2>新辦核發借書證</h2>
+      <h2>新證核發</h2>
       <div class="row"><div><label class="f">姓名 *</label><input id="cName"></div><div><label class="f">性別</label><select id="cSex"><option value=""></option><option>男</option><option>女</option></select></div></div>
       <div class="row"><div><label class="f">生日（年-月-日 或 月日）</label><input id="cBirth" placeholder="1970-03-12"></div><div><label class="f">電話</label><input id="cPhone" inputmode="tel"></div></div>
       <label class="f">地址</label><input id="cAddr">
@@ -372,10 +372,11 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
   </section>
   <section id="p-cone" class="hidden">
     <div class="card">
-      <h2>個別清單：查詢單一讀者</h2>
+      <h2>讀者查詢</h2>
       <div class="row"><input id="lq" placeholder="姓名／電話／證號"><select id="lst"><option value="">不限狀態</option><option>正常</option><option>停用</option><option>掛失</option></select><button class="p" id="lGo" style="flex:0 0 auto">查詢</button></div>
-      <div id="lOut"><p class="sub" style="margin-top:12px">請輸入姓名、電話或證號，查出這一位再做編輯、改狀態、補拍照片、補發或看借閱紀錄。要瀏覽所有人請到「全部清單」。</p></div>
+      <p class="sub" style="margin-top:12px">請輸入姓名、電話或證號，查出這一位再做編輯、改狀態、補拍照片、補發或看借閱紀錄。要瀏覽所有人請到「全部清單」。</p>
     </div>
+    <div id="lOut"></div>
   </section>
   <section id="p-call" class="hidden">
     <div class="card">
@@ -520,7 +521,7 @@ var ICONS = {
   call: '<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
   admin: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'
 };
-var TABS = [['home', '首頁', 1], ['borrow', '借出書', 1], ['ret', '歸還書', 1], ['search', '查館藏', 1], ['over', '逾期', 1], ['hold', '館藏維護', 2], ['cnew', '新辦核發', 1, '借書證'], ['cimp', '批次匯入', 3, '借書證'], ['cone', '個別清單', 1, '借書證'], ['call', '全部清單', 3, '借書證'], ['admin', '管理', 3]];
+var TABS = [['home', '首頁', 1], ['borrow', '借出書', 1], ['ret', '歸還書', 1], ['search', '查館藏', 1], ['over', '逾期', 1], ['hold', '館藏維護', 2], ['cnew', '新證核發', 1], ['cimp', '批次匯入', 3], ['cone', '讀者查詢', 1], ['call', '全部清單', 3], ['admin', '管理', 3]];
 function start() {
   $('login').classList.add('hidden'); $('app').classList.remove('hidden');
   $('who').textContent = ME.name; $('sideWho').textContent = ME.name + '（' + ME.role + '）';
@@ -920,9 +921,17 @@ function loadReaders() {
   if (!$('lq').value.trim()) return msg($('lOut'), false, '請輸入姓名、電話或證號');
   A('listReaders', $('lq').value, $('lst').value).then(function (r) {
     if (!r.success) return msg($('lOut'), false, r.message);
-    $('lOut').innerHTML = '<div class="sub">共 ' + r.total + ' 筆' + (r.total > r.items.length ? '（只列前 ' + r.items.length + ' 筆，請再輸入更完整的關鍵字）' : '') + '</div>' + r.items.map(function (x) {
-      return '<div class="item"><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + loanChip(x) + '</b>' + loanLines(x) + '<div class="sub">' + esc(x.phone) + ' ／ ' + esc(x.idMasked) + ' ／ ' + esc(x.address) + (x.photo ? ' ／ <a href="' + esc(x.photo) + '" target="_blank" rel="noopener">照片</a>' : '') + '</div>' +
-        (/^已換證/.test(x.status) ? '' : (ME.role === '管理員' ? '<div class="row" style="margin-top:6px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div>' : '') + '<div class="row" style="margin-top:6px">' + (ME.role === '管理員' ? '<button class="s" data-lo="' + esc(x.id) + '">借閱紀錄</button>' : '') + '<button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="s" data-ph="' + esc(x.id) + '">' + (x.photo ? '重拍照片' : '補拍照片') + '</button>' + (ME.role === '管理員' ? '<button class="d" data-re="' + esc(x.id) + '">補發新證</button>' : '') + '</div><div data-loans="' + esc(x.id) + '"></div><div data-form="' + esc(x.id) + '"></div>') + '</div>';
+    $('lOut').innerHTML = '<div class="sub" style="margin:2px 4px 8px">共 ' + r.total + ' 筆' + (r.total > r.items.length ? '（只列前 ' + r.items.length + ' 筆，請再輸入更完整的關鍵字）' : '') + '</div>' + r.items.map(function (x) {
+      var info = [x.phone ? '電話　' + esc(x.phone) : '', x.idMasked ? '身分證　' + esc(x.idMasked) : '', x.address ? '地址　' + esc(x.address) : '', x.photo ? '<a href="' + esc(x.photo) + '" target="_blank" rel="noopener">查看照片</a>' : ''].filter(Boolean).map(function (t) { return '<div class="sub">' + t + '</div>'; }).join('');
+      var admin = ME.role === '管理員', open = !/^已換證/.test(x.status);
+      var card1 = '<div class="card"><div class="big"><b>' + esc(x.name) + '</b> <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + '</div>' + (info || '<div class="sub">（沒有登記電話、地址）</div>') +
+        (open ? (admin ? '<div class="row" style="margin-top:10px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div>' : '') +
+          '<div class="row" style="margin-top:8px"><button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="s" data-ph="' + esc(x.id) + '">' + (x.photo ? '重拍照片' : '補拍照片') + '</button>' + (admin ? '<button class="d" data-re="' + esc(x.id) + '">補發新證</button>' : '') + '</div><div data-form="' + esc(x.id) + '"></div>' : '') + '</div>';
+      var ln = x.loans || [];
+      var card2 = '<div class="card"><div class="big"><b>借出書訊</b> ' + loanChip(x) + '</div>' +
+        (ln.length ? ln.map(function (l, k) { return '<div class="item"><b>' + (k + 1) + '. 《' + esc(l.title) + '》' + (l.overdue ? ' <span class="chip bad">逾期</span>' : '') + '</b><span class="sub">書標 ' + esc(l.label) + '　應還 ' + esc(l.due) + '</span></div>'; }).join('') : '<div class="sub">目前沒有借出中的書</div>') +
+        (admin && open ? '<div class="row" style="margin-top:8px"><button class="s" data-lo="' + esc(x.id) + '">全部借閱紀錄</button></div><div data-loans="' + esc(x.id) + '"></div>' : '') + '</div>';
+      return card1 + card2;
     }).join('');
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-set]'), function (b) { b.onclick = function () { var id = b.dataset.set; A('setReaderStatus', id, $('lOut').querySelector('select[data-s="' + id + '"]').value, '').then(function (x) { alert(x.message); loadReaders(); }); }; });
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-ph]'), function (b) { b.onclick = function () { var id = b.dataset.ph; openCam(function (u) { A('setReaderPhoto', id, u).then(function (x) { alert(x.message); loadReaders(); }).catch(function (e) { alert(e.message); }); }); }; });
