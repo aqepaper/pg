@@ -55,29 +55,28 @@ header button { background: rgba(255, 255, 255, .18); color: #fff; border: 0; bo
 #menuBtn { font-size: 1.25rem; line-height: 1; padding: 6px 12px; }
 
 #side {
-  position: fixed; top: 0; bottom: 0; left: 0; width: 224px;
+  position: fixed; top: 0; bottom: 0; left: 0; width: 172px;
   background: var(--card); border-right: 1px solid var(--line);
   z-index: 40; display: flex; flex-direction: column;
   transform: translateX(-100%); transition: transform .22s cubic-bezier(.4, 0, .2, 1);
 }
 #side.open { transform: none; }
-#side .brand { background: var(--hd); color: #fff; height: 64px; padding: 0 18px; display: flex; flex-direction: column; justify-content: center; font-weight: 700; font-size: 1.1rem; line-height: 1.3; letter-spacing: 0.04em; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
+#side .brand { background: var(--hd); color: #fff; height: 64px; padding: 0 14px; display: flex; flex-direction: column; justify-content: center; font-weight: 700; font-size: 1rem; line-height: 1.3; letter-spacing: 0.03em; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); }
 #side .brand small { display: block; font-weight: 400; opacity: .88; margin-top: 2px; font-size: .82rem; }
 nav { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; flex: 1; }
-nav button {
-  display: flex; align-items: center; gap: 12px;
-  border: 0; background: none; text-align: left; padding: 14px 20px;
-  font-size: 1.02rem; color: var(--ink); border-left: 4px solid transparent;
+nav button, #side .foot button {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  border: 0; background: none; text-align: left; padding: 11px 14px; border-radius: 0;
+  font-size: .98rem; color: var(--ink); border-left: 4px solid transparent;
   cursor: pointer; transition: background .15s, color .15s;
 }
-nav button svg { width: 22px; height: 22px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
+nav button svg, #side .foot button svg { width: 20px; height: 20px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
 nav button.on svg { opacity: 1; }
 nav .grp { padding: 12px 14px 4px; font-size: .78rem; color: var(--sub); letter-spacing: .08em; }
 nav button.sub1 { padding-left: 26px; }
-nav button:hover { background: #fcf6ef; }
+nav button:hover, #side .foot button:hover { background: #fcf6ef; }
 nav button.on { color: var(--act); border-color: var(--ac); background: var(--ac2); font-weight: 700; }
-#side .foot { padding: 14px 16px; border-top: 1px solid var(--line); }
-#side .foot button { width: 100%; }
+#side .foot { padding: 6px 0; border-top: 1px solid var(--line); }
 #shade { position: fixed; inset: 0; background: rgba(40, 28, 18, .45); backdrop-filter: blur(2px); z-index: 30; }
 
 /* 卡片與表單元件 */
@@ -186,7 +185,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
 #cam { position: fixed; inset: 0; z-index: 55; background: rgba(35, 25, 16, .985); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 12px; }
 #cam .stage { position: relative; display: inline-block; line-height: 0; border-radius: 12px; overflow: hidden; background: #000; }
 #cam video, #cam img.snap { max-width: 100%; max-height: 66vh; display: block; }
-#cam video { transform: scaleX(-1); }
+#cam video { }
 #cam .frame { position: absolute; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 9999px rgba(0, 0, 0, .55); pointer-events: none; }
 #cam .hint { color: #fff; text-align: center; font-size: .98rem; line-height: 1.5; max-width: 420px; }
 #cam .btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
@@ -200,7 +199,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
   #side { transform: none; }
   #shade { display: none !important; }
   #menuBtn { display: none; }
-  #app { padding-left: 224px; }
+  #app { padding-left: 172px; }
   #app main { max-width: 1180px; padding: 22px 28px; }
   header { padding: 0 28px; }
   header h1 { font-size: 1.2rem; }
@@ -257,7 +256,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
   <aside id="side">
     <div class="brand">普高圖書館<small id="sideWho"></small></div>
     <nav id="tabs"></nav>
-    <div class="foot"><button class="s" id="logout">登出系統</button></div>
+    <div class="foot"><button id="logout"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span>登出系統</span></button></div>
   </aside>
   <div id="shade" class="hidden"></div>
   <main>
@@ -358,10 +357,11 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
   <section id="p-cnew" class="hidden">
     <div class="card">
       <h2>新證核發</h2>
-      <div class="row"><div><label class="f">姓名 *</label><input id="cName"></div><div><label class="f">性別</label><select id="cSex"><option value=""></option><option>男</option><option>女</option></select></div></div>
-      <div class="row"><div><label class="f">生日（年-月-日 或 月日）</label><input id="cBirth" placeholder="1970-03-12"></div><div><label class="f">電話</label><input id="cPhone" inputmode="tel"></div></div>
-      <label class="f">地址</label><input id="cAddr">
-      <label class="f">身分證字號</label><input id="cId" autocapitalize="characters">
+      <p class="sub">以下七項都要填寫（標 * ）。</p>
+      <div class="row"><div><label class="f">姓名 *</label><input id="cName"></div><div><label class="f">性別 *</label><select id="cSex"><option value="">請選擇</option><option>男</option><option>女</option></select></div></div>
+      <div class="row"><div><label class="f">生日 *（西元年-月-日）</label><input id="cBirth" placeholder="1970-03-12" inputmode="numeric" maxlength="10"></div><div><label class="f">電話 *</label><input id="cPhone" inputmode="tel" placeholder="0912345678"></div></div>
+      <label class="f">地址 *</label><input id="cAddr">
+      <label class="f">身分證字號 *</label><input id="cId" autocapitalize="characters" maxlength="10">
       <label class="f">大頭照 *（用手機鏡頭拍，只拍頭部）</label><div class="photoBox"><div id="cPhotoView" class="ph">尚未拍照</div><button type="button" class="s" id="cCam">拍大頭照</button></div>
       <label class="chk"><input type="checkbox" id="cChk"> 已當面查驗證件</label>
       <button class="p" id="cAdd" style="width:100%">核發借書證</button>
@@ -429,9 +429,9 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
 <div id="cam" class="hidden">
   <div class="stage" id="camStage"><video id="camVideo" autoplay playsinline muted></video><img id="camSnap" class="snap hidden" alt=""><div class="frame" id="camFrame"></div></div>
   <div class="hint" id="camHint">請把頭部對準橢圓框，臉部置中、正面看鏡頭<br>不戴帽子與口罩，光線充足</div>
-  <div class="btns" id="camBtns1"><button class="p" id="camShot">拍攝</button><button class="s" id="camAlt">改用系統相機</button><button class="d" id="camCancel">取消</button></div>
+  <div class="btns" id="camBtns1"><button class="p" id="camShot">拍攝</button><button class="s" id="camFlip">改用自拍鏡頭</button><button class="s" id="camAlt">改用系統相機</button><button class="d" id="camCancel">取消</button></div>
   <div class="btns hidden" id="camBtns2"><button class="p" id="camUse">使用這張</button><button class="s" id="camRetry">重拍</button></div>
-  <input id="camFile" type="file" accept="image/*" capture="user" class="hidden">
+  <input id="camFile" type="file" accept="image/*" capture="environment" class="hidden">
 </div>
 <div id="scan" class="hidden">
   <div id="reader"></div>
@@ -850,10 +850,12 @@ function camCropToUrl(src, vw, vh) {
   c.getContext('2d').drawImage(src, b.x, b.y, b.w, b.h, 0, 0, 480, 640);
   return c.toDataURL('image/jpeg', .85);
 }
+var camFacing = ssGet('libCamFace') === 'user' ? 'user' : 'environment';       // 預設後（主）鏡頭，可切換成自拍鏡頭
+function camFaceUi() { $('camFlip').textContent = camFacing === 'user' ? '改用後鏡頭' : '改用自拍鏡頭'; $('camVideo').style.transform = camFacing === 'user' ? 'scaleX(-1)' : ''; }
 function openCam(cb) {
-  camCb = cb; camShotUrl = ''; camSetMode(false); $('cam').classList.remove('hidden');
+  camCb = cb; camShotUrl = ''; camSetMode(false); $('cam').classList.remove('hidden'); camFaceUi();
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $('camHint').textContent = '這個瀏覽器無法開啟內建相機，請按「改用系統相機」'; return; }
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false }).then(function (st) {
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: camFacing }, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false }).then(function (st) {
     camStream = st; var v = $('camVideo'); v.srcObject = st;
     v.onloadedmetadata = function () {
       camBox = camCropBox(v.videoWidth, v.videoHeight); var f = $('camFrame');
@@ -869,7 +871,8 @@ $('camShot').onclick = function () {
 $('camRetry').onclick = function () { var cb = camCb; camClose(); openCam(cb); };
 $('camUse').onclick = function () { var cb = camCb, u = camShotUrl; camClose(); if (cb && u) cb(u); };
 $('camCancel').onclick = camClose;
-$('camAlt').onclick = function () { $('camFile').value = ''; $('camFile').click(); };
+$('camFlip').onclick = function () { camFacing = camFacing === 'user' ? 'environment' : 'user'; ssSet('libCamFace', camFacing); camStop(); openCam(camCb); };
+$('camAlt').onclick = function () { $('camFile').setAttribute('capture', camFacing); $('camFile').value = ''; $('camFile').click(); };
 $('camFile').onchange = function () {
   var f = this.files[0]; if (!f) return; var fr = new FileReader();
   fr.onload = function () { var img = new Image(); img.onload = function () { camShotUrl = camCropToUrl(img, img.width, img.height); $('camSnap').src = camShotUrl; camStop(); camSetMode(true); }; img.onerror = function () { alert('照片無法讀取'); }; img.src = fr.result; };
@@ -892,7 +895,11 @@ function fileToDataUrl(file, maxW) {
 }
 $('cAdd').onclick = function () {
   var d = { name: $('cName').value, gender: $('cSex').value, birth: $('cBirth').value, phone: $('cPhone').value, address: $('cAddr').value, idNo: $('cId').value, idChecked: $('cChk').checked };
-  if (!CARD_PHOTO) return msg($('cMsg'), false, '請先拍大頭照');
+  var miss = [];
+  if (!d.name.trim()) miss.push('姓名'); if (!d.gender) miss.push('性別'); if (!d.birth.trim()) miss.push('生日'); if (!d.phone.trim()) miss.push('電話'); if (!d.address.trim()) miss.push('地址'); if (!d.idNo.trim()) miss.push('身分證字號'); if (!CARD_PHOTO) miss.push('大頭照');
+  if (miss.length) return msg($('cMsg'), false, '請填寫完整，還缺：' + miss.join('、'));
+  d.birth = d.birth.trim().replace(/[\/.]/g, '-');
+  if (!/^\d{4}-\d{1,2}-\d{1,2}$/.test(d.birth)) return msg($('cMsg'), false, '生日請用西元年-月-日，例如 1970-03-12');
   busy($('cAdd'), A('issueReader', d, CARD_PHOTO)).then(function (r) {
     msg($('cMsg'), r.success, r.message + (r.success ? '\n請列印借書證 QR：' + r.id : ''));
     if (r.success) ['cName', 'cBirth', 'cPhone', 'cAddr', 'cId'].forEach(function (k) { $(k).value = ''; }), $('cChk').checked = false, $('cSex').value = '', CARD_PHOTO = '', showCardPhoto();
@@ -956,7 +963,7 @@ function editReader(x) {
     '<label class="f">地址</label><input data-k="address" value="' + esc(x.address) + '">' +
     '<label class="f">身分證字號（目前 ' + esc(x.idMasked || '未登記') + '；留空＝不變）</label><input data-k="idNo" autocapitalize="characters">' +
     '<label class="f">備註</label><input data-k="note" value="' + esc(x.note) + '">' +
-    '<label class="f">更換照片</label><input data-k="photo" type="file" accept="image/*" capture="user">' +
+    '<label class="f">更換照片</label><input data-k="photo" type="file" accept="image/*" capture="environment">' +
     '<p><button class="p" data-k="save">儲存</button></p><div data-k="msg"></div>';
   var q = function (k) { return box.querySelector('[data-k="' + k + '"]'); };
   q('gender').value = x.gender;
