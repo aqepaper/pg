@@ -531,7 +531,7 @@ var IDLE_MIN = 15, lastAct = Date.now(), lastSaved = 0;
 function saveSess() { lastSaved = Date.now(); ssSet('libSess', PIN ? JSON.stringify({ pin: PIN, me: ME, t: lastAct }) : null); }
 function touch() { lastAct = Date.now(); if (PIN && lastAct - lastSaved > 10000) saveSess(); }
 ['click', 'keydown', 'touchstart', 'input'].forEach(function (ev) { document.addEventListener(ev, touch, true); });
-function idleCheck() { if (PIN && Date.now() - lastAct > IDLE_MIN * 60000) { closeScan(); doLogout('閒置超過 ' + IDLE_MIN + ' 分鐘，已自動登出，請重新輸入 PIN'); } }
+function idleCheck() { if (PIN && Date.now() - lastAct > IDLE_MIN * 60000) { closeScan(); doLogout('閒置超過 ' + IDLE_MIN + ' 分鐘，已自動登出'); } }
 setInterval(idleCheck, 30000);
 document.addEventListener('visibilitychange', function () { if (!document.hidden) idleCheck(); });   // 手機鎖屏後回來立即檢查
 function doLogout(m) { sideOpen(false); setReader(null); $('circMsgs').innerHTML = ''; ['sOut', 'sDetail', 'oOut', 'lOut', 'aOut', 'logOut', 'repOut', 'eForm', 'bForm', 'stList', 'sysOut'].forEach(function (k) { $(k).innerHTML = ''; });
