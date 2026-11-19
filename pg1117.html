@@ -412,7 +412,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
       <h3 id="stTitle" style="font-size:1rem;margin:16px 0 4px;color:var(--act)">新增館員</h3>
       <div class="row"><div><label class="f">本名</label><input id="stReal"></div><div><label class="f">法名</label><input id="stDh"></div></div>
       <div class="row"><div><label class="f">PIN（6 位數字）</label><input id="stPin" inputmode="numeric" maxlength="6"></div>
-        <div><label class="f">權限</label><select id="stRole"><option>借還</option><option>編目員</option><option>管理員</option><option value="">停用</option></select></div></div>
+        <div><label class="f">權限</label><select id="stRole"><option value="借還">館員</option><option>編目員</option><option>管理員</option><option value="">停用</option></select></div></div>
       <div class="row" style="margin-top:12px"><button class="p" id="stSave">儲存館員</button><button class="s" id="stNew">清空（改為新增）</button></div>
       <div id="stMsg"></div>
     </div>
@@ -449,6 +449,7 @@ details summary { cursor: pointer; padding: 6px 0; user-select: none; }
 var $ = function (id) { return document.getElementById(id); };
 var PIN = '', ME = null, READER = null, MODE = 'borrow';
 var RANK = { '借還': 1, '編目員': 2, '管理員': 3 };
+function roleName(r) { return r === '借還' ? '館員' : r; }          // 畫面上「借還」權限顯示為「館員」（試算表與程式內部仍用「借還」）
 
 /* ---------- 呼叫後端 ---------- */
 function lsGet(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
@@ -531,7 +532,7 @@ var ICONS = {
 var TABS = [['home', '首頁', 1], ['borrow', '借出書', 1], ['ret', '歸還書', 1], ['search', '查館藏', 1], ['over', '逾期', 1], ['hold', '館藏維護', 2], ['cnew', '新證核發', 1], ['cimp', '批次匯入', 3], ['cone', '讀者查詢', 1], ['call', '全部清單', 3], ['admin', '管理', 3]];
 function start() {
   $('login').classList.add('hidden'); $('app').classList.remove('hidden');
-  $('who').textContent = ME.name; $('sideWho').textContent = ME.name + '（' + ME.role + '）';
+  $('who').textContent = ME.name; $('sideWho').textContent = ME.name + '（' + roleName(ME.role) + '）';
   var nav = $('tabs'); nav.innerHTML = '';
   var lastGrp = '';
   TABS.forEach(function (t) {
@@ -1077,7 +1078,7 @@ function loadStaff() {
     var nm = function (x) { return esc([x.real, x.dharma].filter(Boolean).join(' / ') || '（未填姓名）'); };
     $('stList').innerHTML = (on.map(function (i) {
       var x = r.items[i];
-      return '<div class="item flex-row"><div><b>' + nm(x) + ' <span class="chip good">' + esc(x.role) + '</span></b><span class="sub">' + (x.keep ? '預設「借還」，PIN 沿用名單（不顯示）' : 'PIN <span class="pinv" data-pin="' + esc(x.pin) + '">••••••</span> <a href="#" class="pint">顯示</a>') + '</span></div><button class="s" data-st="' + i + '">修改</button></div>';
+      return '<div class="item flex-row"><div><b>' + nm(x) + ' <span class="chip good">' + esc(roleName(x.role)) + '</span></b><span class="sub">' + (x.keep ? '預設「館員」，PIN 沿用名單（不顯示）' : 'PIN <span class="pinv" data-pin="' + esc(x.pin) + '">••••••</span> <a href="#" class="pint">顯示</a>') + '</span></div><button class="s" data-st="' + i + '">修改</button></div>';
     }).join('') || '<div class="sub">還沒有館員。請從下方新增。</div>') +
       (off.length ? '<details style="margin-top:10px"><summary class="sub">已停用或沒有 PIN 的 ' + off.length + ' 人（不能登入）</summary>' + off.map(function (i) {
         var x = r.items[i];
