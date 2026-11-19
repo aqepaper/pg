@@ -908,12 +908,20 @@ $('aGo').onclick = function () { loadAll(0); };
 $('aq').onkeydown = function (e) { if (e.key === 'Enter') loadAll(0); };
 $('aPrev').onclick = function () { loadAll(ALL_OFF - 100); };
 $('aNext').onclick = function () { loadAll(ALL_OFF + 100); };
+function loanChip(x) {
+  var n = (x.loans || []).length, od = (x.loans || []).filter(function (l) { return l.overdue; }).length;
+  if (!n) return '<span class="chip">未借書</span>';
+  return '<span class="chip ' + (od ? 'bad' : 'good') + '">借出 ' + n + ' 本' + (od ? '，逾期 ' + od + ' 本' : '') + '</span>';
+}
+function loanLines(x) {
+  return (x.loans || []).map(function (l) { return '<div class="sub">' + (l.overdue ? '<span class="chip bad">逾期</span> ' : '') + '《' + esc(l.title) + '》 ' + esc(l.label) + '　應還 ' + esc(l.due) + '</div>'; }).join('');
+}
 function loadReaders() {
   if (!$('lq').value.trim()) return msg($('lOut'), false, '請輸入姓名、電話或證號');
   A('listReaders', $('lq').value, $('lst').value).then(function (r) {
     if (!r.success) return msg($('lOut'), false, r.message);
     $('lOut').innerHTML = '<div class="sub">共 ' + r.total + ' 筆' + (r.total > r.items.length ? '（只列前 ' + r.items.length + ' 筆，請再輸入更完整的關鍵字）' : '') + '</div>' + r.items.map(function (x) {
-      return '<div class="item"><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + '</b><div class="sub">' + esc(x.phone) + ' ／ ' + esc(x.idMasked) + ' ／ ' + esc(x.address) + (x.photo ? ' ／ <a href="' + esc(x.photo) + '" target="_blank" rel="noopener">照片</a>' : '') + '</div>' +
+      return '<div class="item"><b>' + esc(x.name) + ' <span class="chip">' + esc(x.id) + '</span>' + statusChip(x.status) + loanChip(x) + '</b>' + loanLines(x) + '<div class="sub">' + esc(x.phone) + ' ／ ' + esc(x.idMasked) + ' ／ ' + esc(x.address) + (x.photo ? ' ／ <a href="' + esc(x.photo) + '" target="_blank" rel="noopener">照片</a>' : '') + '</div>' +
         (/^已換證/.test(x.status) ? '' : (ME.role === '管理員' ? '<div class="row" style="margin-top:6px"><select data-s="' + esc(x.id) + '"><option>正常</option><option>停用</option><option>掛失</option></select><button class="s" data-set="' + esc(x.id) + '">改狀態</button></div>' : '') + '<div class="row" style="margin-top:6px">' + (ME.role === '管理員' ? '<button class="s" data-lo="' + esc(x.id) + '">借閱紀錄</button>' : '') + '<button class="s" data-ed="' + esc(x.id) + '">編輯資料</button><button class="s" data-ph="' + esc(x.id) + '">' + (x.photo ? '重拍照片' : '補拍照片') + '</button>' + (ME.role === '管理員' ? '<button class="d" data-re="' + esc(x.id) + '">補發新證</button>' : '') + '</div><div data-loans="' + esc(x.id) + '"></div><div data-form="' + esc(x.id) + '"></div>') + '</div>';
     }).join('');
     Array.prototype.forEach.call($('lOut').querySelectorAll('button[data-set]'), function (b) { b.onclick = function () { var id = b.dataset.set; A('setReaderStatus', id, $('lOut').querySelector('select[data-s="' + id + '"]').value, '').then(function (x) { alert(x.message); loadReaders(); }); }; });
