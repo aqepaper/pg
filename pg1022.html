@@ -38,8 +38,8 @@
   .squad-grid-wrap.collapsed{max-height:0;opacity:0}
   .back-btn{display:none;width:100%;padding:13px 16px;font-size:20px;font-family:'Noto Sans TC',sans-serif;font-weight:500;background:transparent;border:1px solid var(--line);border-radius:var(--radius-sm);color:var(--ink);cursor:pointer;margin-bottom:16px;letter-spacing:1px;text-align:left}
   .back-btn.visible{display:block}
-  .search{display:block;width:100%;padding:13px 16px;font-size:20px;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:16px;letter-spacing:.04em;outline:none;-webkit-appearance:none;appearance:none;text-align:center}
-  .search::placeholder{color:#A39D93;text-align:center}
+  .search{display:block;width:100%;padding:13px 16px;font-size:20px;font-family:'Noto Sans TC',sans-serif;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:16px;letter-spacing:.04em;outline:none;-webkit-appearance:none;appearance:none}
+  .search::placeholder{color:#A39D93}
   .search:focus{border-color:var(--moss)}
   .member-squad{font-size:15px;color:var(--ink-soft);margin-left:10px;flex:0 0 auto}
   mark{background:var(--moss-light);color:var(--ink);border-bottom:2px solid var(--moss);padding:0 1px}
@@ -49,23 +49,23 @@
 
 <header>
   <h1>大高二座位查詢表</h1>
-  <p>--11月12日</p>
-  <p class="upd">更新日期：2026年11月12日 00:05</p>
+  <p>--11月26日</p>
+  <p class="upd">更新日期：2026年11月26日 12:39</p>
 </header>
 
 <div class="main">
+  <input class="search" id="q" type="text" placeholder="輸入姓名或法名查詢" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+
+  <button class="back-btn" id="backBtn" onclick="clearAll()">← 重新選擇小隊</button>
+
   <div class="squad-grid-wrap" id="squadGridWrap">
     <div class="squad-grid" id="squadGrid"></div>
   </div>
-
-  <input class="search" id="q" type="text" placeholder="輸入姓名或法名查詢" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
 
   <div class="divider"></div>
 
   <div class="result-info" id="resultInfo"></div>
   <div id="cardList"></div>
-
-  <button class="back-btn" id="backBtn" onclick="clearAll()">← 重新選擇小隊</button>
 </div>
 
 <script>
@@ -312,6 +312,7 @@ const RAW = [
   ["東18-10","第3小隊","鄭夙雅","法孜","女"],
   ["東18-12","第3小隊","洪淑玲","傳玲","女"],
   // 第19排
+  ["西19-9","第35小隊","林淑淨","傳熹","女"],
   ["西19-7","第21小隊","林健平","傳啟","男"],
   ["西19-6","第21小隊","馮欽鳳","傳航","男"],
   ["西19-4","第21小隊","張麗娟","傳捨","女"],
@@ -326,6 +327,7 @@ const RAW = [
   ["東19-10","第3小隊","謝宜庭","傳書","女"],
   ["東19-12","第3小隊","王蘭青","傳慈","女"],
   // 第20排
+  ["西20-6","第35小隊","何佩珊","傳尚","女"],
   ["西20-4","第21小隊","尤美雲","傳露","女"],
   ["西20-3","第21小隊","黃淑琳","傳惟","女"],
   ["西20-1","第21小隊","楊淑華","傳懿","女"],
@@ -367,8 +369,6 @@ const RAW = [
   ["西23-3","第26小隊","黃明貴","傳寂","男"],
   ["西23-1","第26小隊","劉盈妤","法紓","女"],
   // 第24排
-  ["西24-9","第35小隊","何佩珊","傳尚","女"],
-  ["西24-7","第35小隊","林淑淨","傳熹","女"],
   ["西24-6","第26小隊","張雅瑛","傳晶","女"],
   ["西24-4","第26小隊","翁慈伶","法慈","女"],
   ["西24-3","第26小隊","李慧蓉","傳徽","女"],
@@ -438,7 +438,6 @@ function render() {
   const showing = !!(activeSquad || query);
   document.getElementById('squadGridWrap').classList.toggle('collapsed', showing);
   document.getElementById('backBtn').classList.toggle('visible', showing);
-  document.getElementById('q').style.display = activeSquad ? 'none' : 'block';
 
   if(query) {
     const rs = ALL.filter(p => p.name.includes(query) || (p.dharma||'').includes(query))
